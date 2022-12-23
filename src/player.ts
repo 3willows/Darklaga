@@ -1,5 +1,5 @@
 import * as GL from "./webgl"
-import { blast, player0, player1, player2, player3, player4 } from "./sprites"
+import { blast, muzzle, player0, player1, player2, player3, player4 } from "./sprites"
 import { key } from "./input"
 import { opts } from "./options"
 import * as Shot from "./shot"
@@ -140,6 +140,7 @@ export function step() {
 
     if (pl.cooldown) --pl.cooldown;
     if (pl.shooting) --pl.shooting;
+    if (pl.muzzle_flash) --pl.muzzle_flash;
 
     if (pl.controllable && !pl.cooldown && (opts.ModAutoFire || pl.shooting))
         shoot()
@@ -147,11 +148,15 @@ export function step() {
 
 export function render() {
     
-    const {x, y, distance} = pl;
+    const {x, y, distance, muzzle_flash} = pl;
     const frame = distance < -10 ? player0 :
                   distance < 0 ? player1 : 
                   distance == 0 ? player2 : 
                   distance <= 10 ? player3 : player4;
 
     GL.drawSprite(frame, x >> 3, y >> 3);
+
+    if (muzzle_flash && opts.UseNewSchool)
+        GL.drawSpriteAdditive(muzzle, (x >> 3) + 2, (y >> 3) - 22, 32);
+
 }

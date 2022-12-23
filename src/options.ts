@@ -1,5 +1,8 @@
 export const opts = {
 
+    // New-school graphics
+    UseNewSchool: true,
+
     // Does hitting a wall cause ship to bounce ?
     ModWallsBounce: false,
 

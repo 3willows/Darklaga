@@ -202,6 +202,12 @@ export function drawSprite(sprite: Sprite, x: number, y: number) {
     gl.deleteBuffer(texturesBuf);
 }
 
+// TODO: implement additive blending ! 
+// mul is 0..32
+export function drawSpriteAdditive(sprite: Sprite, x: number, y: number, mul: number) {
+    drawSprite(sprite, x, y)
+}
+
 export function startRender() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
