@@ -1,7 +1,8 @@
 import * as GL from "./webgl"
-import { player0, player1, player2, player3, player4 } from "./sprites"
+import { blast, player0, player1, player2, player3, player4 } from "./sprites"
 import { key } from "./input"
-import { options } from "./options"
+import { opts } from "./options"
+import * as Shot from "./shot"
 
 type Player = {
 
@@ -30,7 +31,7 @@ type Player = {
     distance: number
 }
 
-const player : Player = {
+const pl : Player = {
     x: 880,
     y: 1960,
     x_speed: 0,
@@ -49,30 +50,48 @@ const player : Player = {
     distance: 0
 }
 
+function shoot() {
+
+    pl.muzzle_flash = 2;
+    pl.cooldown = 6;
+    Shot.add({
+        type: Shot.SHOT_BLASTER,
+        x: pl.x + 80,
+        y: pl.y + 8,
+        w: blast.w << 3,
+        h: blast.h << 3
+    })
+
+}
+
 export function step() {
 
-    const friction = options.ModPlayerFriction * options.ModPlayerFriction * 4;
-    const speed = 5 + options.ModPlayerSpeed;
+    const friction = opts.ModPlayerFriction * opts.ModPlayerFriction * 4;
+    const speed = 5 + opts.ModPlayerSpeed;
 
     // user input
     
-    player.r_x_speed = 0;
-    player.r_y_speed = 0;
+    pl.r_x_speed = 0;
+    pl.r_y_speed = 0;
 
-    if (player.controllable) {
+    if (pl.controllable) {
 
         if (key.up) {
-            player.r_y_speed = -3*speed;
+            pl.r_y_speed = -3*speed;
         } else if (key.down) {
-            player.r_y_speed = 3*speed;
+            pl.r_y_speed = 3*speed;
         }
 
         if (key.left) {
-            player.r_x_speed = -3*speed;
-            player.distance = Math.max(-20, player.distance - 3);
+            pl.r_x_speed = -3*speed;
+            pl.distance = Math.max(-20, pl.distance - 3);
         } else if (key.right) {
-            player.r_x_speed = 3*speed;
-            player.distance = Math.min(20, player.distance + 3);
+            pl.r_x_speed = 3*speed;
+            pl.distance = Math.min(20, pl.distance + 3);
+        }
+
+        if (key.action) {
+            pl.shooting = 5;
         }
     }
 
@@ -90,37 +109,45 @@ export function step() {
         return realSpeed;
     }
 
-    player.x_speed = adjustSpeed(player.x_speed, player.r_x_speed);
-    player.y_speed = adjustSpeed(player.y_speed, player.r_y_speed);
+    pl.x_speed = adjustSpeed(pl.x_speed, pl.r_x_speed);
+    pl.y_speed = adjustSpeed(pl.y_speed, pl.r_y_speed);
 
-    if (player.distance > 0) --player.distance;
-    if (player.distance < 0) ++player.distance;
+    if (pl.distance > 0) --pl.distance;
+    if (pl.distance < 0) ++pl.distance;
     
-    player.x += player.x_speed;
-    player.y += player.y_speed;
+    pl.x += pl.x_speed;
+    pl.y += pl.y_speed;
 
     // clipping
 
-    if (player.x < 32) {
-        player.x = 32;
-        player.x_speed *= (options.ModWallsBounce ? -1 : 0);
-    } else if (player.x > 1696) {
-        player.x = 1696;
-        player.x_speed *= (options.ModWallsBounce ? -1 : 0);
+    if (pl.x < 32) {
+        pl.x = 32;
+        pl.x_speed *= (opts.ModWallsBounce ? -1 : 0);
+    } else if (pl.x > 1696) {
+        pl.x = 1696;
+        pl.x_speed *= (opts.ModWallsBounce ? -1 : 0);
     }
 
-    if (player.y < 192) {
-        player.y = 192;
-        player.y_speed *= (options.ModWallsBounce ? -1 : 0);
-    } else if (player.y > 2176) {
-        player.y = 2176;
-        player.y_speed *= (options.ModWallsBounce ? -1 : 0);
+    if (pl.y < 192) {
+        pl.y = 192;
+        pl.y_speed *= (opts.ModWallsBounce ? -1 : 0);
+    } else if (pl.y > 2176) {
+        pl.y = 2176;
+        pl.y_speed *= (opts.ModWallsBounce ? -1 : 0);
     }
+
+    // Shots
+
+    if (pl.cooldown) --pl.cooldown;
+    if (pl.shooting) --pl.shooting;
+
+    if (pl.controllable && !pl.cooldown && (opts.ModAutoFire || pl.shooting))
+        shoot()
 }
 
 export function render() {
     
-    const {x, y, distance} = player;
+    const {x, y, distance} = pl;
     const frame = distance < -10 ? player0 :
                   distance < 0 ? player1 : 
                   distance == 0 ? player2 : 

@@ -6,8 +6,10 @@ export type Sprite = {
     tr: number, 
     tb: number 
 }
-export const player0 : Sprite = {"w":24,"h":25,"tl":0,"tt":0,"tr":0.1796875,"tb":0.1875};
-export const player1 : Sprite = {"w":24,"h":25,"tl":0.1875,"tt":0,"tr":0.3671875,"tb":0.1875};
-export const player2 : Sprite = {"w":24,"h":25,"tl":0.375,"tt":0,"tr":0.5546875,"tb":0.1875};
-export const player3 : Sprite = {"w":24,"h":25,"tl":0.5625,"tt":0,"tr":0.7421875,"tb":0.1875};
-export const player4 : Sprite = {"w":24,"h":25,"tl":0.75,"tt":0,"tr":0.9296875,"tb":0.1875};
+export const blast : Sprite = {"w":4,"h":9,"tl":0,"tt":0,"tr":0.03125,"tb":0.0703125};
+export const player0 : Sprite = {"w":24,"h":25,"tl":0.03125,"tt":0,"tr":0.21875,"tb":0.1953125};
+export const player1 : Sprite = {"w":24,"h":25,"tl":0.21875,"tt":0,"tr":0.40625,"tb":0.1953125};
+export const player2 : Sprite = {"w":24,"h":25,"tl":0.40625,"tt":0,"tr":0.59375,"tb":0.1953125};
+export const player3 : Sprite = {"w":24,"h":25,"tl":0.59375,"tt":0,"tr":0.78125,"tb":0.1953125};
+export const player4 : Sprite = {"w":24,"h":25,"tl":0.78125,"tt":0,"tr":0.96875,"tb":0.1953125};
+export const vblast : Sprite = {"w":7,"h":9,"tl":0,"tt":0.1953125,"tr":0.0546875,"tb":0.265625};

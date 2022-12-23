@@ -101,8 +101,8 @@ async function emit() {
             h: b.h,
             tl: b.x / w,
             tt: b.y / w,
-            tr: (b.x + b.w - 1) / w,
-            tb: (b.y + b.h - 1) / w
+            tr: (b.x + b.w) / w,
+            tb: (b.y + b.h) / w
         }) + ";\n"
     }).join("");
 
