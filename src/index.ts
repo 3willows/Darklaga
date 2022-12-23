@@ -1,14 +1,17 @@
 import * as GL from "./webgl"
+import * as Player from "./player"
 
 // Rendering happens every time setInterval() triggers.
 function render() {
-    GL.render();
+    GL.startRender();
+    Player.render();
+    GL.endRender();
 }
 
 // Simulation is based on a fixed-duration step
 const stepDurationMilliseconds = 16.666; 
 function step() {
-    ;
+    Player.step();
 }
 
 export function run() {

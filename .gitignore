@@ -1,6 +1,3 @@
 node_modules/
 dist/
-.fusebox/
-.cache/
-BigAssets/
-src/pack/*.js
+old/
