@@ -4,11 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc src/index.ts --outFile dist/darklaga.js --module amd"
+    "build": "tsc src/index.ts --outFile dist/darklaga.js --module amd",
+    "pack": "node pack/pack.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "sharp": "^0.31.3",
     "typescript": "^4.9.4"
   }
 }
