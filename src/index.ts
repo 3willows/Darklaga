@@ -1,7 +1,10 @@
-import * as X from "./x"
+import * as GL from "./webgl"
 
-export function A() {
-    return X.f();
+export function run() {
+
+    setInterval(function() {
+        console.log("Frame!")
+        GL.render();
+    }, 16);
+
 }
-
-document.write(A().toFixed());
