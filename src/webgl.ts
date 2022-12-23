@@ -133,24 +133,70 @@ const atlas = (function() {
     return texture;
 }())
 
+// We try to batch as many sprite renders as possible
+// together. At 12 values per sprite, our batches contain
+// 1000 sprites each.
+const maxSpriteData   = 12000;
+const spritePositions = new Float32Array(maxSpriteData);
+const spriteTextures  = new Float32Array(maxSpriteData);
+let spritesBatched = 0;
+
 export function drawSprite(sprite: Sprite, x: number, y: number) {
 
     const {tt, tl, tr, tb, h, w} = sprite;
+
+    const x2 = x + w;
+    const y2 = y + h;
+
+    // First triangle
+    spritePositions[spritesBatched +  0] = x;
+    spritePositions[spritesBatched +  1] = y;
+    spritePositions[spritesBatched +  2] = x2;
+    spritePositions[spritesBatched +  3] = y2;
+    spritePositions[spritesBatched +  4] = x;
+    spritePositions[spritesBatched +  5] = y2;
+
+    spriteTextures[spritesBatched +  0] = tl;
+    spriteTextures[spritesBatched +  1] = tt;
+    spriteTextures[spritesBatched +  2] = tr;
+    spriteTextures[spritesBatched +  3] = tb;
+    spriteTextures[spritesBatched +  4] = tl;
+    spriteTextures[spritesBatched +  5] = tb;
+
+    // Second triangle
+    spritePositions[spritesBatched +  6] = x;
+    spritePositions[spritesBatched +  7] = y;
+    spritePositions[spritesBatched +  8] = x2;
+    spritePositions[spritesBatched +  9] = y2;
+    spritePositions[spritesBatched + 10] = x2;
+    spritePositions[spritesBatched + 11] = y;
     
+    spriteTextures[spritesBatched +  6] = tl;
+    spriteTextures[spritesBatched +  7] = tt;
+    spriteTextures[spritesBatched +  8] = tr;
+    spriteTextures[spritesBatched +  9] = tb;
+    spriteTextures[spritesBatched + 10] = tr;
+    spriteTextures[spritesBatched + 11] = tt;
+
+    spritesBatched += 12;
+}
+
+// Draw all sprites accumulated into the current batch 
+function drawBatchedSprites() {
+
+    if (!spritesBatched) 
+        return;
+
     // Allocate and fill positions buffer
     const positionsBuf = gl.createBuffer();
     if (!positionsBuf) throw "Could not allocate buffer";
 
     gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuf);
 
-    const x2 = x + w;
-    const y2 = y + h;
-
-    const positions = new Float32Array([
-        x, y,   x2, y2,   x, y2,
-        x, y,   x2, y2,   x2, y   ]);
-
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    gl.bufferData(
+        gl.ARRAY_BUFFER, 
+        spritePositions.subarray(0, spritesBatched), 
+        gl.STATIC_DRAW);
 
     // Allocate and fill textures buffer
     const texturesBuf = gl.createBuffer();
@@ -158,11 +204,10 @@ export function drawSprite(sprite: Sprite, x: number, y: number) {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, texturesBuf);
 
-    const textures = new Float32Array([
-        tl, tt,   tr, tb,   tl, tb,
-        tl, tt,   tr, tb,   tr, tt   ]);
-
-    gl.bufferData(gl.ARRAY_BUFFER, textures, gl.STATIC_DRAW);
+    gl.bufferData(
+        gl.ARRAY_BUFFER, 
+        spriteTextures.subarray(0, spritesBatched), 
+        gl.STATIC_DRAW);
 
     // Render buffer
     gl.useProgram(program.program);
@@ -196,10 +241,12 @@ export function drawSprite(sprite: Sprite, x: number, y: number) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.drawArrays(gl.TRIANGLES, 0, spritesBatched/2);
 
     gl.deleteBuffer(positionsBuf);
     gl.deleteBuffer(texturesBuf);
+
+    spritesBatched = 0;
 }
 
 // TODO: implement additive blending ! 
@@ -214,5 +261,5 @@ export function startRender() {
 }
 
 export function endRender() {
-    ;
+    drawBatchedSprites();
 }

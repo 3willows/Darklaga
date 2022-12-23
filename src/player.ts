@@ -120,20 +120,22 @@ export function step() {
 
     // clipping
 
+    const bounce = opts.ModWallsBounce ? -1 : 0;
+
     if (pl.x < 32) {
         pl.x = 32;
-        pl.x_speed *= (opts.ModWallsBounce ? -1 : 0);
+        pl.x_speed *= bounce;
     } else if (pl.x > 1696) {
         pl.x = 1696;
-        pl.x_speed *= (opts.ModWallsBounce ? -1 : 0);
+        pl.x_speed *= bounce;
     }
 
     if (pl.y < 192) {
         pl.y = 192;
-        pl.y_speed *= (opts.ModWallsBounce ? -1 : 0);
+        pl.y_speed *= bounce;
     } else if (pl.y > 2176) {
         pl.y = 2176;
-        pl.y_speed *= (opts.ModWallsBounce ? -1 : 0);
+        pl.y_speed *= bounce;
     }
 
     // Shots
