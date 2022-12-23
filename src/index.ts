@@ -1,10 +1,12 @@
 import * as GL from "./webgl"
 import * as Player from "./player"
 import * as Shot from "./shot"
+import * as Background from "./background"
 
 // Rendering happens every time setInterval() triggers.
 function render() {
     GL.startRender();
+    Background.render();
     Shot.render();
     Player.render();
     GL.endRender();
