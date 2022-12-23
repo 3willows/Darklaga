@@ -37,6 +37,6 @@ export function run() {
         // Render once per wake-up
         render();
 
-    }, stepDurationMilliseconds);
+    }, stepDurationMilliseconds/2);
 
 }
