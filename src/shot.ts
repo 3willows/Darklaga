@@ -72,7 +72,9 @@ function shotStep(ref: number): boolean {
     const off = shots[ref]
 
     const type = shots[off + TYPE];
-    if (type == SHOT_BLASTER) {
+    if (type == SHOT_DEAD) {
+        // Nothing, will be removed at end of step.
+    } else if (type == SHOT_BLASTER) {
         if ((shots[off + TOP] -= 96) < -96)
             shots[off + TYPE] = SHOT_DEAD;
     } else {
@@ -109,7 +111,9 @@ function shotRender(ref: number): number {
     const off = shots[ref];
     
     const type = shots[off + TYPE];
-    if (type == SHOT_BLASTER) {
+    if (type == SHOT_DEAD) {
+        // Nothing
+    } else if (type == SHOT_BLASTER) {
         GL.drawSprite(blast, shots[off + LEFT] >> 3, shots[off + TOP] >> 3)
     } else {
         throw "Unknown shot type"
@@ -155,6 +159,63 @@ export function add(s: {
     shots[off + PARAM0] = s.p0 || 0;
     shots[off + PARAM1] = s.p1 || 0;
     shots[off + PARAM2] = s.p2 || 0;
+    shots[off + HIT] = 0;
+    shots[off + TIMER] = 0;
 
     return true;
+}
+
+// COLLISION =================================================================
+
+// A collision has occurred with the shot at the specified position. Return
+// the amount of damage, and apply per-shot on-hit behavior. 
+function onShotCollide(off: number): number {
+
+    const type = shots[off + TYPE];
+    
+    if (type == SHOT_DEAD) 
+        return 0;
+    
+    if (type == SHOT_BLASTER || type == SHOT_FBLASTER) {
+        shots[off + TYPE] = SHOT_DEAD;
+        shots[off + HIT] = 1;
+        return 64;
+    }
+
+    throw "Unknown shot type"
+}
+
+// Return the damage amount if at least one shot intersects the rectangle, or
+// zero if no shots intersect it. 
+// Triggers enemy-hit behavior for colliding shots (which usually causes the shot
+// to become dead, at which point it will be removed on the next step).
+export function collideEnemy(x: number, y: number, w: number, h: number) {
+
+    const x2 = x + w;
+    const y2 = y + h;
+
+    let damage = 0;
+
+    // Traverse all live shots while testing for collision.
+    let ref = 0;
+    while (shots[ref] > 0) {
+
+        const off = shots[ref];
+        ref = off + NEXT;
+
+        // Do we collide ? 
+        const sx = shots[off + LEFT];
+        if (sx >= x2) continue;
+        const sy = shots[off + TOP];
+        if (sy >= y2) continue;
+        const sw = shots[off + WIDTH];
+        if (sw + sx <= x) continue;
+        const sh = shots[off + HEIGHT];
+        if (sh + sy <= y) continue;
+        
+        // We do collide, but does it register as such ?
+        damage += onShotCollide(off);
+    }
+
+    return damage;
 }

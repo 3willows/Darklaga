@@ -26,6 +26,12 @@ function step() {
 
 Enemy.add(new Suicide(256, 256));
 
+Enemy.add(new Suicide(512, 256));
+
+Enemy.add(new Suicide(768, 256));
+
+Enemy.add(new Suicide(1024, 256));
+
 export function run() {
     let nextFrame = +new Date();
 
