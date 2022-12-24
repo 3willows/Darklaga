@@ -15,6 +15,7 @@ function render() {
 // Simulation is based on a fixed-duration step
 const stepDurationMilliseconds = 16.666; 
 function step() {
+    Background.step();
     Shot.step();
     Player.step();
 }

@@ -33,11 +33,169 @@ function compileShader(type: number, source: string) {
     return shader;
 }
 
-// Vertex shader converts (X, Y) pixel positions, starting
-// at (0,0) top left and ending at (240, 320), to OpenGL 
-// positions starting at (-1, -1) bottom left and ending
-// at (1, 1).
-const vertexShader = compileShader(gl.VERTEX_SHADER, `
+// COLORED POLYGONS ==========================================================
+
+// Shader for drawing untextured, colored polygons. 
+const colorProgram = (function() {
+
+    // Vertex shader converts (X, Y) pixel positions, starting
+    // at (0,0) top left and ending at (240, 320), to OpenGL 
+    // positions starting at (-1, -1) bottom left and ending
+    // at (1, 1).
+    const vertexShader = compileShader(gl.VERTEX_SHADER, `
+attribute vec2 aVertexPosition;
+attribute vec4 aVertexColor;
+varying lowp vec4 vColor;
+void main() {
+    gl_Position = vec4(
+        (aVertexPosition.x / 120.0) - 1.0, 
+        1.0 - (aVertexPosition.y / 160.0), 
+        1.0, 
+        1.0);
+    vColor = aVertexColor;
+}
+`);
+
+    const pixelShader = compileShader(gl.FRAGMENT_SHADER, `
+varying lowp vec4 vColor;
+void main() {
+    gl_FragColor = vColor;
+}
+`);
+
+    const program = gl.createProgram();
+    if (!program) throw "Could not create program";
+
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, pixelShader);
+    gl.linkProgram(program);
+
+    return {
+        program: program,
+        attribLocations: {
+            vertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
+            texCoord: gl.getAttribLocation(program, "aVertexColor")
+        }
+    }
+
+}());
+
+// To minimize the number of WebGL calls, batch together renderings of the
+// same type: up to 1000 triangles.
+const coloredPositions = new Float32Array(6000);
+const coloredColors    = new Float32Array(12000);
+let coloredBatched     = 0;
+
+// Points are given as [x1, y1, x2, y2, ...] and there are at least 3 of them. Assumed
+// to be given in order around the polygon, so they will be transformed into triangles
+// with points (0,1,2) (0,2,3) .. (0,N-1,N)
+export function drawPolyAdditive(points: number[], r: number, g: number, b: number, a: number) {
+
+    // Just in case, draw any accumulated batches of the other types
+    if (spritesBatched) drawBatchedSprites();
+
+    function point(x: number, y: number) {
+        coloredPositions[2 * coloredBatched + 0] = x
+        coloredPositions[2 * coloredBatched + 1] = y
+        coloredColors[4 * coloredBatched + 0] = r
+        coloredColors[4 * coloredBatched + 1] = g
+        coloredColors[4 * coloredBatched + 2] = b
+        coloredColors[4 * coloredBatched + 3] = a
+        ++coloredBatched;
+    }
+
+    for (let i = 1; i < points.length/2 - 1; ++i)
+    {
+        point(points[0], points[1]);
+        point(points[2*i], points[2*i+1]);
+        point(points[2*i+2], points[2*i+3]);
+    }
+}
+
+export function drawRectAdditive(
+    x: number, y: number, w: number, h: number,
+    r: number, g: number, b: number, a: number)
+{
+    drawPolyAdditive([
+        x  , y  , 
+        x  , y+h, 
+        x+w, y+h, 
+        x+w, y
+    ], r, g, b, a);    
+}
+
+function drawBatchedColored() {
+
+    if (!coloredBatched) return;
+
+    // Allocate and fill positions buffer
+    const positionsBuf = gl.createBuffer();
+    if (!positionsBuf) throw "Could not allocate buffer";
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuf);
+
+    gl.bufferData(
+        gl.ARRAY_BUFFER, 
+        coloredPositions.subarray(0, 2*coloredBatched), 
+        gl.STATIC_DRAW);
+
+    // Allocate and fill colors buffer
+    const colorsBuf = gl.createBuffer();
+    if (!colorsBuf) throw "Could not allocate buffer";
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuf);
+
+    gl.bufferData(
+        gl.ARRAY_BUFFER, 
+        coloredColors.subarray(0, 4*coloredBatched), 
+        gl.STATIC_DRAW);
+
+    // Render buffer
+    gl.useProgram(colorProgram.program);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuf);
+    gl.vertexAttribPointer(
+        colorProgram.attribLocations.vertexPosition,
+        /* size */ 2,
+        /* type */ gl.FLOAT,
+        /* normalize */ false,
+        /* stride */ 0,
+        /* offset */ 0);
+
+    gl.enableVertexAttribArray(colorProgram.attribLocations.vertexPosition);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuf);
+    gl.vertexAttribPointer(
+        colorProgram.attribLocations.texCoord,
+        /* size */ 4,
+        /* type */ gl.FLOAT,
+        /* normalize */ false,
+        /* stride */ 0,
+        /* offset */ 0);
+
+    gl.enableVertexAttribArray(colorProgram.attribLocations.texCoord);
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+    gl.drawArrays(gl.TRIANGLES, 0, coloredBatched);
+
+    gl.deleteBuffer(positionsBuf);
+    gl.deleteBuffer(colorsBuf);
+
+    coloredBatched = 0;
+}
+
+// SPRITES ===================================================================
+
+// Shader for drawing sprites.
+const spriteProgram = (function() {
+
+    // Vertex shader converts (X, Y) pixel positions, starting
+    // at (0,0) top left and ending at (240, 320), to OpenGL 
+    // positions starting at (-1, -1) bottom left and ending
+    // at (1, 1).
+    const vertexShader = compileShader(gl.VERTEX_SHADER, `
 attribute vec2 aVertexPosition;
 attribute vec2 aTexCoord;
 varying highp vec2 vTexCoord;
@@ -51,7 +209,7 @@ void main() {
 }
 `);
 
-const pixelShader = compileShader(gl.FRAGMENT_SHADER, `
+    const pixelShader = compileShader(gl.FRAGMENT_SHADER, `
 varying highp vec2 vTexCoord;
 uniform sampler2D uTexData;
 void main() {
@@ -59,8 +217,6 @@ void main() {
 }
 `);
 
-const program = (function() {
-    
     const program = gl.createProgram();
     if (!program) throw "Could not create program";
 
@@ -139,9 +295,11 @@ const atlas = (function() {
 const maxSpriteData   = 12000;
 const spritePositions = new Float32Array(maxSpriteData);
 const spriteTextures  = new Float32Array(maxSpriteData);
-let spritesBatched = 0;
+let spritesBatched    = 0;
 
 export function drawSprite(sprite: Sprite, x: number, y: number) {
+
+    if (coloredBatched) drawBatchedColored();
 
     const {tt, tl, tr, tb, h, w} = sprite;
 
@@ -210,33 +368,33 @@ function drawBatchedSprites() {
         gl.STATIC_DRAW);
 
     // Render buffer
-    gl.useProgram(program.program);
+    gl.useProgram(spriteProgram.program);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuf);
     gl.vertexAttribPointer(
-        program.attribLocations.vertexPosition,
+        spriteProgram.attribLocations.vertexPosition,
         /* size */ 2,
         /* type */ gl.FLOAT,
         /* normalize */ false,
         /* stride */ 0,
         /* offset */ 0);
 
-    gl.enableVertexAttribArray(program.attribLocations.vertexPosition);
+    gl.enableVertexAttribArray(spriteProgram.attribLocations.vertexPosition);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, texturesBuf);
     gl.vertexAttribPointer(
-        program.attribLocations.texCoord,
+        spriteProgram.attribLocations.texCoord,
         /* size */ 2,
         /* type */ gl.FLOAT,
         /* normalize */ false,
         /* stride */ 0,
         /* offset */ 0);
 
-    gl.enableVertexAttribArray(program.attribLocations.texCoord);
+    gl.enableVertexAttribArray(spriteProgram.attribLocations.texCoord);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, atlas);
-    gl.uniform1i(program.uniformLocations.texData, 0);
+    gl.uniform1i(spriteProgram.uniformLocations.texData, 0);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -255,6 +413,8 @@ export function drawSpriteAdditive(sprite: Sprite, x: number, y: number, mul: nu
     drawSprite(sprite, x, y)
 }
 
+// GENERAL ===================================================================
+
 export function startRender() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -262,4 +422,5 @@ export function startRender() {
 
 export function endRender() {
     drawBatchedSprites();
+    drawBatchedColored();
 }

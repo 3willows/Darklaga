@@ -3,7 +3,11 @@ import * as GL from "./webgl"
 
 function randomizeStars() : Int32Array {
     const stars = new Int32Array(3 * 100);
-    // TODO
+    for (let i = 0; i < 300; i += 3) {
+        stars[i  ] = 10 + Math.floor(Math.random() * 220);
+        stars[i+1] = Math.floor(Math.random() * 320) << 3;
+        stars[i+2] = Math.floor(Math.random() * 5); 
+    }
     return stars;
 }
 
@@ -39,13 +43,42 @@ const bg = {
     stars: randomizeStars()
 }
 
+const STAR_SPEED = 100
+
+function renderStars() {
+    for (let i = 0; i < 300; i += 3) {
+        const c = (((64 / (1 + bg.stars[i+2])) | bg.lfactor) & 255) / 255.0;
+        GL.drawRectAdditive(
+            /* x, y */ bg.stars[i], bg.stars[i+1] >> 3, 
+            /* w, h */ 1, ((bg.lfactor + STAR_SPEED) / 3 / (1 + bg.stars[i+2])),
+            /* rgba */ c, c, c, 1);
+    }
+}
+
 export function render() {
     if (bg.current == LEVEL0) {
         GL.drawSprite(planet1, 120, 80);
     } else if (bg.current == LEVEL1) {
         GL.drawSprite(back, 0, 0);
         GL.drawSprite(planet2, 0, 0);
+        renderStars();
     } else {
         throw "Unknown background"
     }
+}
+
+export function step() {
+
+    for (let i = 0; i < 300; i += 3) {
+        const y = bg.stars[i+1] += (bg.lfactor >> 2) + (STAR_SPEED >> (1 + bg.stars[i+2]));
+        
+        if ((y >> 3) + (STAR_SPEED >> (4 + bg.stars[i+2])) > 319) {
+            bg.stars[i  ] = 10 + Math.floor(Math.random() * 220);
+            const depth = bg.stars[i+2] = bg.lfactor ? 0 : Math.floor(Math.random()*3);
+            const y = -(1 + Math.random()) * ((bg.lfactor + STAR_SPEED) / 3 / (1 + depth)); 
+            bg.stars[i+1] = Math.floor(y) << 3;
+            
+        }
+    }
+
 }
