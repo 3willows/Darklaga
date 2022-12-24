@@ -195,10 +195,16 @@ const spriteProgram = (function() {
     // at (0,0) top left and ending at (240, 320), to OpenGL 
     // positions starting at (-1, -1) bottom left and ending
     // at (1, 1).
+    // 
+    // It also transfers to the pixel shader: 
+    //  - the polygon alpha channels (identical for all three vertices of a triangle)
+    //  - the texture coordinates
     const vertexShader = compileShader(gl.VERTEX_SHADER, `
 attribute vec2 aVertexPosition;
 attribute vec2 aTexCoord;
+attribute vec2 aAlphas;
 varying highp vec2 vTexCoord;
+varying highp vec2 vAlphas;
 void main() {
     gl_Position = vec4(
         (aVertexPosition.x / 120.0) - 1.0, 
@@ -206,14 +212,28 @@ void main() {
         1.0, 
         1.0);
     vTexCoord = aTexCoord;
+    vAlphas = aAlphas;
 }
 `);
 
+    // Most of the work in the shader is dealing with the two alpha 
+    // channels, stored in `vAlphas.x` and `vAlphas.y`. The final formula
+    // for blending the color of the sprite with the color of the buffer
+    // is: 
+    //   buffer * (1 - x) + sprite * y
+    // For alpha-blending 'x = y' ; for additive-blending 'x = 0'.
     const pixelShader = compileShader(gl.FRAGMENT_SHADER, `
 varying highp vec2 vTexCoord;
+varying highp vec2 vAlphas;
 uniform sampler2D uTexData;
 void main() {
-    gl_FragColor = texture2D(uTexData, vTexCoord);
+    lowp vec4 texColor = texture2D(uTexData, vTexCoord);
+    // Pre-multiplied alpha
+    gl_FragColor = vec4(
+        texColor.r * texColor.a * vAlphas.y,
+        texColor.g * texColor.a * vAlphas.y,
+        texColor.b * texColor.a * vAlphas.y,
+        texColor.a * vAlphas.x);
 }
 `);
 
@@ -228,7 +248,8 @@ void main() {
         program: program,
         attribLocations: {
             vertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
-            texCoord: gl.getAttribLocation(program, "aTexCoord")
+            texCoord: gl.getAttribLocation(program, "aTexCoord"),
+            alphas: gl.getAttribLocation(program, "aAlphas")
         },
         uniformLocations: {
             texData: gl.getUniformLocation(program, "uTexData")
@@ -295,9 +316,10 @@ const atlas = (function() {
 const maxSpriteData   = 12000;
 const spritePositions = new Float32Array(maxSpriteData);
 const spriteTextures  = new Float32Array(maxSpriteData);
+const spriteAlphas    = new Float32Array(maxSpriteData);
 let spritesBatched    = 0;
 
-export function drawSprite(sprite: Sprite, x: number, y: number) {
+function drawSpriteRaw(sprite: Sprite, x: number, y: number, srca: number, dsta: number) {
 
     if (coloredBatched) drawBatchedColored();
 
@@ -336,7 +358,17 @@ export function drawSprite(sprite: Sprite, x: number, y: number) {
     spriteTextures[spritesBatched + 10] = tr;
     spriteTextures[spritesBatched + 11] = tt;
 
+    // Additional alpha channels
+    for (let i = 0; i < 12; i += 2) {
+        spriteAlphas[spritesBatched + i] = dsta;
+        spriteAlphas[spritesBatched + i + 1] = srca;
+    }
+
     spritesBatched += 12;
+}
+
+export function drawSprite(sprite: Sprite, x: number, y: number) {
+    drawSpriteRaw(sprite, x, y, 1, 1)
 }
 
 // Draw all sprites accumulated into the current batch 
@@ -367,6 +399,17 @@ function drawBatchedSprites() {
         spriteTextures.subarray(0, spritesBatched), 
         gl.STATIC_DRAW);
 
+    // Allocate and fill alphas buffer
+    const alphasBuf = gl.createBuffer();
+    if (!alphasBuf) throw "Could not allocate buffer";
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, alphasBuf);
+
+    gl.bufferData(
+        gl.ARRAY_BUFFER, 
+        spriteAlphas.subarray(0, spritesBatched), 
+        gl.STATIC_DRAW);
+    
     // Render buffer
     gl.useProgram(spriteProgram.program);
 
@@ -392,12 +435,27 @@ function drawBatchedSprites() {
 
     gl.enableVertexAttribArray(spriteProgram.attribLocations.texCoord);
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, alphasBuf);
+    gl.vertexAttribPointer(
+        spriteProgram.attribLocations.alphas,
+        /* size */ 2,
+        /* type */ gl.FLOAT,
+        /* normalize */ false,
+        /* stride */ 0,
+        /* offset */ 0);
+
+    gl.enableVertexAttribArray(spriteProgram.attribLocations.alphas);
+
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, atlas);
     gl.uniform1i(spriteProgram.uniformLocations.texData, 0);
 
+    // We use gl.ONE for the source and have our fragment shader produce
+    // pre-multipled alpha ; this lets us support both normal alpha 
+    // blending (with pre-multiplied alpha) and additive blending (set 
+    // fragment alpha to 0, but leave color channel alone).
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.drawArrays(gl.TRIANGLES, 0, spritesBatched/2);
 
@@ -407,10 +465,14 @@ function drawBatchedSprites() {
     spritesBatched = 0;
 }
 
-// TODO: implement additive blending ! 
 // mul is 0..32
 export function drawSpriteAdditive(sprite: Sprite, x: number, y: number, mul: number) {
-    drawSprite(sprite, x, y)
+    drawSpriteRaw(sprite, x, y, (mul / 32), 0);
+}
+
+// mul is 0..32
+export function drawSpriteAlpha(sprite: Sprite, x: number, y: number, mul: number) {
+    drawSpriteRaw(sprite, x, y, (mul / 32), (mul / 32));
 }
 
 // GENERAL ===================================================================

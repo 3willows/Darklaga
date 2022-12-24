@@ -1,6 +1,7 @@
 import * as S from "./sprites";
 import * as Shot from "./shot";
 import * as GL from "./webgl";
+import { opts } from "options";
 
 export type Mode = "n"|"v"|"d"
 
@@ -76,19 +77,7 @@ const explosions = {
             S.explon8,
             S.explon9,
             S.explon10,
-            S.explon11,
-            S.explon12,
-            S.explon13,
-            S.explon14,
-            S.explon15,
-            S.explon16,
-            S.explon17,
-            S.explon18,
-            S.explon19,
-            S.explon20,
-            S.explon21,
-            S.explon22,
-            S.explon23 ],
+            S.explon11 ],
     v: [] as S.Sprite[],
     d: [] as S.Sprite[]
 }
@@ -112,24 +101,30 @@ export class Dying extends Enemy {
     }
 
     public render() {
+
+        const ex = (this.x >> 3) - 4;
+        const ey = (this.y >> 3) - 4;
+
         if (this.timer < 8) {
 
             // The enemy sprite itself
             GL.drawSprite(this.hit, this.x >> 3, this.y >> 3);
+
+            // A two-layer explosion sprite
+            if (opts.LodExplosions)
+                GL.drawSprite(this.explo[this.timer >> 1], ex, ey);            
+            GL.drawSpriteAdditive(this.explo[this.timer >> 1], ex, ey, 32);
             
-            // An explosion sprite
-            GL.drawSprite(
-                this.explo[this.timer >> 1],
-                (this.x >> 3) - 4,
-                (this.y >> 3) - 4);
-        
         } else {
 
-            // Only the explosion sprite
-            GL.drawSprite(
-                this.explo[(this.timer+8)>>2], 
-                (this.x >> 3) - 4, 
-                (this.y >> 3) - 4);
+            const factor = 40 - this.timer;
+
+            if (factor > 0) {
+                // Only the two-layer explosion sprite
+                if (opts.LodExplosions)
+                    GL.drawSpriteAlpha(this.explo[(this.timer+8)>>2], ex, ey, factor);
+                GL.drawSpriteAdditive(this.explo[(this.timer+8)>>2], ex, ey, factor);
+            }
         }
     }
 }
