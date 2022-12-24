@@ -105,6 +105,10 @@ export class Dying extends Enemy {
         const ex = (this.x >> 3) - 4;
         const ey = (this.y >> 3) - 4;
 
+        // Center the flash
+        const bx = (this.x >> 3) - (S.boomlight.w - this.hit.w)/2;
+        const by = (this.y >> 3) - (S.boomlight.h - this.hit.h)/2;
+
         if (this.timer < 8) {
 
             // The enemy sprite itself
@@ -115,6 +119,10 @@ export class Dying extends Enemy {
                 GL.drawSprite(this.explo[this.timer >> 1], ex, ey);            
             GL.drawSpriteAdditive(this.explo[this.timer >> 1], ex, ey, 32);
             
+            // An additive flash of light
+            if (opts.LodExplosions >= 2)
+                GL.drawSpriteAdditive(S.boomlight, bx, by, this.timer << 2);
+
         } else {
 
             const factor = 40 - this.timer;
@@ -125,6 +133,10 @@ export class Dying extends Enemy {
                     GL.drawSpriteAlpha(this.explo[(this.timer+8)>>2], ex, ey, factor);
                 GL.drawSpriteAdditive(this.explo[(this.timer+8)>>2], ex, ey, factor);
             }
+
+            if (opts.LodExplosions >= 2 && this.timer < 24)
+                GL.drawSpriteAdditive(S.boomlight, bx, by, (24 - this.timer) << 1);
+
         }
     }
 }
