@@ -3,6 +3,9 @@ export const opts = {
     // New-school graphics
     UseNewSchool: true,
 
+    // Level of details for explosions
+    LodExplosions: 3,
+
     // Does hitting a wall cause ship to bounce ?
     ModWallsBounce: false,
 
@@ -14,4 +17,5 @@ export const opts = {
 
     // Player movement quadratic friction, 0..5
     ModPlayerFriction: 1
+
 }

@@ -1,11 +1,14 @@
-import { Enemy } from "./enemy"
+import { Enemy, Mode } from "./enemy"
 import * as S from "./sprites"
+import * as GL from "./webgl"
 
-export class Suicide extends Enemy {
+export class Suicide1 extends Enemy {
 
-    constructor(x: number, y: number) {
+    constructor(x: number, y: number, mode: Mode) {
         super(x, y, 
-            /* health */ 5, 
+            /* health */ mode == "n" ? 5 :
+                         mode == "d" ? 7 : 6, 
+            mode,
             [   S.esuiciden2, 
                 S.esuiciden3, 
                 S.esuiciden4, 
