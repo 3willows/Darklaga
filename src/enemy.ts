@@ -86,17 +86,19 @@ const explosions = {
 export class Dying extends Enemy {
 
     private explo : S.Sprite[]
+    private angle : number
 
     constructor(x: number, y: number, sprite: S.Sprite, mode: "n"|"v"|"d") {
         super(x, y, 0, mode, [sprite], sprite)
         this.explo = explosions[mode];
+        this.angle = Math.random()
     }
 
     public shootable(): boolean { return false; }
 
     public step() {
         super.step();
-        if (this.timer >= 88) return null;
+        if (this.timer >= 40) return null;
         return this;
     }
 
@@ -108,6 +110,8 @@ export class Dying extends Enemy {
         // Center the flash
         const bx = (this.x >> 3) - (S.boomlight.w - this.hit.w)/2;
         const by = (this.y >> 3) - (S.boomlight.h - this.hit.h)/2;
+
+        let alpha;
 
         if (this.timer < 8) {
 
@@ -123,6 +127,8 @@ export class Dying extends Enemy {
             if (opts.LodExplosions >= 2)
                 GL.drawSpriteAdditive(S.boomlight, bx, by, this.timer << 2);
 
+            alpha = this.timer << 1;
+
         } else {
 
             const factor = 40 - this.timer;
@@ -137,10 +143,27 @@ export class Dying extends Enemy {
             if (opts.LodExplosions >= 2 && this.timer < 24)
                 GL.drawSpriteAdditive(S.boomlight, bx, by, (24 - this.timer) << 1);
 
+            alpha = 24 - this.timer;
+        }
+
+        // Three triangles centered on the explosion, additive
+        if (opts.LodExplosions >= 3 && alpha > 0) {
+            for (let i = 0; i < 3; ++i) {
+                const cx = (this.x >> 3) + (this.w >> 4);
+                const cy = (this.y >> 3) + (this.h >> 4);
+                const ia = Math.PI * (this.angle + this.timer / 255 + i * 0.66);
+                const ix = cx + 370 * Math.cos(ia);
+                const iy = cy + 370 * Math.sin(ia);
+                const ja = ia + Math.PI / 64;
+                const jx = cx + 370 * Math.cos(ja);
+                const jy = cy + 370 * Math.sin(ja);
+                GL.drawPolyAdditive(
+                    [cx, cy, ix, iy, jx, jy],
+                    1, 1, 1, alpha/32);
+            }
         }
     }
 }
-
 
 const enemies : Enemy[] = [];
 
