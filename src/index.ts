@@ -2,12 +2,15 @@ import * as GL from "./webgl"
 import * as Player from "./player"
 import * as Shot from "./shot"
 import * as Background from "./background"
+import * as Enemy from "./enemy"
+import { Suicide } from "enemy.types"
 
 // Rendering happens every time setInterval() triggers.
 function render() {
     GL.startRender();
     Background.render();
     Shot.render();
+    Enemy.render();
     Player.render();
     GL.endRender();
 }
@@ -17,8 +20,11 @@ const stepDurationMilliseconds = 16.666;
 function step() {
     Background.step();
     Shot.step();
+    Enemy.step();
     Player.step();
 }
+
+Enemy.add(new Suicide(256, 256));
 
 export function run() {
     let nextFrame = +new Date();
