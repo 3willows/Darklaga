@@ -1,5 +1,7 @@
 export const opts = {
 
+    UseVertical: true,
+
     // New-school graphics
     UseNewSchool: true,
 

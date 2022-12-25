@@ -64,6 +64,10 @@ function shoot() {
 
 }
 
+export function pos() {
+    return {x: pl.x, y: pl.y};
+}
+
 export function step() {
 
     const friction = opts.ModPlayerFriction * opts.ModPlayerFriction * 4;
