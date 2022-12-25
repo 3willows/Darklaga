@@ -78,8 +78,30 @@ const explosions = {
             S.explon9,
             S.explon10,
             S.explon11 ],
-    v: [] as S.Sprite[],
-    d: [] as S.Sprite[]
+    v: [    S.explov0,
+            S.explov1,
+            S.explov2,
+            S.explov3,
+            S.explov4,
+            S.explov5,
+            S.explov6,
+            S.explov7,
+            S.explov8,
+            S.explov9,
+            S.explov10,
+            S.explov11 ],
+    d: [    S.explod0,
+            S.explod1,
+            S.explod2,
+            S.explod3,
+            S.explod4,
+            S.explod5,
+            S.explod6,
+            S.explod7,
+            S.explod8,
+            S.explod9,
+            S.explod10,
+            S.explod11 ]
 }
     
 
