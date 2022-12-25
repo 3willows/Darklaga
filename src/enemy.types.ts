@@ -5,9 +5,87 @@ import * as GL from "./webgl"
 import * as Dan from "./dan"
 import { opts } from "options"
 
-// Given a ship sprite-set 01234, oscillates 23432101
+// Given a ship sprite-set 01234, oscillates 23432101 ;
+// given 012, oscillates 1210
 function twoSide(s: S.Sprite[]): S.Sprite[] {
-    return [s[2], s[3], s[4], s[3], s[2], s[1], s[0], s[1]];
+    if (s.length == 5)
+        return [s[2], s[3], s[4], s[3], s[2], s[1], s[0], s[1]];
+    return [s[1], s[2], s[1], s[0]];
+}
+
+const estatic = {
+    n: twoSide(S.estaticn),
+    d: twoSide(S.estaticd),
+    v: twoSide(S.estaticv)
+}
+
+// Static enemy, moves down slowly
+export class Static extends Enemy {
+
+    // Initial X-position
+    public readonly ix : number
+    
+    // Variant, 1 2 or 3
+    public readonly variant: number
+
+    // Angle, increases from 0 to 256 in variant=2
+    public angle : number
+
+    // Shot timer
+    public stimer : number
+
+    constructor(x: number, y: number, mode: Mode, params: number[]) {
+        super(x, y, 
+            /* health */ mode == "n" ? (params[0] < 3 ? 9 : 8) :
+                         mode == "d" ? (params[0] < 3 ? 10 : 8) : 
+                                       (params[0] < 2 ? 11 : 9),
+            mode,
+            estatic[mode],
+            mode == "n" ? S.estaticnh :
+            mode == "d" ? S.estaticdh : S.estaticvh);
+
+        this.ix = x;
+        this.variant = params[0];
+        this.angle = 0;
+        this.stimer = 75;
+    }
+
+    public step(): Enemy|null {
+        
+        const self = super.step();
+        if (self !== this) return self;
+
+        switch (this.variant) {
+            case 1: 
+                this.y += 4;
+                break;
+            case 2: 
+                // Sinusoidal movement
+                this.angle++;
+                this.y += this.mode == "v" ? 16 : 8;
+                if (this.y < 20) { this.angle = 0 }
+                if (this.angle > 256) { this.angle = 256 }
+                const angle = this.angle * Math.PI / 128 * 
+                    (this.mode == "n" ? 0.5 : 
+                     this.mode == "d" ? 1 : 2);
+                this.x = 920 - (this.ix - 940) * Math.cos(angle);
+                break;
+            case 3: 
+                this.y += 4;
+                if (this.stimer-- < 0) {
+                    this.stimer = 50;
+                    const sprite = this.mode == "n" ? 1 : 
+                                   this.mode == "d" ? 2 : 3;
+                    Dan.fireStandard(this.cx(), this.cy(), -16, 0, sprite);
+                    Dan.fireStandard(this.cx(), this.cy(), +16, 0, sprite);
+                }
+                break;
+        }
+     
+        if (this.y >= 2560) return null;
+
+        return this;
+    }
 }
 
 const suicide = {

@@ -4,7 +4,7 @@ import * as Shot from "./shot"
 import * as Background from "./background"
 import * as Enemy from "./enemy"
 import * as Dan from "./dan"
-import { Sweep } from "enemy.types"
+import { Static } from "enemy.types"
 
 // Rendering happens every time setInterval() triggers.
 function render() {
@@ -27,13 +27,13 @@ function step() {
     Dan.step();
 }
 
-Enemy.add(new Sweep(256, 512, "n", [0]));
+Enemy.add(new Static(256, -480, "n", [3]));
 
-Enemy.add(new Sweep(512, 512, "n", [0]));
+Enemy.add(new Static(256, -360, "n", [3]));
 
-Enemy.add(new Sweep(768, 768, "d", [1]));
+Enemy.add(new Static(256, -240, "d", [3]));
 
-Enemy.add(new Sweep(1024, 512, "v", [1]));
+Enemy.add(new Static(256, -120, "v", [3]));
 
 export function run() {
     let nextFrame = +new Date();

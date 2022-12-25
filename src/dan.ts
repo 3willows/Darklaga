@@ -47,9 +47,20 @@ const DAN_FORK			= 0x000F
 const DAN_SPIR			= 0x0010
 const DAN_FWOK2			= 0x0011
 
+// Given a shot sprite-set 01234, oscillates 23432101 ;
+// given 012, oscillates 1210
+function twoSide(s: S.Sprite[]): S.Sprite[] {
+    if (s.length == 5)
+        return [s[2], s[3], s[4], s[3], s[2], s[1], s[0], s[1]];
+    return [s[1], s[2], s[1], s[0]];
+}
+
 // Bullet sprites (as animations)
 const sprites = [
-    [S.bullet2all]
+    [S.bullet2all],
+    twoSide(S.bullet1n),
+    twoSide(S.bullet1d),
+    twoSide(S.bullet1v),
 ]
 
 const maxDanAmount = 200;
