@@ -708,6 +708,14 @@ export const blast : Sprite = {
     "tr": 0.98828125,
     "tb": 0.017578125
 };
+export const bullet2all : Sprite = {
+    "w": 4,
+    "h": 9,
+    "tl": 0.98828125,
+    "tt": 0,
+    "tr": 0.99609375,
+    "tb": 0.017578125
+};
 export const vblast : Sprite = {
     "w": 7,
     "h": 9,

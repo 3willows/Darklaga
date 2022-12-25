@@ -3,6 +3,7 @@ import * as Player from "./player"
 import * as Shot from "./shot"
 import * as Background from "./background"
 import * as Enemy from "./enemy"
+import * as Dan from "./dan"
 import { Sweep } from "enemy.types"
 
 // Rendering happens every time setInterval() triggers.
@@ -12,6 +13,7 @@ function render() {
     Shot.render();
     Enemy.render();
     Player.render();
+    Dan.render();
     GL.endRender();
 }
 
@@ -22,6 +24,7 @@ function step() {
     Shot.step();
     Enemy.step();
     Player.step();
+    Dan.step();
 }
 
 Enemy.add(new Sweep(256, 512, "n", [0]));

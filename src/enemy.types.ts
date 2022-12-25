@@ -2,6 +2,7 @@ import { Enemy, Mode } from "./enemy"
 import * as S from "./sprites"
 import * as Player from "./player"
 import * as GL from "./webgl"
+import * as Dan from "./dan"
 import { opts } from "options"
 
 // Given a ship sprite-set 01234, oscillates 23432101
@@ -19,8 +20,8 @@ const suicide = {
 class Suicide2 extends Enemy {
 
     private readonly toLeft : boolean
-    private readonly cy : number
-    private readonly cx : number 
+    private readonly cty : number
+    private readonly ctx : number 
     private angle : number
     
     constructor(x: number, y: number, mode: Mode, health: number) {
@@ -31,8 +32,8 @@ class Suicide2 extends Enemy {
         const {x:px} = Player.pos();
 
         this.toLeft = x > px;
-        this.cy = y;
-        this.cx = this.toLeft ? x - 640 : x + 640;
+        this.cty = y;
+        this.ctx = this.toLeft ? x - 640 : x + 640;
         
         // Angle starts negative but is only applied when positive, 
         // so this is a random delay.
@@ -48,8 +49,8 @@ class Suicide2 extends Enemy {
         if (this.angle < 0) return this;
 
         if (this.angle < Math.PI / 2) {
-            this.x = this.cx + (this.toLeft ? 1 : -1) * 640 * Math.cos(this.angle);
-            this.y = this.cy + (this.mode == "n" ? 1 : 2) * 640 * Math.sin(this.angle);
+            this.x = this.ctx + (this.toLeft ? 1 : -1) * 640 * Math.cos(this.angle);
+            this.y = this.cty + (this.mode == "n" ? 1 : 2) * 640 * Math.sin(this.angle);
             return this;
         }
 
@@ -153,6 +154,13 @@ export class Sweep extends Enemy {
         } else {
             this.dir++;
             this.wait = 640;
+        }
+
+        if (this.stimer-- == 0) {
+            this.stimer = this.mode == "n" ? 600 + Math.floor(Math.random() * 128) :
+                          this.mode == "d" ? 50 + Math.floor(Math.random() * 128) :                  
+                                             300 + Math.floor(Math.random() * 64);
+            Dan.fireStandard(this.cx(), this.cy(), 0, 16, /* sprite */ 0);
         }
 
         return this;

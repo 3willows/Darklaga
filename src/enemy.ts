@@ -63,6 +63,10 @@ export class Enemy {
             : this.sprites[this.frame()];
         GL.drawSprite(sprite, this.x >> 3, this.y >> 3);
     }
+
+    // Position of the center of the enemy
+    public cx() { return this.x + this.w/2; }
+    public cy() { return this.y + this.h/2; }
 }
 
 const explosions = {
