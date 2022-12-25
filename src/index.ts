@@ -3,7 +3,7 @@ import * as Player from "./player"
 import * as Shot from "./shot"
 import * as Background from "./background"
 import * as Enemy from "./enemy"
-import { Suicide } from "enemy.types"
+import { Sweep } from "enemy.types"
 
 // Rendering happens every time setInterval() triggers.
 function render() {
@@ -24,13 +24,13 @@ function step() {
     Player.step();
 }
 
-Enemy.add(new Suicide(256, -256, "n", [0]));
+Enemy.add(new Sweep(256, 512, "n", [0]));
 
-Enemy.add(new Suicide(512, -256, "n", [0]));
+Enemy.add(new Sweep(512, 512, "n", [0]));
 
-Enemy.add(new Suicide(768, -256, "d", [-1]));
+Enemy.add(new Sweep(768, 768, "d", [1]));
 
-Enemy.add(new Suicide(1024, -256, "v", [1]));
+Enemy.add(new Sweep(1024, 512, "v", [1]));
 
 export function run() {
     let nextFrame = +new Date();

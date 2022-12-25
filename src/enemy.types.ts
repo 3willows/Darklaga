@@ -39,7 +39,7 @@ class Suicide2 extends Enemy {
         this.angle = -Math.PI * (0.156 + Math.random() * 0.5);
     }
 
-    public step() {
+    public step(): Enemy|null {
     
         const self = super.step();
         if (self !== this) return self;
@@ -60,6 +60,8 @@ class Suicide2 extends Enemy {
     }
 }
 
+// Flies downwards, then arcs to a faster horizontal trajectory
+// that intersects the player's position
 export class Suicide extends Enemy {
 
     private dir : number
@@ -76,7 +78,7 @@ export class Suicide extends Enemy {
         this.dir = params[0]
     }
 
-    public step() {
+    public step() : Enemy|null {
         const self = super.step();
         if (self !== this) return self;
 
@@ -104,4 +106,55 @@ export class Suicide extends Enemy {
 
         return this;
     }
+}
+
+const sweep = {
+    n: twoSide(S.esweepn),
+    d: twoSide(S.esweepd),
+    v: twoSide(S.esweepv)
+}
+
+// Moves in a square, sometimes shoots
+export class Sweep extends Enemy {
+
+    public shoots : boolean
+    public dir : number
+    public wait : number
+    public stimer : number
+
+    constructor(x: number, y: number, mode: Mode, params: number[]) {
+        super(x, y - 1600, 
+            /* health */ mode == "n" ? 6 : 
+                         mode == "d" ? 7 : 8,
+            mode,
+            sweep[mode],
+            mode == "n" ? S.esweepnh : 
+            mode == "d" ? S.esweepdh : S.esweepvh);
+
+        this.shoots = !!params[0];
+        this.dir = 0;
+        this.wait = 3200;
+        this.stimer = 300 + Math.floor(300 * Math.random());
+    }
+
+    public step() : Enemy|null {
+
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.wait > 0) {
+            this.wait -= 16 + 8*(this.dir % 2);
+            switch (this.dir % 4) {
+                case 0: this.y += 8; break;
+                case 1: this.x -= 8; break;
+                case 2: this.y -= 8; break;
+                default: this.x += 8; break;
+            }
+        } else {
+            this.dir++;
+            this.wait = 640;
+        }
+
+        return this;
+    }    
 }
