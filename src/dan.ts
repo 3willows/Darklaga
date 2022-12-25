@@ -61,10 +61,15 @@ const spriteNames = {
     "b1d": twoSide(S.bullet1d),
     "b1v": twoSide(S.bullet1v),
     "b2": [S.bullet2all],
-    "b3": twoSide(S.bullet3all),
+    "b3n": twoSide(S.bullet3n),
+    "b3d": twoSide(S.bullet3d),
+    "b3v": twoSide(S.bullet3v),
     "b4n": [S.bullet4n],
     "b4d": [S.bullet4d],
-    "b4v": [S.bullet4v]
+    "b4v": [S.bullet4v],
+    "b5n": twoSide(S.bullet5n),
+    "b5d": twoSide(S.bullet5d),
+    "b5v": twoSide(S.bullet5v),
 }
 
 // Index and reverse-index sprite names
