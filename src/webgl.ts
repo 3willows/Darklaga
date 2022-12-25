@@ -33,6 +33,12 @@ function compileShader(type: number, source: string) {
     return shader;
 }
 
+let statAvgDur = 0
+let statFrameStart = +new Date()
+let statBatches = 0
+let statPolys = 0
+let statBytes = 0
+
 // COLORED POLYGONS ==========================================================
 
 // Shader for drawing untextured, colored polygons. 
@@ -139,6 +145,8 @@ function drawBatchedColored() {
         coloredPositions.subarray(0, 2*coloredBatched), 
         gl.STATIC_DRAW);
 
+    statBytes += 2 * coloredBatched * 4;
+
     // Allocate and fill colors buffer
     const colorsBuf = gl.createBuffer();
     if (!colorsBuf) throw "Could not allocate buffer";
@@ -149,6 +157,8 @@ function drawBatchedColored() {
         gl.ARRAY_BUFFER, 
         coloredColors.subarray(0, 4*coloredBatched), 
         gl.STATIC_DRAW);
+
+    statBytes += 4 * coloredBatched * 4;
 
     // Render buffer
     gl.useProgram(colorProgram.program);
@@ -179,6 +189,9 @@ function drawBatchedColored() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
     gl.drawArrays(gl.TRIANGLES, 0, coloredBatched);
+
+    statPolys += coloredBatched/3;
+    statBatches += 1;
 
     gl.deleteBuffer(positionsBuf);
     gl.deleteBuffer(colorsBuf);
@@ -388,6 +401,8 @@ function drawBatchedSprites() {
         spritePositions.subarray(0, spritesBatched), 
         gl.STATIC_DRAW);
 
+    statBytes += spritesBatched * 4;
+
     // Allocate and fill textures buffer
     const texturesBuf = gl.createBuffer();
     if (!texturesBuf) throw "Could not allocate buffer";
@@ -399,6 +414,8 @@ function drawBatchedSprites() {
         spriteTextures.subarray(0, spritesBatched), 
         gl.STATIC_DRAW);
 
+    statBytes += spritesBatched * 4;
+
     // Allocate and fill alphas buffer
     const alphasBuf = gl.createBuffer();
     if (!alphasBuf) throw "Could not allocate buffer";
@@ -409,6 +426,8 @@ function drawBatchedSprites() {
         gl.ARRAY_BUFFER, 
         spriteAlphas.subarray(0, spritesBatched), 
         gl.STATIC_DRAW);
+
+    statBytes += spritesBatched * 4;
     
     // Render buffer
     gl.useProgram(spriteProgram.program);
@@ -459,6 +478,9 @@ function drawBatchedSprites() {
 
     gl.drawArrays(gl.TRIANGLES, 0, spritesBatched/2);
 
+    statPolys += spritesBatched/6;
+    statBatches += 1;
+
     gl.deleteBuffer(positionsBuf);
     gl.deleteBuffer(texturesBuf);
 
@@ -478,6 +500,7 @@ export function drawSpriteAlpha(sprite: Sprite, x: number, y: number, mul: numbe
 // GENERAL ===================================================================
 
 export function startRender() {
+    statFrameStart = +new Date();
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 }
@@ -485,4 +508,16 @@ export function startRender() {
 export function endRender() {
     drawBatchedSprites();
     drawBatchedColored();
+
+    const dur = +new Date() - statFrameStart;
+    statAvgDur = 0.9 * statAvgDur + 0.1 * dur;
+    document.getElementById("log")!.innerText =
+        dur.toFixed() + " ms (avg " + statAvgDur.toFixed(2) + " ms)\n" +  
+        statBatches.toFixed() + " batches\n" +
+        statPolys.toFixed() + " triangles\n" + 
+        (statBytes / 1024).toFixed(1) + " KB"
+
+    statBatches = 0
+    statPolys = 0
+    statBytes = 0
 }
