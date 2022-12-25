@@ -1,4 +1,4 @@
-import { back, planet1, planet2, planet3, planet4 } from "./sprites";
+import { back, planet } from "./sprites";
 import * as GL from "./webgl"
 
 function randomizeStars() : Int32Array {
@@ -57,10 +57,10 @@ function renderStars() {
 
 export function render() {
     if (bg.current == LEVEL0) {
-        GL.drawSprite(planet1, 120, 80);
+        GL.drawSprite(planet[0], 120, 80);
     } else if (bg.current == LEVEL1) {
         GL.drawSprite(back, 0, 0);
-        GL.drawSprite(planet2, 0, 0);
+        GL.drawSprite(planet[1], 0, 0);
         renderStars();
     } else {
         throw "Unknown background"

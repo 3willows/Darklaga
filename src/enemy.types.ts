@@ -4,31 +4,15 @@ import * as Player from "./player"
 import * as GL from "./webgl"
 import { opts } from "options"
 
+// Given a ship sprite-set 01234, oscillates 23432101
+function twoSide(s: S.Sprite[]): S.Sprite[] {
+    return [s[2], s[3], s[4], s[3], s[2], s[1], s[0], s[1]];
+}
+
 const suicide = {
-    n: [    S.esuiciden2, 
-            S.esuiciden3, 
-            S.esuiciden4, 
-            S.esuiciden3,
-            S.esuiciden2,
-            S.esuiciden1,
-            S.esuiciden0,
-            S.esuiciden1],
-    d: [    S.esuicided2, 
-            S.esuicided3, 
-            S.esuicided4, 
-            S.esuicided3,
-            S.esuicided2,
-            S.esuicided1,
-            S.esuicided0,
-            S.esuicided1],
-    v: [    S.esuicidev2, 
-            S.esuicidev3, 
-            S.esuicidev4, 
-            S.esuicidev3,
-            S.esuicidev2,
-            S.esuicidev1,
-            S.esuicidev0,
-            S.esuicidev1],
+    n: twoSide(S.esuiciden),
+    d: twoSide(S.esuicided),
+    v: twoSide(S.esuicidev)
 }
 
 // Second stage of 'suicide' enemy, moves in an arc 

@@ -1,5 +1,5 @@
 import * as GL from "./webgl"
-import { blast, muzzle, player0, player1, player2, player3, player4 } from "./sprites"
+import { blast, muzzle, player } from "./sprites"
 import { key } from "./input"
 import { opts } from "./options"
 import * as Shot from "./shot"
@@ -155,10 +155,10 @@ export function step() {
 export function render() {
     
     const {x, y, distance, muzzle_flash} = pl;
-    const frame = distance < -10 ? player0 :
-                  distance < 0 ? player1 : 
-                  distance == 0 ? player2 : 
-                  distance <= 10 ? player3 : player4;
+    const frame = player[distance < -10 ? 0 :
+                         distance < 0 ? 1 : 
+                         distance == 0 ? 2 : 
+                         distance <= 10 ? 3 : 4];
 
     GL.drawSprite(frame, x >> 3, y >> 3);
 

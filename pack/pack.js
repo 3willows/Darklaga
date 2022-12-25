@@ -186,9 +186,35 @@ async function packImages() {
     }
 }
 
+// Find names like 'foo0' 'foo1' etc. and combine them as arrays of 
+// values. 
+function mergeBindings(bindings, side) {
+    const out = {}
+    for (let k in bindings) {
+        const b = bindings[k];
+        const value = {
+            w: b.w,
+            h: b.h,
+            tl: b.x / side,
+            tt: b.y / side,
+            tr: (b.x + b.w) / side,
+            tb: (b.y + b.h) / side
+        }
+        const ending = /\d+$/.exec(k);
+        if (!ending) {
+            out[k] = value;
+        } else {
+            const k2 = k.substring(0, k.length - ending[0].length)
+            out[k2] = out[k2] || [];
+            out[k2][Number(ending[0])] = value;
+        }
+    }
+    return out;
+}
+
 async function emit() {
 
-    const [bounds, atlas, w] = await packImages();
+    const [bindings, atlas, side] = await packImages();
 
     fs.writeFileSync("dist/atlas.png", atlas);
 
@@ -199,16 +225,12 @@ async function emit() {
         + "])";
     fs.writeFileSync("dist/atlas.js", asData);
 
+    const bounds = mergeBindings(bindings, side);
     const boundsStr = Object.keys(bounds).map(k => {
         const b = bounds[k];
-        return "export const " + k + " : Sprite = " + JSON.stringify({
-            w: b.w,
-            h: b.h,
-            tl: b.x / w,
-            tt: b.y / w,
-            tr: (b.x + b.w) / w,
-            tb: (b.y + b.h) / w
-        }) + ";\n"
+        return "export const " + k + " : Sprite" + 
+            (b.hasOwnProperty("length") ? "[]" : "") + 
+            " = " + JSON.stringify(b, null, 4) + ";\n"
     }).join("");
 
     const sprites = `export type Sprite = {

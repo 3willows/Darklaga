@@ -66,42 +66,9 @@ export class Enemy {
 }
 
 const explosions = {
-    n: [    S.explon0,
-            S.explon1,
-            S.explon2,
-            S.explon3,
-            S.explon4,
-            S.explon5,
-            S.explon6,
-            S.explon7,
-            S.explon8,
-            S.explon9,
-            S.explon10,
-            S.explon11 ],
-    v: [    S.explov0,
-            S.explov1,
-            S.explov2,
-            S.explov3,
-            S.explov4,
-            S.explov5,
-            S.explov6,
-            S.explov7,
-            S.explov8,
-            S.explov9,
-            S.explov10,
-            S.explov11 ],
-    d: [    S.explod0,
-            S.explod1,
-            S.explod2,
-            S.explod3,
-            S.explod4,
-            S.explod5,
-            S.explod6,
-            S.explod7,
-            S.explod8,
-            S.explod9,
-            S.explod10,
-            S.explod11 ]
+    n: S.explon,
+    v: S.explov,
+    d: S.explod
 }
     
 
