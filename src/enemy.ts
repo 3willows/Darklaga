@@ -12,11 +12,11 @@ export class Enemy {
     public w: number
     public h: number
     public flash: number
-
+    public health: number
     constructor(
         public x: number, 
         public y: number,
-        public health: number,
+        health: number,
         public mode: Mode,
         public sprites: S.Sprite[],
         public hit: S.Sprite) {       
@@ -25,6 +25,7 @@ export class Enemy {
         this.flash = 0
         this.w = sprites[0].w << 3;
         this.h = sprites[0].h << 3;
+        this.health = 1 << health;
     }
 
     public frame() {

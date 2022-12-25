@@ -56,12 +56,24 @@ function twoSide(s: S.Sprite[]): S.Sprite[] {
 }
 
 // Bullet sprites (as animations)
-const sprites = [
-    [S.bullet2all],
-    twoSide(S.bullet1n),
-    twoSide(S.bullet1d),
-    twoSide(S.bullet1v),
-]
+const spriteNames = {
+    "b1n": twoSide(S.bullet1n),
+    "b1d": twoSide(S.bullet1d),
+    "b1v": twoSide(S.bullet1v),
+    "b2": [S.bullet2all],
+    "b3": twoSide(S.bullet3all),
+    "b4n": [S.bullet4n],
+    "b4d": [S.bullet4d],
+    "b4v": [S.bullet4v]
+}
+
+// Index and reverse-index sprite names
+const spriteByName : {[key:string]: number }= {};
+const sprites : S.Sprite[][] = [];
+for (let k in spriteNames) {
+    spriteByName[k] = sprites.length;
+    sprites.push((spriteNames as { [key:string]: S.Sprite[] })[k]);
+}
 
 const maxDanAmount = 200;
 const danSize = 15;
@@ -164,7 +176,7 @@ export function render() {
 // Add a shot, return true if the shot was added, false otherwise. 
 function add(s: {
     type: number,
-    sprite: number,
+    sprite: string,
     x: number,
     y: number,
     life: number, // 64=infinite
@@ -181,12 +193,13 @@ function add(s: {
     dan[off + NEXT] = dan[0];
     dan[0] = off;
 
+    const sprite = spriteByName[s.sprite];
     dan[off + TYPE] = s.type;
-    dan[off + SPRITE] = s.sprite;
+    dan[off + SPRITE] = sprite;
     dan[off + LEFT] = s.x;
     dan[off + TOP] = s.y;
-    dan[off + WIDTH] = sprites[s.sprite][0].w;
-    dan[off + HEIGHT] = sprites[s.sprite][0].h;
+    dan[off + WIDTH] = sprites[sprite][0].w;
+    dan[off + HEIGHT] = sprites[sprite][0].h;
     dan[off + PARAM0] = s.p0 || 0;
     dan[off + PARAM1] = s.p1 || 0;
     dan[off + PARAM2] = s.p2 || 0;
@@ -202,7 +215,7 @@ export function fireStandard(
     y: number, 
     vx: number, 
     vy: number, 
-    sprite: number) 
+    sprite: string) 
 {
     add({
         type: DAN_STD,

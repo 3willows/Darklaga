@@ -74,11 +74,91 @@ export class Static extends Enemy {
                 this.y += 4;
                 if (this.stimer-- < 0) {
                     this.stimer = 50;
-                    const sprite = this.mode == "n" ? 1 : 
-                                   this.mode == "d" ? 2 : 3;
+                    const sprite = "b1" + this.mode;
                     Dan.fireStandard(this.cx(), this.cy(), -16, 0, sprite);
                     Dan.fireStandard(this.cx(), this.cy(), +16, 0, sprite);
                 }
+                break;
+        }
+     
+        if (this.y >= 2560) return null;
+
+        return this;
+    }
+}
+
+const bounce = {
+    n: twoSide(S.ebouncen),
+    d: twoSide(S.ebounced),
+    v: twoSide(S.ebouncev)
+}
+
+export class Bounce extends Enemy {
+
+    public readonly variant : number
+    public vx : number
+    public vy : number
+    public stimer : number
+
+    constructor(x: number, y: number, mode: Mode, params: number[]) {
+        super(x, y, 
+            /* health */mode == "n" ? 8 : 
+                        mode == "d" ? 9 : 10,
+            mode,
+            bounce[mode],
+            mode == "n" ? S.ebouncenh :
+            mode == "d" ? S.ebouncedh : S.ebouncevh);
+
+        this.variant = params[0];
+        this.stimer = 0;
+        const speed = mode == "v" ? 16 : 8;
+        this.vx = (x >= 960) ? -speed : speed;
+        this.vy = speed;
+    }
+    
+    public step(): Enemy|null {
+        
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.y > 0) this.x += this.vx;
+        this.y += this.vy;
+
+        const m = this.mode;
+        function pick(base: number, rand: number) {
+            return Math.floor(Math.random()*rand) + base + (m == "v" ? 8 : 0)
+        }
+
+        switch (this.variant) {
+            case 1: 
+                if (this.y <= 220) this.vy = pick(8,0);
+                if (this.y >= 2144) this.vy = -pick(8,0);
+                if (this.x <= 60) this.vx = pick(8,0);
+                if (this.x >= 1664) this.vx = -pick(8,0);
+                if (this.y > 0 && this.stimer-- <= 0) {
+                    this.stimer = m == "n" ? 25 : 20;
+                    Dan.fireStandard(this.cx(), this.cy(), 0, 16, "b4" + m);
+                }
+                break;
+            case 2: 
+                if (this.y <= 220) this.vy = pick(8,0);
+                if (this.y >= 2144) this.vy = -pick(8,0);
+                if (this.x <= 60) this.vx = pick(8,0);
+                if (this.x >= 1664) this.vx = -pick(8,0);
+                break;
+            case 3: 
+                if (this.y <= 220) this.vy = pick(0,8);
+                if (this.y >= 2144) this.vy = -pick(0,8);
+                if (this.x <= 60) this.vx = pick(0,8);
+                if (this.x >= 1664) this.vx = -pick(0,8);
+                break;
+            case 4: 
+                if (this.y <= 220) this.vy = pick(8,0);
+                if (this.y >= 2144) this.vy = -pick(8,0);
+                if (this.x <= 60) this.vx = pick(8,0);
+                if (this.x >= 1664) this.vx = -pick(8,0);
+                if (Math.random() < 0.016) this.vx = -this.vx;
+                if (Math.random() < 0.016) this.vy = -this.vy;
                 break;
         }
      
@@ -238,7 +318,7 @@ export class Sweep extends Enemy {
             this.stimer = this.mode == "n" ? 600 + Math.floor(Math.random() * 128) :
                           this.mode == "d" ? 50 + Math.floor(Math.random() * 128) :                  
                                              300 + Math.floor(Math.random() * 64);
-            Dan.fireStandard(this.cx(), this.cy(), 0, 16, /* sprite */ 0);
+            Dan.fireStandard(this.cx(), this.cy(), 0, 16, "b2");
         }
 
         return this;

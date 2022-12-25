@@ -4,7 +4,7 @@ import * as Shot from "./shot"
 import * as Background from "./background"
 import * as Enemy from "./enemy"
 import * as Dan from "./dan"
-import { Static } from "enemy.types"
+import { Bounce } from "enemy.types"
 
 // Rendering happens every time setInterval() triggers.
 function render() {
@@ -27,13 +27,13 @@ function step() {
     Dan.step();
 }
 
-Enemy.add(new Static(256, -480, "n", [3]));
+Enemy.add(new Bounce(256, -480, "n", [1]));
 
-Enemy.add(new Static(256, -360, "n", [3]));
+Enemy.add(new Bounce(256, -360, "n", [1]));
 
-Enemy.add(new Static(256, -240, "d", [3]));
+Enemy.add(new Bounce(256, -240, "d", [1]));
 
-Enemy.add(new Static(256, -120, "v", [3]));
+Enemy.add(new Bounce(256, -120, "v", [1]));
 
 export function run() {
     let nextFrame = +new Date();
