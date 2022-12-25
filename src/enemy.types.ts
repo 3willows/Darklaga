@@ -175,6 +175,54 @@ export class Sniper extends Enemy {
     }
 }
 
+const carrier = {
+    n: twoSide(S.ecarriern),
+    d: twoSide(S.ecarrierd),
+    v: twoSide(S.ecarrierv)
+}
+
+// Fires seeking missiles
+export class Carrier extends Enemy {
+
+    public readonly variant : number
+
+    constructor(x: number, y: number, mode: Mode, params: number[]) {
+        super(x, y, 
+            /* health */mode == "n" ? 10 : 11,
+            mode, 
+            carrier[mode],
+            mode == "n" ? S.ecarriernh : 
+            mode == "d" ? S.ecarrierdh : S.ecarriervh);
+        
+        this.variant = params[0];
+        if (this.variant == 2) this.alpha = 0;
+    }
+
+    public step(): Enemy|null {
+        
+        const self = super.step();
+        if (self !== this) return self;
+
+        let ready = false;
+        let freq = this.mode == "n" ? 100 : 
+                   this.mode == "d" ? 75 : 50;
+        if (this.variant == 1) {
+            if (this.y <= 960) { this.y += 8; }
+            else ready = true;
+        } else {
+            if (this.alpha < 33) { this.alpha++; }
+            else ready = true;   
+        }
+
+        if (!ready) return this;
+
+        if (this.timer > 64 && (this.timer % freq) == 0) {
+            Dan.fireCarrier(this.cx(), this.cy(), this.mode);
+        }
+        
+        return this;
+    }
+}
 
 const bounce = {
     n: twoSide(S.ebouncen),

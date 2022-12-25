@@ -4,6 +4,7 @@
 import * as S from "./sprites"
 import * as GL from "./webgl"
 import * as Player from "./player"
+import { Mode } from "enemy";
 
 // Shot data is encoded as consecutive Int32 values, 
 // with the meanings:
@@ -31,6 +32,12 @@ const DAN_DEAD			= 0x0000
 //   PARAMS0 = x-velocity
 //   PARAMS1 = y-velocity
 const DAN_STD			= 0x0001
+
+// Carrier bullet: 
+//   Seeks after the player's position for a while, then turns
+//   into a CARB explosion.
+//   PARAMS0 = x-velocity (x8)
+//   PARAMS1 = y-velocity (x8)
 const DAN_CARN			= 0x0002
 const DAN_CARD			= 0x0003
 const DAN_CARV			= 0x0004
@@ -78,6 +85,7 @@ const spriteNames = {
     "b5n": twoSide(S.bullet5n),
     "b5d": twoSide(S.bullet5d),
     "b5v": twoSide(S.bullet5v),
+    "exv": S.explov,
 }
 
 // Index and reverse-index sprite names
@@ -134,9 +142,12 @@ function danStep(ref: number) {
     }
 
     if (type == DAN_DAIM) {
+        ++dan[off + ANIM];
         const timer = (dan[off + TIMER] += 4);
         if (timer >= 128) {
-            const {x, y} = Player.pos();
+            const pp = Player.pos();
+            const x = pp.x + 80;
+            const y = pp.y + 80;
             const dx = x - dan[off + LEFT];
             const dy = y - dan[off + TOP];
             const norm = Math.sqrt(dx * dx + dy * dy);
@@ -149,6 +160,46 @@ function danStep(ref: number) {
         const mult = (128*128 - timer*timer) / (128*32);
         dan[off + LEFT] += Math.floor(mult * dan[off + PARAM0]);
         dan[off + TOP] += Math.floor(mult * dan[off + PARAM1]);
+        return true;
+    }
+
+    if (type == DAN_CARN || type == DAN_CARD || type == DAN_CARV) {
+        
+        ++dan[off + ANIM];
+        
+        const maxSpeed = 1 << 6;
+        
+        // Shift direction towards player
+        const pp = Player.pos();
+        const x = pp.x + 80;
+        const y = pp.y + 80;
+        const dx = x - dan[off + LEFT];
+        const dy = y - dan[off + TOP];
+        const dux = (type == DAN_CARN ? 1 : 2) * (dx > 0 ? 1 : dx < 0 ? -1 : 0);
+        const duy = (type == DAN_CARN ? 1 : 2) * (dy > 0 ? 1 : dy < 0 ? -1 : 0);
+
+        const vx = (dan[off + PARAM0] = 
+            Math.max(-maxSpeed, Math.min(maxSpeed, dan[off + PARAM0] + dux)));
+            
+        const vy = (dan[off + PARAM1] = 
+            Math.max(-maxSpeed, Math.min(maxSpeed, dan[off + PARAM1] + duy)));
+
+        // Use direction to move
+        const sx = (dan[off + LEFT] += vx >> (type == DAN_CARV ? 2 : 3)); 
+        const sy = (dan[off + TOP]  += vy >> (type == DAN_CARV ? 2 : 3));
+
+        if (dan[off + ANIM] > 300 || sx <= 200 || sx >= 1720 || sy <= 200 || sy >= 2360) {
+
+            dan[off + TYPE] = DAN_CARB;
+            dan[off + SPRITE] = spriteByName["exv"];
+            dan[off + TIMER] = 0;
+        }
+
+        return true;
+    }
+
+    if (type == DAN_CARB) {
+        if (++dan[off + TIMER] >= 40) return false;
         return true;
     }
 
@@ -182,6 +233,22 @@ function danRender(ref: number) {
     const type = dan[off + TYPE];
     if (type == DAN_DEAD) {
         // Nothing
+    } else if (type == DAN_CARB) {
+        
+        const anim = dan[off + TIMER];
+        if (anim < 8) {
+            const sprite = sprites[dan[off + SPRITE]][anim];
+            GL.drawSprite(sprite, 
+                (dan[off + LEFT] >> 3) - (sprite.w >> 1), 
+                (dan[off + TOP] >> 3) - (sprite.h >> 1));
+        } else {
+            const sprite = sprites[dan[off + SPRITE]][(anim+8)>>1];
+            GL.drawSpriteAlpha(sprite, 
+                (dan[off + LEFT] >> 3) - (sprite.w >> 1), 
+                (dan[off + TOP] >> 3) - (sprite.h >> 1),
+                40 - anim);
+        }
+
     } else {
         const anim = sprites[dan[off + SPRITE]];
         const sprite = anim[(dan[off + ANIM] >> 3) % anim.length];
@@ -238,6 +305,7 @@ function add(s: {
     dan[off + PARAM3] = s.p3 || 0;
     dan[off + DIE] = s.life;
     dan[off + TIMER] = 0;
+    dan[off + ANIM] = 0;
 
     return true;
 }
@@ -279,4 +347,16 @@ export function fireBelowArcBig(x: number, y: number, sprite: string) {
     fireStandard(x, y, -7, 3, sprite);
     fireStandard(x, y,  3, 7, sprite);
     fireStandard(x, y, -3, 7, sprite);
+}
+
+export function fireCarrier(x: number, y: number, mode: Mode) {
+    const type = mode == "n" ? DAN_CARN :
+                 mode == "d" ? DAN_CARD : DAN_CARV;
+    const sprite = "b1v";
+    add({ type, sprite, x, y, life: 64, p0: -80, p1:   0 })
+    add({ type, sprite, x, y, life: 64, p0:  80, p1:   0 })
+    add({ type, sprite, x, y, life: 64, p0: -60, p1:  60 })
+    add({ type, sprite, x, y, life: 64, p0:  60, p1:  60 })
+    add({ type, sprite, x, y, life: 64, p0: -60, p1: -60 })
+    add({ type, sprite, x, y, life: 64, p0:  60, p1: -60 })
 }

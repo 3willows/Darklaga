@@ -13,6 +13,7 @@ export class Enemy {
     public h: number
     public flash: number
     public health: number
+    public alpha: number
     constructor(
         public x: number, 
         public y: number,
@@ -26,6 +27,7 @@ export class Enemy {
         this.w = sprites[0].w << 3;
         this.h = sprites[0].h << 3;
         this.health = 1 << health;
+        this.alpha = 33;
     }
 
     public frame() {
@@ -33,7 +35,7 @@ export class Enemy {
     }
 
     // Can this enemy be shot ?
-    public shootable() : boolean { return true; }
+    public shootable() : boolean { return this.alpha >= 32; }
 
     // Execute a simulation step. Returns the new version of the
     // enemy (usually it's the same instance, but it may change
@@ -62,7 +64,10 @@ export class Enemy {
         const sprite = this.flash 
             ? this.hit
             : this.sprites[this.frame()];
-        GL.drawSprite(sprite, this.x >> 3, this.y >> 3);
+        if (this.alpha >= 32)
+            GL.drawSprite(sprite, this.x >> 3, this.y >> 3);
+        else
+            GL.drawSpriteAlpha(sprite, this.x >> 3, this.y >> 3, this.alpha);
     }
 
     // Position of the center of the enemy
