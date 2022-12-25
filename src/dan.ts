@@ -3,6 +3,7 @@
 
 import * as S from "./sprites"
 import * as GL from "./webgl"
+import * as Player from "./player"
 
 // Shot data is encoded as consecutive Int32 values, 
 // with the meanings:
@@ -34,6 +35,13 @@ const DAN_CARN			= 0x0002
 const DAN_CARD			= 0x0003
 const DAN_CARV			= 0x0004
 const DAN_CARB			= 0x0005
+
+// Delayed aim bullet:
+//  Moves in a direction, slowing down to a halt, then
+//  turns into a standard bullet moving toward the player
+//  PARAMS0 = x-velocity
+//  PARAMS1 = y-velocity
+//  PARAMS2 = velocity of the standard bullet
 const DAN_DAIM			= 0x0006
 const DAN_ADN			= 0x0007
 const DAN_MISL			= 0x0008
@@ -122,6 +130,25 @@ function danStep(ref: number) {
             // Die if out-of-bounds
             return false;
 
+        return true;
+    }
+
+    if (type == DAN_DAIM) {
+        const timer = (dan[off + TIMER] += 4);
+        if (timer >= 128) {
+            const {x, y} = Player.pos();
+            const dx = x - dan[off + LEFT];
+            const dy = y - dan[off + TOP];
+            const norm = Math.sqrt(dx * dx + dy * dy);
+            dan[off + PARAM0] = Math.floor(dan[off + PARAM2] * dx / norm);
+            dan[off + PARAM1] = Math.floor(dan[off + PARAM2] * dy / norm);
+            dan[off + TYPE] = DAN_STD;
+            return true;
+        } 
+
+        const mult = (128*128 - timer*timer) / (128*32);
+        dan[off + LEFT] += Math.floor(mult * dan[off + PARAM0]);
+        dan[off + TOP] += Math.floor(mult * dan[off + PARAM1]);
         return true;
     }
 
@@ -231,4 +258,25 @@ export function fireStandard(
         p0: vx,
         p1: vy,
     })
+}
+
+// Fire six delayed-aim bullets in two arcs below the position
+export function fireBelowArc2Seek(x: number, y: number, sprite: string) {
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0:  8, p1:  0, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0:  6, p1:  6, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0: -6, p1:  6, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0:  4, p1:  0, p2: 10 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0:  3, p1:  3, p2: 10 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0: -3, p1:  3, p2: 10 })
+}
+
+// Fires seven bullets below
+export function fireBelowArcBig(x: number, y: number, sprite: string) {
+    fireStandard(x, y,  0, 8, sprite);
+    fireStandard(x, y,  6, 6, sprite);
+    fireStandard(x, y, -6, 6, sprite);
+    fireStandard(x, y,  7, 3, sprite);
+    fireStandard(x, y, -7, 3, sprite);
+    fireStandard(x, y,  3, 7, sprite);
+    fireStandard(x, y, -3, 7, sprite);
 }

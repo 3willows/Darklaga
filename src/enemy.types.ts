@@ -87,12 +87,102 @@ export class Static extends Enemy {
     }
 }
 
+const sniper = {
+    n: twoSide(S.esnipern),
+    d: twoSide(S.esniperd),
+    v: twoSide(S.esniperv)
+}
+
+// Moves to firing position, shoots, then moves down
+export class Sniper extends Enemy {
+
+    public readonly variant : number
+
+    // Horizontal speed for variant 2
+    public dx: number
+
+    constructor(x: number, y: number, mode: Mode, params: number[]) {
+        super(x, y, 
+            /* health */mode == "n" ? 8 : 
+                        mode == "d" ? 10 : 11,
+            mode,
+            sniper[mode],
+            mode == "n" ? S.esnipernh :
+            mode == "d" ? S.esniperdh : S.esnipervh);
+
+        this.variant = params[0];
+        this.dx = x < 0 ? 1 : -1;
+    }
+
+    public step(): Enemy|null {
+        
+        const self = super.step();
+        if (self !== this) return self;
+
+        const freq = this.mode == "v" ? 50 : 100; 
+        const bs = this.mode == "v" ? 32 : 16;
+
+        switch (this.variant) {
+            case 1: 
+            
+                const target = this.mode == "v" ? 480 : 960;
+
+                if (this.y <= 0) this.timer = 0;
+                if (this.timer >= 256 || this.y <= target) this.y += 8;
+                if (this.y > target && (this.timer % freq) == 0) 
+                    Dan.fireStandard(this.cx(), this.cy(), 0, bs, "b4" + this.mode);
+                
+                break;
+            case 2: 
+
+                const speed = this.mode == "v" ? 8 : 4;
+                
+                this.x += this.dx * speed;
+                
+                if (this.x <= 10) this.dx = 1;
+                else if (this.x >= 1714) this.dx = -1;
+                else if (0 == (this.timer % freq)) {
+                    Dan.fireStandard(this.cx(), this.cy(), 0, bs, "b4" + this.mode);                
+                }
+
+                break;
+            case 3: 
+
+                if (this.y <= (this.mode == "n" ? 960 : 256)) { this.y += 8; }
+                else if (0 == (this.timer % (this.mode == "d" ? 100 : 75))) {
+                    
+                    const cx = this.cx();
+                    const cy = this.cy();
+
+                    if (this.mode == "n") {
+                        Dan.fireStandard(cx, cy,  0,  8, "b5n");
+                        Dan.fireStandard(cx, cy,  6,  6, "b5n");
+                        Dan.fireStandard(cx, cy, -6,  6, "b5n");
+                    } else if (this.mode == "d") {
+                        Dan.fireBelowArc2Seek(cx, cy, "b5d");
+                    } else {
+                        Dan.fireBelowArcBig(cx, cy, "b5v");
+                    }
+                }
+                
+
+                break;
+        }
+     
+        if (this.y >= 2560) return null;
+
+        return this;
+    }
+}
+
+
 const bounce = {
     n: twoSide(S.ebouncen),
     d: twoSide(S.ebounced),
     v: twoSide(S.ebouncev)
 }
 
+// Bounces around the border of the screen
 export class Bounce extends Enemy {
 
     public readonly variant : number
