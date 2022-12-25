@@ -13,8 +13,22 @@ const suicide = {
             S.esuiciden1,
             S.esuiciden0,
             S.esuiciden1],
-    d: [] as S.Sprite[],
-    v: [] as S.Sprite[]
+    d: [    S.esuicided2, 
+            S.esuicided3, 
+            S.esuicided4, 
+            S.esuicided3,
+            S.esuicided2,
+            S.esuicided1,
+            S.esuicided0,
+            S.esuicided1],
+    v: [    S.esuicidev2, 
+            S.esuicidev3, 
+            S.esuicidev4, 
+            S.esuicidev3,
+            S.esuicidev2,
+            S.esuicidev1,
+            S.esuicidev0,
+            S.esuicidev1],
 }
 
 // Second stage of 'suicide' enemy, moves in an arc 
@@ -26,7 +40,9 @@ class Suicide2 extends Enemy {
     private angle : number
     
     constructor(x: number, y: number, mode: Mode, health: number) {
-        super(x, y, health, mode, suicide[mode], S.esuicidenh);
+        super(x, y, health, mode, suicide[mode], 
+            mode == "n" ? S.esuicidenh :
+            mode == "d" ? S.esuicidedh : S.esuicidevh);
 
         const {x:px} = Player.pos();
 
@@ -70,7 +86,8 @@ export class Suicide extends Enemy {
                          mode == "d" ? 7 : 6, 
             mode,
             suicide[mode],
-            S.esuicidenh);
+            mode == "n" ? S.esuicidenh :
+            mode == "d" ? S.esuicidedh : S.esuicidevh);
 
         this.dir = params[0]
     }

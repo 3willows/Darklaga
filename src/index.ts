@@ -28,9 +28,9 @@ Enemy.add(new Suicide(256, -256, "n", [0]));
 
 Enemy.add(new Suicide(512, -256, "n", [0]));
 
-Enemy.add(new Suicide(768, -256, "n", [-1]));
+Enemy.add(new Suicide(768, -256, "d", [-1]));
 
-Enemy.add(new Suicide(1024, -256, "n", [1]));
+Enemy.add(new Suicide(1024, -256, "v", [1]));
 
 export function run() {
     let nextFrame = +new Date();
