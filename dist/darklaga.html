@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head><title>Darklaga - Cannonball Symphony</title>
+</head>
+<body style="background-color:black">
+    <canvas id="gl" width="480" height="640" style="margin:10px auto;display:block"></canvas>
+    <pre id="log" style="color:green;margin:10px auto;width:480px"></pre>
+    <script type="text/javascript">
+        var defined = {};
+        function define(name, deps, callback) {
+            defined[name] = { 
+                exports: {__esModule: false}, 
+                deps: deps, 
+                callback: callback 
+            };
+        }
+    </script>
+    <script src="./atlas.js"></script>
+    <script src="./darklaga.js"></script>
+    <script type="text/javascript">
+        function require(name) {
+            var modl = defined[name];
+            if (!modl.exports.__esModule) {
+                var args = [
+                    function() { throw "Cannot Require" },
+                    modl.exports
+                ];
+                while (args.length < modl.deps.length) 
+                    args.push(require(modl.deps[args.length]));
+                modl.callback.apply(null, args);
+            }
+            return modl.exports;
+        }
+
+        require("index").run();
+    </script>
+</body>
+</html>
