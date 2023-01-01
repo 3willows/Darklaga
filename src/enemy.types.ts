@@ -283,6 +283,72 @@ export class Flyby extends Enemy {
     }
 }
 
+// Formerly "Flyby" version 3, now uses "Static" image
+export class Tank extends Enemy {
+
+    // Shoot whenever health goes under this threshold
+    private threshold : number
+
+    // Speed multiplier
+    private readonly m : number
+    
+    // Health regeneration if wounded
+    private readonly regen : number
+
+    // Threshold regen if wounded
+    private readonly tregen : number
+
+    constructor(x: number, y: number, mode: Mode, params: number[]) {
+        super(x, y, 
+            /* health */ mode == "v" ? 11 : 10,
+            mode, 
+            estatic[mode],
+            mode == "n" ? S.estaticnh : 
+            mode == "d" ? S.estaticdh : S.estaticvh);
+
+        this.threshold = this.basehealth;
+        this.m = mode == "n" ? 1 : 2;
+
+        this.regen = mode == "v" ? 2 : 1;
+        this.tregen = mode == "n" ? 0 : this.regen;
+    }
+
+    public step() : Enemy|null {
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.timer * this.m <= 100)
+            this.y += this.m * 8;
+        
+        if (this.threshold > this.health) {
+            this.threshold = this.health;
+            const a = Math.random() * 2 * Math.PI;
+            if (this.mode == "n") 
+                Dan.fireStandard(
+                    this.cx(), this.cy(), 
+                    Math.floor(20 * Math.cos(a)),
+                    Math.floor(20 * Math.sin(a)),
+                    "b3n");
+            else if (this.mode == "d")
+                Dan.fireSeek(
+                    this.cx(), this.cy(), 
+                    Math.floor(4 * Math.cos(a)),
+                    Math.floor(4 * Math.sin(a)),
+                    6, "b3d");
+            else
+                Dan.fireMissile(
+                    this.cx(), this.cy(), a, "b3v");
+        }
+
+        if (this.health < this.basehealth) {
+            this.health += this.regen;
+            this.threshold += this.tregen;
+        }
+
+        return this;
+    }
+}
+
 const carrier = {
     n: twoSide(S.ecarriern),
     d: twoSide(S.ecarrierd),

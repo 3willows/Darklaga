@@ -9,6 +9,7 @@ export class Enemy {
     
     public timer : number
 
+    public basehealth : number
     public w: number
     public h: number
     public flash: number
@@ -26,7 +27,7 @@ export class Enemy {
         this.flash = 0
         this.w = sprites[0].w << 3;
         this.h = sprites[0].h << 3;
-        this.health = 1 << health;
+        this.basehealth = this.health = 1 << health;
         this.alpha = 33;
     }
 
