@@ -163,6 +163,28 @@ function danStep(ref: number) {
         return true;
     }
 
+    if (type == DAN_FWOK) {
+        ++dan[off + ANIM];
+        const timer = (dan[off + TIMER] += 4);
+        
+        const mult = (128*128 - timer*timer) / (128*32);
+        const x = dan[off + LEFT] += Math.floor(mult * dan[off + PARAM0]);
+        const y = dan[off + TOP] += Math.floor(mult * dan[off + PARAM1]);
+        
+        if (timer >= 128) {
+            for (let i = 0; i < 16; ++i) {
+                const a = Math.PI * 2 * (i/16);
+                fireStandard(x, y, 
+                    Math.floor(10 * Math.cos(a)),
+                    Math.floor(10 * Math.sin(a)),
+                    dan[off + PARAM3])
+            }
+            return false;
+        } 
+
+        return true;
+    }
+
     if (type == DAN_MISL) {
         const timer = ++dan[off + TIMER];
         const a = dan[off + PARAM3] / 256 * Math.PI;
@@ -303,7 +325,7 @@ export function render() {
 // Add a shot, return true if the shot was added, false otherwise. 
 function add(s: {
     type: number,
-    sprite: string,
+    sprite: string|number,
     x: number,
     y: number,
     life: number, // 64=infinite
@@ -320,7 +342,7 @@ function add(s: {
     dan[off + NEXT] = dan[0];
     dan[0] = off;
 
-    const sprite = spriteByName[s.sprite];
+    const sprite = typeof s.sprite == "string" ? spriteByName[s.sprite] : s.sprite;
     dan[off + TYPE] = s.type;
     dan[off + SPRITE] = sprite;
     dan[off + LEFT] = s.x;
@@ -343,7 +365,7 @@ export function fireStandard(
     y: number, 
     vx: number, 
     vy: number, 
-    sprite: string) 
+    sprite: string|number) 
 {
     add({
         type: DAN_STD,
@@ -389,6 +411,27 @@ export function fireMissile(
         y,
         life: 64,
         p3: Math.floor(a / Math.PI * 256)
+    })
+}
+
+export function fireWorks(
+    x: number, 
+    y: number, 
+    vx: number,
+    vy: number,
+    sprite: string,
+    subsprite: string) 
+{
+    add({
+        type: DAN_FWOK,
+        sprite,
+        x,
+        y,
+        life: 64,
+        p0: vx,
+        p1: vy, 
+        p2: 3,
+        p3: spriteByName[subsprite]
     })
 }
 

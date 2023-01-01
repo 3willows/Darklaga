@@ -349,6 +349,95 @@ export class Tank extends Enemy {
     }
 }
 
+const group = {
+    n: twoSide(S.egroupn),
+    d: twoSide(S.egroupd),
+    v: twoSide(S.egroupv)
+}
+
+// Spreads 3 or 5 copies of itself
+export class Group extends Enemy {
+
+    private spread: number
+    private copy: number
+
+    private readonly initx : number
+    private readonly copies: number
+    private readonly speed: number
+    private readonly rf : number
+    
+    constructor(x: number, y: number, mode: Mode, params: number[]) {
+        super(x, y, 
+            /* health */mode == "v" ? 13 : 11,
+            mode, 
+            group[mode],
+            mode == "n" ? S.egroupnh : 
+            mode == "d" ? S.egroupdh : S.egroupvh);
+
+        this.initx = x;
+        this.spread = 0;
+        this.copy = 0;
+        this.speed = mode == "v" ? 2 : 1;
+        this.copies = mode == "v" ? 5 : 3;
+        this.rf = mode == "v" ? 49 : 
+                  mode == "n" ? 29 : 74;
+    }
+
+    public step(): Enemy|null {
+        
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.timer * this.speed < 100) {
+            // Descend mode
+            this.y += this.speed * 8;
+        } else if (this.timer < 1384) {
+            // Spread and fire mode.
+            if (this.spread < 128) {
+                ++this.spread;
+            } else {
+                if (0 == (this.timer % this.rf)) {
+                    const a = Math.random() * 2 * Math.PI;
+                    if (this.mode == "n") 
+                        Dan.fireStandard(
+                            this.cx(), this.cy(), 
+                            Math.floor(20 * Math.cos(a)),
+                            16,
+                            "b5n");
+                    else if (this.mode == "d")
+                        Dan.fireSeek(
+                            this.cx(), this.cy(), 
+                            Math.floor(4 * Math.cos(a)),
+                            4,
+                            6, "b5d");
+                    else
+                        Dan.fireWorks(
+                            this.cx(), this.cy(), 
+                            Math.floor(4 * Math.cos(a)),
+                            4,
+                            "b5v", "b3v");
+                }
+            }
+        } else {
+            // Contract and leave mode
+            if (this.spread > 0) {
+                --this.spread;
+            } else {
+                this.y += this.speed * 8;
+                if (this.y >= 2560) return null;
+            }
+        }
+
+        this.copy = (this.copy + 1)%this.copies;
+        this.x = this.initx + 
+            (((this.copy - Math.floor(this.copies/2)) 
+                * 300
+                * this.spread) >> 7);
+                
+        return this;
+    }
+}
+
 const carrier = {
     n: twoSide(S.ecarriern),
     d: twoSide(S.ecarrierd),
