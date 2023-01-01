@@ -4,7 +4,7 @@ import * as Shot from "./shot"
 import * as Background from "./background"
 import * as Enemy from "./enemy"
 import * as Dan from "./dan"
-import { Carrier } from "enemy.types"
+import { Flyby } from "enemy.types"
 
 // Rendering happens every time setInterval() triggers.
 function render() {
@@ -27,13 +27,13 @@ function step() {
     Dan.step();
 }
 
-Enemy.add(new Carrier(256, 256, "n", [2]));
+Enemy.add(new Flyby(256, -256, "n", [1]));
 
-Enemy.add(new Carrier(512, 512, "n", [2]));
+Enemy.add(new Flyby(512, -512, "n", [1]));
 
-Enemy.add(new Carrier(768, 768, "d", [2]));
+Enemy.add(new Flyby(768, -768, "d", [1]));
 
-Enemy.add(new Carrier(1024, 1024, "v", [2]));
+Enemy.add(new Flyby(1024, -1024, "v", [1]));
 
 export function run() {
     let nextFrame = +new Date();

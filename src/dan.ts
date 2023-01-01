@@ -163,6 +163,34 @@ function danStep(ref: number) {
         return true;
     }
 
+    if (type == DAN_MISL) {
+        const timer = ++dan[off + TIMER];
+        const a = dan[off + PARAM3] / 256 * Math.PI;
+        const left = dan[off + LEFT] += Math.floor(20 * Math.cos(a));
+        const top = dan[off + TOP] += Math.floor(20 * Math.sin(a));
+        if (timer < 100 && timer % 2 == 0) {
+            const pp = Player.pos();
+            const dx = pp.x - left;
+            const dy = pp.y - top;
+            const aim = Math.atan2(dy, dx);
+            
+            const adjaim = 
+                Math.abs(aim - a) < Math.PI ? aim :
+                Math.abs(aim - a + 2 * Math.PI) < Math.PI ? aim + 2 * Math.PI : 
+                                                            aim - 2 * Math.PI; 
+            
+            dan[off + PARAM3] += a > adjaim ? -3 : 3;
+        }
+
+        if (timer >= 100)
+            if (left <= -20-400 || left > 1920+400 || 
+                    top <= -20-400 || top >= 2560+400) 
+                // Die if out-of-bounds
+                return false;
+
+        return true;
+    }
+
     if (type == DAN_CARN || type == DAN_CARD || type == DAN_CARV) {
         
         ++dan[off + ANIM];
@@ -325,6 +353,42 @@ export function fireStandard(
         life: 64,
         p0: vx,
         p1: vy,
+    })
+}
+
+export function fireSeek(
+    x: number, 
+    y: number, 
+    vx: number, 
+    vy: number, 
+    delay: number,
+    sprite: string) 
+{
+    add({
+        type: DAN_DAIM,
+        sprite,
+        x,
+        y,
+        life: 64,
+        p0: vx,
+        p1: vy,
+        p2: delay
+    })
+}
+
+export function fireMissile(
+    x: number, 
+    y: number, 
+    a: number,
+    sprite: string) 
+{
+    add({
+        type: DAN_MISL,
+        sprite,
+        x,
+        y,
+        life: 64,
+        p3: Math.floor(a / Math.PI * 256)
     })
 }
 

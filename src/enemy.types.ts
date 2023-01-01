@@ -175,6 +175,114 @@ export class Sniper extends Enemy {
     }
 }
 
+const flyby = {
+    n: twoSide(S.eflybyn),
+    d: twoSide(S.eflybyd),
+    v: twoSide(S.eflybyv)
+}
+
+export class Flyby extends Enemy {
+
+    // Rotation angular speed
+    private readonly dir : number
+
+    // Rotation center
+    private readonly px : number
+    private readonly py : number
+
+    // True if this is variant 1
+    private readonly isVar1 : boolean
+    
+    // Duration before rotation phase
+    private readonly t1 : number 
+
+    // Speed before rotation phase
+    private readonly v1 : number
+
+    // Duration of rotation phase
+    private readonly t2 : number
+
+    // VX after rotation phase
+    private readonly v3 : number
+
+    // Fire rate (after rotation phase starts)
+    private readonly fr : number
+
+    // Angle during rotation phase
+    private angle : number
+
+    constructor(x: number, y: number, mode: Mode, params: number[]) {
+        super(x, y, 
+            /* health */mode == "n" ? 8 : 
+                        mode == "d" ? 9 : 10,
+            mode, 
+            flyby[mode],
+            mode == "n" ? S.eflybynh : 
+            mode == "d" ? S.eflybydh : S.eflybyvh);
+
+        const m = mode == "v" ? 2 : 1;
+
+        if (x < 880) {
+            this.dir = - Math.PI / 128;
+            this.px = x + 320;
+            this.angle = Math.PI;
+        } else {
+            this.dir = Math.PI / 128;   
+            this.px = x - 320;
+            this.angle = 0;
+        }
+
+        const isVar1 = this.isVar1 = params[0] == 1;
+
+        if (!isVar1 || mode == "v") this.dir *= 2;
+
+        this.py = isVar1 ? y + 1600 : 1600;
+        this.t1 = isVar1 ? 200/m : 100;
+        this.v1 = isVar1 ? 8 * m : 16;
+        this.t2 = isVar1 ? (mode == "v" ? 1120 : 1220) : 163;
+        this.v3 = isVar1 ? m * 32 : -16;
+        this.fr = isVar1 ? 20/m : (mode == "v" ? 50 : 20); 
+    }
+
+    public step() : Enemy|null {
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.timer <= this.t1) {        
+            if (!this.isVar1 && this.y < 0) 
+                this.timer = 0;
+            this.y += this.v1; 
+        } else if (this.timer <= this.t2) {
+            this.angle += this.dir;
+            this.x = this.px + Math.floor(320 * Math.cos(this.angle));
+            this.y = this.py + Math.floor(320 * Math.sin(this.angle));
+            if (0 == (this.timer % this.fr)) {
+                const a = Math.random() * 2 * Math.PI;
+                if (this.mode == "n") 
+                    Dan.fireStandard(
+                        this.cx(), this.cy(), 
+                        Math.floor(20 * Math.cos(a)),
+                        Math.floor(20 * Math.sin(a)),
+                        "b3n");
+                else if (this.mode == "d")
+                    Dan.fireSeek(
+                        this.cx(), this.cy(), 
+                        Math.floor(4 * Math.cos(a)),
+                        Math.floor(4 * Math.sin(a)),
+                        6, "b3d");
+                else
+                    Dan.fireMissile(
+                        this.cx(), this.cy(), a, "b3v");
+            }
+        } else {
+            this.y += this.v3;
+            if (this.y >= 2560 || this.y <= -240) return null;
+        }
+
+        return this;
+    }
+}
+
 const carrier = {
     n: twoSide(S.ecarriern),
     d: twoSide(S.ecarrierd),
