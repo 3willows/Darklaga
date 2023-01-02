@@ -38,6 +38,9 @@ let statFrameStart = +new Date()
 let statBatches = 0
 let statPolys = 0
 let statBytes = 0
+let statCurrentSecond = 0
+let statCurrentFrames = 0
+let statLastFrames = 0
 
 // COLORED POLYGONS ==========================================================
 
@@ -509,10 +512,23 @@ export function endRender() {
     drawBatchedSprites();
     drawBatchedColored();
 
-    const dur = +new Date() - statFrameStart;
+    
+    const now = +new Date();
+    const dur = now - statFrameStart;
+
+    const nowSec = Math.floor(now / 1000);
+    if (nowSec > statCurrentSecond) {
+        statLastFrames = statCurrentFrames / (nowSec - statCurrentSecond);
+        statCurrentFrames = 0;
+        statCurrentSecond = nowSec;
+    }
+
+    ++statCurrentFrames;
+
     statAvgDur = 0.9 * statAvgDur + 0.1 * dur;
     document.getElementById("log")!.innerText =
-        dur.toFixed() + " ms (avg " + statAvgDur.toFixed(2) + " ms)\n" +  
+        dur.toFixed() + " ms (avg " + statAvgDur.toFixed(2) + " ms) " + 
+        statLastFrames + " FPS\n" +  
         statBatches.toFixed() + " batches\n" +
         statPolys.toFixed() + " triangles\n" + 
         (statBytes / 1024).toFixed(1) + " KB"

@@ -38,8 +38,7 @@ Enemy.add(new Group(1024, -256, "v", [1]));
 export function run() {
     let nextFrame = +new Date();
 
-    setInterval(function() {
-
+    function frame() {
         const now = +new Date();
         
         if (now - nextFrame > 10000) 
@@ -58,6 +57,9 @@ export function run() {
         // Render once per wake-up
         render();
 
-    }, stepDurationMilliseconds/2);
+        requestAnimationFrame(frame);
+    }
+    
+    requestAnimationFrame(frame);
 
 }
