@@ -51,8 +51,21 @@ const DAN_CARB			= 0x0005
 //  PARAMS2 = velocity of the standard bullet
 const DAN_DAIM			= 0x0006
 const DAN_ADN			= 0x0007
+
+// Homing missile
+//  Moves towards an angle, initially adjusts angle to aim at
+//  the player
+//  PARAMS3 = angle 
 const DAN_MISL			= 0x0008
+
+// Fireworks
+//  Moves in a direction, slowing down to a halt, then explodes
+//  into several standard bullets in all directions
+//  PARAMS0 = x-velocity
+//  PARAMS1 = y-velocity
+//  PARAMS2 = id of the sprite of the created bullets
 const DAN_FWOK			= 0x0009
+
 const DAN_WDIA			= 0x000A
 const DAN_WHOR			= 0x000B
 const DAN_MISL2			= 0x000C
@@ -186,10 +199,11 @@ function danStep(ref: number) {
     }
 
     if (type == DAN_MISL) {
+        ++dan[off + ANIM];
         const timer = ++dan[off + TIMER];
         const a = dan[off + PARAM3] / 256 * Math.PI;
-        const left = dan[off + LEFT] += Math.floor(20 * Math.cos(a));
-        const top = dan[off + TOP] += Math.floor(20 * Math.sin(a));
+        const left = dan[off + LEFT] += Math.floor(10 * Math.cos(a));
+        const top = dan[off + TOP] += Math.floor(10 * Math.sin(a));
         if (timer < 100 && timer % 2 == 0) {
             const pp = Player.pos();
             const dx = pp.x - left;

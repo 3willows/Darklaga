@@ -438,6 +438,79 @@ export class Group extends Enemy {
     }
 }
 
+// Shoots in a spiral, previously 'Group2'
+export class Spiral extends Enemy {
+
+    private readonly t1 : number
+    private readonly vy : number;
+
+    private stimer : number
+    private firing : number
+
+    private readonly va : number;
+    private readonly fm : number;
+    private readonly fe : number;
+
+    constructor(x: number, y: number, mode: Mode, params: number[]) {
+        super(x, y, 
+            /* health */mode == "v" ? 14 : 11,
+            mode, 
+            group[mode],
+            mode == "n" ? S.egroupnh : 
+            mode == "d" ? S.egroupdh : S.egroupvh);
+
+        this.t1 = mode == "v" ? 100 : 200;
+        this.vy = mode == "v" ? 16 : 8;
+        this.stimer = 0;
+        this.firing = 0;
+        this.va = mode == "n" ? Math.PI / 8 : 
+                  mode == "d" ? Math.PI / 2 : Math.PI / 4; 
+        this.fm = mode == "n" ? 16 : 
+                  mode == "d" ? 16 : 8;
+        this.fe = mode == "n" ? 32 : 
+                  mode == "d" ? 2000 : 65;
+    }
+ 
+    public step(): Enemy|null {
+        
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.timer < this.t1) {
+            this.y += this.vy; 
+        } else if (this.timer < this.t1 + 1000) {
+            if (this.stimer-- <= 0) {
+                ++this.firing;
+                if ((this.firing % this.fm) == 0) {
+                    for (let a = 0; a < 2 * Math.PI; a += this.va) {
+                        const angle = a + this.firing * Math.PI / 128;
+                        const dx = Math.floor(8 * Math.cos(angle));
+                        const dy = Math.floor(8 * Math.sin(angle));
+                        if (this.mode == "n") {
+                            Dan.fireStandard(this.cx(), this.cy(), 
+                                dx, dy, "b3n")    
+                        } else if (this.mode == "d") {
+                            Dan.fireStandard(this.cx(), this.cy(), 
+                                dx, dy, "b3d")    
+                        } else {
+                            Dan.fireMissile(this.cx(), this.cy(), 
+                                angle, "b3v")
+                        }
+                    }
+                }
+                if (this.firing == this.fe) {
+                    this.firing = 0;
+                    this.stimer = 50;
+                }
+            }
+        } else {
+            if ((this.y += this.vy) >= 2560) return null;
+        }
+
+        return this;
+    }
+}
+
 const carrier = {
     n: twoSide(S.ecarriern),
     d: twoSide(S.ecarrierd),
