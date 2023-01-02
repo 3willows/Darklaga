@@ -788,6 +788,40 @@ export class Warp extends Enemy {
     }
 }
 
+// Appears, moves to player position, disappears
+export class Warp2 extends Warp {
+
+    private readonly tx : number
+    private readonly ty : number
+
+    private readonly spd : number
+    constructor(x: number, y: number, mode: Mode) {
+        super(x, y, mode, mode == "n" ? 7 : 8)
+        this.spd = mode == "v" ? 16 : 8;
+
+        const pp = Player.pos();
+        this.tx = pp.x;
+        this.ty = pp.y;
+    }
+
+    present() {
+
+        const dx = this.x > this.tx + this.spd ? -this.spd :
+                   this.x < this.tx - this.spd ? this.spd : 0;
+                
+        const dy = this.y > this.ty + this.spd ? -this.spd : 
+                   this.y < this.ty - this.spd ? this.spd : 0;
+
+        if (!dx && !dy) return;
+
+        // Freeze time and move
+        this.timer--;
+        this.x += dx;
+        this.y += dy;
+    }
+}
+
+// Appears, shoots, disappears
 export class Warp1 extends Warp {
 
     private stimer : number = 0

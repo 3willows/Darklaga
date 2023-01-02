@@ -4,7 +4,7 @@ import * as Shot from "./shot"
 import * as Background from "./background"
 import * as Enemy from "./enemy"
 import * as Dan from "./dan"
-import { Warp1 } from "enemy.types"
+import { Warp2 } from "enemy.types"
 
 // Rendering happens every time setInterval() triggers.
 function render() {
@@ -27,13 +27,13 @@ function step() {
     Dan.step();
 }
 
-Enemy.add(new Warp1(256, 256, "n"));
+Enemy.add(new Warp2(256, 256, "n"));
 
-Enemy.add(new Warp1(512, 512, "n"));
+Enemy.add(new Warp2(512, 512, "n"));
 
-Enemy.add(new Warp1(768, 768, "d"));
+Enemy.add(new Warp2(768, 768, "d"));
 
-Enemy.add(new Warp1(1024, 1024, "v"));
+Enemy.add(new Warp2(1024, 1024, "v"));
 
 export function run() {
     let nextFrame = +new Date();
