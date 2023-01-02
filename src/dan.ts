@@ -470,6 +470,30 @@ export function fireBelowArcBig(x: number, y: number, sprite: string) {
     fireStandard(x, y, -3, 7, sprite);
 }
 
+// Fires eight bullets around
+export function fireAround(x: number, y: number, sprite: string) {
+    fireStandard(x, y,  0,  8, sprite);
+    fireStandard(x, y,  6,  6, sprite);
+    fireStandard(x, y, -6,  6, sprite);
+    fireStandard(x, y,  8,  0, sprite);
+    fireStandard(x, y, -8,  0, sprite);
+    fireStandard(x, y,  6, -6, sprite);
+    fireStandard(x, y, -6, -6, sprite);
+    fireStandard(x, y,  0, -8, sprite);
+}
+
+// Fires eight delayed-aim bullets around
+export function fireAroundSeek(x: number, y: number, sprite: string) {
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0:  0, p1:  4, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0:  4, p1:  0, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0:  3, p1:  3, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0: -3, p1:  3, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0:  0, p1: -4, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0: -4, p1:  0, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0:  3, p1: -3, p2: 20 })
+    add({ type: DAN_DAIM, sprite, x, y, life: 64, p0: -3, p1: -3, p2: 20 })
+}
+
 export function fireCarrier(x: number, y: number, mode: Mode) {
     const type = mode == "n" ? DAN_CARN :
                  mode == "d" ? DAN_CARD : DAN_CARV;

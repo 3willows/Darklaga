@@ -741,6 +741,78 @@ export class Suicide extends Enemy {
     }
 }
 
+const warp = {
+    n: twoSide(S.ewarpn),
+    d: twoSide(S.ewarpd),
+    v: twoSide(S.ewarpv)
+}
+
+export class Warp extends Enemy {
+    
+    private readonly speed : number
+    
+    constructor(x: number, y: number, mode: Mode, health: number) {
+        super(x, y,
+            health,
+            mode, 
+            warp[mode],
+            mode == "n" ? S.ewarpnh : 
+            mode == "d" ? S.ewarpdh : S.ewarpvh);
+     
+        this.alpha = 0;
+        this.speed = mode == "v" ? 1 : 0.5;
+    }
+
+    public present() {}
+
+    public step() : Enemy|null {
+
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.timer * this.speed <= 32) {
+            this.alpha = Math.floor(this.timer * this.speed);
+        } else if (this.timer < 256) {
+            if (this.sprites.length > 1)
+                this.sprites = [warp[this.mode][0]];
+            this.present();
+        } else if (this.alpha > 0) {
+            if (this.sprites.length == 1) 
+                this.sprites = warp[this.mode];
+            this.alpha = 32 - Math.floor((this.timer - 256) * this.speed);
+        } else {
+            return null;
+        }
+
+        return this;
+    }
+}
+
+export class Warp1 extends Warp {
+
+    private stimer : number = 0
+    private readonly rstimer : number
+    constructor(x: number, y: number, mode: Mode) {
+        super(x, y, mode, mode == "v" ? 10 : 8)
+        this.rstimer = mode == "v" ? 30 : 200;
+    }
+
+    public present() {
+        if (this.stimer-- > 0) return;
+        this.stimer = this.rstimer;
+        if (this.mode == "n") {
+            Dan.fireAround(this.cx(), this.cy(), "b5n")
+        } else if (this.mode == "d") {
+            Dan.fireAroundSeek(this.cx(), this.cy(), "b5d")
+        } else {
+            Dan.fireMissile(this.cx(), this.cy(), 0, "b5v");
+            Dan.fireMissile(this.cx(), this.cy(), Math.PI / 2, "b5v");
+            Dan.fireMissile(this.cx(), this.cy(), Math.PI, "b5v");
+            Dan.fireMissile(this.cx(), this.cy(), Math.PI * 3 / 2, "b5v");
+        }
+    }
+}
+
 const sweep = {
     n: twoSide(S.esweepn),
     d: twoSide(S.esweepd),

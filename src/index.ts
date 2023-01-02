@@ -4,7 +4,7 @@ import * as Shot from "./shot"
 import * as Background from "./background"
 import * as Enemy from "./enemy"
 import * as Dan from "./dan"
-import { Spiral } from "enemy.types"
+import { Warp1 } from "enemy.types"
 
 // Rendering happens every time setInterval() triggers.
 function render() {
@@ -27,13 +27,13 @@ function step() {
     Dan.step();
 }
 
-Enemy.add(new Spiral(256, -256, "n", [1]));
+Enemy.add(new Warp1(256, 256, "n"));
 
-Enemy.add(new Spiral(512, -512, "n", [1]));
+Enemy.add(new Warp1(512, 512, "n"));
 
-Enemy.add(new Spiral(768, -768, "d", [1]));
+Enemy.add(new Warp1(768, 768, "d"));
 
-Enemy.add(new Spiral(1024, -1024, "v", [1]));
+Enemy.add(new Warp1(1024, 1024, "v"));
 
 export function run() {
     let nextFrame = +new Date();
