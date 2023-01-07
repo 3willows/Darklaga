@@ -53,8 +53,10 @@ const colorProgram = (function() {
     // at (1, 1).
     const vertexShader = compileShader(gl.VERTEX_SHADER, `
 attribute vec2 aVertexPosition;
-attribute vec4 aVertexColor;
-varying lowp vec4 vColor;
+attribute vec3 aVertexColor;
+attribute vec2 aAlphas;
+varying highp vec2 vAlphas;
+varying highp vec3 vColor;
 void main() {
     gl_Position = vec4(
         (aVertexPosition.x / 120.0) - 1.0, 
@@ -62,13 +64,19 @@ void main() {
         1.0, 
         1.0);
     vColor = aVertexColor;
+    vAlphas = aAlphas;
 }
 `);
 
     const pixelShader = compileShader(gl.FRAGMENT_SHADER, `
-varying lowp vec4 vColor;
+varying highp vec2 vAlphas;
+varying highp vec3 vColor;
 void main() {
-    gl_FragColor = vColor;
+    gl_FragColor = vec4(
+        vColor.r * vAlphas.y,
+        vColor.g * vAlphas.y,
+        vColor.b * vAlphas.y,
+        vAlphas.x);
 }
 `);
 
@@ -83,7 +91,8 @@ void main() {
         program: program,
         attribLocations: {
             vertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
-            texCoord: gl.getAttribLocation(program, "aVertexColor")
+            vertexColor: gl.getAttribLocation(program, "aVertexColor"),
+            alphas: gl.getAttribLocation(program, "aAlphas") 
         }
     }
 
@@ -92,13 +101,14 @@ void main() {
 // To minimize the number of WebGL calls, batch together renderings of the
 // same type: up to 1000 triangles.
 const coloredPositions = new Float32Array(6000);
-const coloredColors    = new Float32Array(12000);
+const coloredColors    = new Float32Array(9000);
+const coloredAlphas    = new Float32Array(6000);
 let coloredBatched     = 0;
 
 // Points are given as [x1, y1, x2, y2, ...] and there are at least 3 of them. Assumed
 // to be given in order around the polygon, so they will be transformed into triangles
 // with points (0,1,2) (0,2,3) .. (0,N-1,N)
-export function drawPolyAdditive(points: number[], r: number, g: number, b: number, a: number) {
+export function drawPoly(points: number[], r: number, g: number, b: number, ax: number, ay: number) {
 
     // Just in case, draw any accumulated batches of the other types
     if (spritesBatched) drawBatchedSprites();
@@ -106,12 +116,15 @@ export function drawPolyAdditive(points: number[], r: number, g: number, b: numb
     function point(x: number, y: number) {
         coloredPositions[2 * coloredBatched + 0] = x
         coloredPositions[2 * coloredBatched + 1] = y
-        coloredColors[4 * coloredBatched + 0] = r
-        coloredColors[4 * coloredBatched + 1] = g
-        coloredColors[4 * coloredBatched + 2] = b
-        coloredColors[4 * coloredBatched + 3] = a
+        coloredColors[3 * coloredBatched + 0] = r
+        coloredColors[3 * coloredBatched + 1] = g
+        coloredColors[3 * coloredBatched + 2] = b
+        coloredAlphas[2 * coloredBatched + 0] = ax
+        coloredAlphas[2 * coloredBatched + 1] = ay
         ++coloredBatched;
     }
+
+    if (points.length != 8) console.log("r:%f g:%f b:%f ax:%f ay:%f", r, g, b, ax, ay)
 
     for (let i = 1; i < points.length/2 - 1; ++i)
     {
@@ -121,16 +134,32 @@ export function drawPolyAdditive(points: number[], r: number, g: number, b: numb
     }
 }
 
+export function drawPolyAdditive(points: number[], r: number, g: number, b: number, a: number) {
+    drawPoly(points, r, g, b, 0, a)
+}
+
 export function drawRectAdditive(
     x: number, y: number, w: number, h: number,
     r: number, g: number, b: number, a: number)
 {
-    drawPolyAdditive([
+    drawPoly([
         x  , y  , 
         x  , y+h, 
         x+w, y+h, 
         x+w, y
-    ], r, g, b, a);    
+    ], r, g, b, 0, a);    
+}
+
+export function drawRect(
+    x: number, y: number, w: number, h: number,
+    r: number, g: number, b: number, a: number)
+{
+    drawPoly([
+        x  , y  , 
+        x  , y+h, 
+        x+w, y+h, 
+        x+w, y
+    ], r, g, b, a, a);    
 }
 
 function drawBatchedColored() {
@@ -158,10 +187,23 @@ function drawBatchedColored() {
 
     gl.bufferData(
         gl.ARRAY_BUFFER, 
-        coloredColors.subarray(0, 4*coloredBatched), 
+        coloredColors.subarray(0, 3*coloredBatched), 
         gl.STATIC_DRAW);
 
-    statBytes += 4 * coloredBatched * 4;
+    statBytes += 2 * coloredBatched * 4;
+    
+    // Allocate and fill alphas buffer
+    const alphasBuf = gl.createBuffer();
+    if (!alphasBuf) throw "Could not allocate buffer";
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, alphasBuf);
+
+    gl.bufferData(
+        gl.ARRAY_BUFFER, 
+        coloredAlphas.subarray(0, 2*coloredBatched), 
+        gl.STATIC_DRAW);
+
+    statBytes += 2 * coloredBatched * 4;
 
     // Render buffer
     gl.useProgram(colorProgram.program);
@@ -179,17 +221,32 @@ function drawBatchedColored() {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuf);
     gl.vertexAttribPointer(
-        colorProgram.attribLocations.texCoord,
-        /* size */ 4,
+        colorProgram.attribLocations.vertexColor,
+        /* size */ 3,
         /* type */ gl.FLOAT,
         /* normalize */ false,
         /* stride */ 0,
         /* offset */ 0);
 
-    gl.enableVertexAttribArray(colorProgram.attribLocations.texCoord);
+    gl.enableVertexAttribArray(colorProgram.attribLocations.vertexColor);
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, alphasBuf);
+    gl.vertexAttribPointer(
+        colorProgram.attribLocations.alphas,
+        /* size */ 2,
+        /* type */ gl.FLOAT,
+        /* normalize */ false,
+        /* stride */ 0,
+        /* offset */ 0);
+
+    gl.enableVertexAttribArray(colorProgram.attribLocations.alphas);
+
+    // We use gl.ONE for the source and have our fragment shader produce
+    // pre-multipled alpha ; this lets us support both normal alpha 
+    // blending (with pre-multiplied alpha) and additive blending (set 
+    // fragment alpha to 0, but leave color channel alone).
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.drawArrays(gl.TRIANGLES, 0, coloredBatched);
 
@@ -198,6 +255,7 @@ function drawBatchedColored() {
 
     gl.deleteBuffer(positionsBuf);
     gl.deleteBuffer(colorsBuf);
+    gl.deleteBuffer(alphasBuf);
 
     coloredBatched = 0;
 }
