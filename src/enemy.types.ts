@@ -1023,10 +1023,58 @@ export class Hunter1 extends Hunter {
             if (dy > -spd && dy < spd)
                 this.arrived = true;
             
-        if (dy < -spd) this.y -= spd;
-        if (dy > spd) this.y += spd; 
-        if (dx < -spd) this.x -= spd;
-        if (dx > spd) this.x += spd;
+        if (dy <= -spd) this.y -= spd;
+        if (dy >= spd) this.y += spd; 
+        if (dx <= -spd) this.x -= spd;
+        if (dx >= spd) this.x += spd;
+
+        return this;
+    }
+}
+
+
+export class Hunter2 extends Hunter {
+    private arrived : boolean
+    private tx : number
+    private ty : number
+    private readonly spd : number
+    constructor(x: number, y: number, mode: Mode) {
+        super(x, y, mode, mode == "n" ? 10 : 11)
+        this.tx = x;
+        this.ty = y;
+        this.arrived = true;
+        this.spd = mode == "v" ? 16 : 8;
+    }
+
+    step() : Enemy|null {
+        
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.arrived) 
+        {
+            const pp = Player.pos();
+            this.tx = pp.x;
+            this.ty = pp.y;
+            this.arrived = false;
+        }
+
+        const tx = this.tx;
+        const ty = this.ty;
+
+        const spd = this.spd;
+
+        const dx = tx - this.x;
+        const dy = ty - this.y;
+
+        if (dx > -spd && dx < spd) 
+            if (dy > -spd && dy < spd)
+                this.arrived = true;
+            
+        if (dy <= -spd) this.y -= spd;
+        if (dy >= spd) this.y += spd; 
+        if (dx <= -spd) this.x -= spd;
+        if (dx >= spd) this.x += spd;
 
         return this;
     }
