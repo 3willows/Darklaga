@@ -5,6 +5,7 @@ import * as Background from "./background"
 import * as Enemy from "./enemy"
 import * as Dan from "./dan"
 import * as Pickup from "./pickup"
+import * as Hud from "./hud"
 import { Sweep } from "enemy.types"
 
 // Rendering happens every time requestAnimationFrame() triggers.
@@ -16,6 +17,7 @@ function render() {
     Enemy.render();
     Player.render();
     Dan.render();
+    Hud.render();
     GL.endRender();
 }
 
@@ -27,6 +29,7 @@ function step() {
     Enemy.step();
     Player.step();
     Pickup.step();
+    Hud.step();
     Dan.step();
 
     if (Enemy.count() == 0) {        

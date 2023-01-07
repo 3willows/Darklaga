@@ -1,5 +1,6 @@
 import { opts } from "options"
 import * as S from "./sprites"
+import * as Hud from "./hud"
 import * as Player from "./player"
 import * as GL from "./webgl"
 
@@ -22,15 +23,15 @@ const pickups : Pickups = {
 }
 
 
-const BONUS_LASER	= 0
-const BONUS_ROCKETS	= 1
-const BONUS_BLADES	= 2
-const BONUS_SPEED	= 3
-const BONUS_MULTI	= 4
-const BONUS_OFFP	= 5
-const BONUS_SHIELD	= 6
-const BONUS_UNK		= 7
-const BONUS_DEFP	= 8
+const BONUS_LASER	= Hud.ITEM_LASER
+const BONUS_ROCKETS	= Hud.ITEM_ROCKETS
+const BONUS_BLADES	= Hud.ITEM_BLADES
+const BONUS_SPEED	= Hud.ITEM_SPEED
+const BONUS_MULTI	= Hud.ITEM_MULTI
+const BONUS_OFFP	= Hud.ITEM_OFFP
+const BONUS_SHIELD	= Hud.ITEM_SHIELD
+const BONUS_UNK		= Hud.ITEM_FURY
+const BONUS_DEFP	= Hud.ITEM_DEFP
 const BONUS_WO		= 9
 const BONUS_OO		= 10
 const BONUS_DO		= 11
@@ -56,25 +57,25 @@ const anim = [
     [S.iwover[0], S.ioover[0], S.idover[0]],
 ]
 
-const next = [
+const next : number[] = []
 
-    BONUS_ROCKETS,
-    BONUS_BLADES,
-    BONUS_LASER,
+next[BONUS_SUPER] = BONUS_SUPER;
 
-    BONUS_MULTI,
-    BONUS_OFFP,
-    BONUS_SPEED,
+next[BONUS_ROCKETS] = BONUS_BLADES;
+next[BONUS_BLADES] = BONUS_LASER;
+next[BONUS_LASER] = BONUS_ROCKETS;
 
-    BONUS_UNK,
-    BONUS_DEFP,
-    BONUS_SHIELD,
+next[BONUS_SPEED] = BONUS_MULTI;
+next[BONUS_MULTI] = BONUS_OFFP;
+next[BONUS_OFFP] = BONUS_SPEED;
 
-    BONUS_WO,
-    BONUS_OO,
-    BONUS_DO,
-    BONUS_SUPER
-]
+next[BONUS_SHIELD] = BONUS_UNK;
+next[BONUS_UNK] = BONUS_DEFP;
+next[BONUS_DEFP] = BONUS_SHIELD;
+
+next[BONUS_WO] = BONUS_WO
+next[BONUS_OO] = BONUS_OO
+next[BONUS_DO] = BONUS_DO
 
 type Pickup = {
     kind: number,
@@ -84,14 +85,11 @@ type Pickup = {
     change: number
 }
 
-function alreadyHas(kind: number): boolean { return false }
-function doPickup(kind: number): boolean { return false }
-
 function stepPickup(p: Pickup, pp: {x: number, y: number}) : boolean {
 
     if ((p.change += opts.ModChangePickup) >= 128) {
         p.change = 0;
-        if (alreadyHas(p.kind = next[p.kind]))
+        if (Hud.hasItem(p.kind = next[p.kind]))
             p.kind = next[p.kind]; 
         p.anim = anim[p.kind];
     }
@@ -102,6 +100,7 @@ function stepPickup(p: Pickup, pp: {x: number, y: number}) : boolean {
         p.x < pp.x + 160 && p.x + 320 > pp.x + 160) {
         
         // PICKUP!
+        Hud.pickup(p.kind);
         return false;
     }
 

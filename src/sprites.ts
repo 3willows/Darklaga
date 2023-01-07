@@ -1974,15 +1974,15 @@ export const iblade : Sprite[] = [
         "tb": 0.28125
     }
 ];
+export const id : Sprite = {
+    "w": 18,
+    "h": 19,
+    "tl": 0.875,
+    "tt": 0.2626953125,
+    "tr": 0.892578125,
+    "tb": 0.28125
+};
 export const idover : Sprite[] = [
-    {
-        "w": 18,
-        "h": 19,
-        "tl": 0.875,
-        "tt": 0.2626953125,
-        "tr": 0.892578125,
-        "tb": 0.28125
-    },
     {
         "w": 18,
         "h": 19,
@@ -1998,9 +1998,7 @@ export const idover : Sprite[] = [
         "tt": 0.2626953125,
         "tr": 0.927734375,
         "tb": 0.28125
-    }
-];
-export const idplus : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2008,7 +2006,9 @@ export const idplus : Sprite[] = [
         "tt": 0.2626953125,
         "tr": 0.9453125,
         "tb": 0.28125
-    },
+    }
+];
+export const idplus : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2024,9 +2024,7 @@ export const idplus : Sprite[] = [
         "tt": 0.2626953125,
         "tr": 0.98046875,
         "tb": 0.28125
-    }
-];
-export const ifury : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2034,7 +2032,9 @@ export const ifury : Sprite[] = [
         "tt": 0.2626953125,
         "tr": 0.998046875,
         "tb": 0.28125
-    },
+    }
+];
+export const ifury : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2050,9 +2050,7 @@ export const ifury : Sprite[] = [
         "tt": 0.2646484375,
         "tr": 0.7001953125,
         "tb": 0.283203125
-    }
-];
-export const ilaser : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2060,7 +2058,9 @@ export const ilaser : Sprite[] = [
         "tt": 0.2646484375,
         "tr": 0.7177734375,
         "tb": 0.283203125
-    },
+    }
+];
+export const ilaser : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2076,9 +2076,7 @@ export const ilaser : Sprite[] = [
         "tt": 0.2685546875,
         "tr": 0.5703125,
         "tb": 0.287109375
-    }
-];
-export const imulti : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2086,7 +2084,9 @@ export const imulti : Sprite[] = [
         "tt": 0.2685546875,
         "tr": 0.587890625,
         "tb": 0.287109375
-    },
+    }
+];
+export const imulti : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2102,9 +2102,7 @@ export const imulti : Sprite[] = [
         "tt": 0.2685546875,
         "tr": 0.623046875,
         "tb": 0.287109375
-    }
-];
-export const imystery : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2112,7 +2110,9 @@ export const imystery : Sprite[] = [
         "tt": 0.2705078125,
         "tr": 0.640625,
         "tb": 0.2890625
-    },
+    }
+];
+export const imystery : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2128,9 +2128,7 @@ export const imystery : Sprite[] = [
         "tt": 0.2724609375,
         "tr": 0.294921875,
         "tb": 0.291015625
-    }
-];
-export const ioover : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2138,15 +2136,17 @@ export const ioover : Sprite[] = [
         "tt": 0.2744140625,
         "tr": 0.3125,
         "tb": 0.29296875
-    },
-    {
-        "w": 18,
-        "h": 19,
-        "tl": 0.3125,
-        "tt": 0.2744140625,
-        "tr": 0.330078125,
-        "tb": 0.29296875
-    },
+    }
+];
+export const io : Sprite = {
+    "w": 18,
+    "h": 19,
+    "tl": 0.3125,
+    "tt": 0.2744140625,
+    "tr": 0.330078125,
+    "tb": 0.29296875
+};
+export const ioover : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2154,9 +2154,7 @@ export const ioover : Sprite[] = [
         "tt": 0.2744140625,
         "tr": 0.552734375,
         "tb": 0.29296875
-    }
-];
-export const ioplus : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2172,7 +2170,9 @@ export const ioplus : Sprite[] = [
         "tt": 0.2763671875,
         "tr": 0.365234375,
         "tb": 0.294921875
-    },
+    }
+];
+export const ioplus : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2180,9 +2180,7 @@ export const ioplus : Sprite[] = [
         "tt": 0.2763671875,
         "tr": 0.3828125,
         "tb": 0.294921875
-    }
-];
-export const irocket : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2198,7 +2196,9 @@ export const irocket : Sprite[] = [
         "tt": 0.2763671875,
         "tr": 0.41796875,
         "tb": 0.294921875
-    },
+    }
+];
+export const irocket : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2206,9 +2206,7 @@ export const irocket : Sprite[] = [
         "tt": 0.2763671875,
         "tr": 0.435546875,
         "tb": 0.294921875
-    }
-];
-export const ishield : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2224,7 +2222,9 @@ export const ishield : Sprite[] = [
         "tt": 0.27734375,
         "tr": 0.26953125,
         "tb": 0.2958984375
-    },
+    }
+];
+export const ishield : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2232,9 +2232,7 @@ export const ishield : Sprite[] = [
         "tt": 0.2783203125,
         "tr": 0.453125,
         "tb": 0.296875
-    }
-];
-export const ispeed : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2250,7 +2248,9 @@ export const ispeed : Sprite[] = [
         "tt": 0.2783203125,
         "tr": 0.48828125,
         "tb": 0.296875
-    },
+    }
+];
+export const ispeed : Sprite[] = [
     {
         "w": 18,
         "h": 19,
@@ -2258,9 +2258,7 @@ export const ispeed : Sprite[] = [
         "tt": 0.2783203125,
         "tr": 0.505859375,
         "tb": 0.296875
-    }
-];
-export const iwover : Sprite[] = [
+    },
     {
         "w": 18,
         "h": 19,
@@ -2276,13 +2274,39 @@ export const iwover : Sprite[] = [
         "tt": 0.28125,
         "tr": 0.875,
         "tb": 0.2998046875
+    }
+];
+export const iw : Sprite = {
+    "w": 18,
+    "h": 19,
+    "tl": 0.875,
+    "tt": 0.28125,
+    "tr": 0.892578125,
+    "tb": 0.2998046875
+};
+export const iwover : Sprite[] = [
+    {
+        "w": 18,
+        "h": 19,
+        "tl": 0.892578125,
+        "tt": 0.28125,
+        "tr": 0.91015625,
+        "tb": 0.2998046875
     },
     {
         "w": 18,
         "h": 19,
-        "tl": 0.875,
+        "tl": 0.91015625,
         "tt": 0.28125,
-        "tr": 0.892578125,
+        "tr": 0.927734375,
+        "tb": 0.2998046875
+    },
+    {
+        "w": 18,
+        "h": 19,
+        "tl": 0.927734375,
+        "tt": 0.28125,
+        "tr": 0.9453125,
         "tb": 0.2998046875
     }
 ];
@@ -2356,9 +2380,9 @@ export const bullet5n : Sprite[] = [
     {
         "w": 15,
         "h": 10,
-        "tl": 0.892578125,
+        "tl": 0.9453125,
         "tt": 0.28125,
-        "tr": 0.9072265625,
+        "tr": 0.9599609375,
         "tb": 0.291015625
     }
 ];
@@ -2366,26 +2390,26 @@ export const bullet5v : Sprite[] = [
     {
         "w": 15,
         "h": 10,
-        "tl": 0.9072265625,
+        "tl": 0.9599609375,
         "tt": 0.28125,
-        "tr": 0.921875,
+        "tr": 0.974609375,
         "tb": 0.291015625
     },
     {
         "w": 15,
         "h": 10,
-        "tl": 0.921875,
+        "tl": 0.974609375,
         "tt": 0.28125,
-        "tr": 0.9365234375,
+        "tr": 0.9892578125,
         "tb": 0.291015625
     },
     {
         "w": 15,
         "h": 10,
-        "tl": 0.9365234375,
-        "tt": 0.28125,
-        "tr": 0.951171875,
-        "tb": 0.291015625
+        "tl": 0.7353515625,
+        "tt": 0.2822265625,
+        "tr": 0.75,
+        "tb": 0.2919921875
     }
 ];
 export const blast : Sprite = {
