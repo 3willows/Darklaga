@@ -5,6 +5,9 @@ export const opts = {
     // New-school graphics
     UseNewSchool: true,
 
+    // Higher level of detail for weapons
+    LodWeaponDetail: true,
+
     // Level of details for explosions
     LodExplosions: 3,
 

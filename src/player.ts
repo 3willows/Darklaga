@@ -1,5 +1,5 @@
 import * as GL from "./webgl"
-import { blast, muzzle, player } from "./sprites"
+import * as S from "./sprites"
 import { key } from "./input"
 import { opts } from "./options"
 import * as Hud from "./hud"
@@ -57,10 +57,11 @@ function shoot() {
 
     switch (stuff.weapon) {
     case Hud.ITEM_WNONE:
+    {
         pl.muzzle_flash = 2;
         pl.cooldown = stuff.offense != Hud.ITEM_SPEED ? 6 : 
                       stuff.offense_overload ? 1 : 3;
-        const w = blast.w << 3, h = blast.h << 3;
+        const w = S.blast.w << 3, h = S.blast.h << 3;
         
         Shot.add(Shot.SHOT_BLASTER, pl.x + 80, pl.y + 8, w, h);
         if (stuff.offense == Hud.ITEM_MULTI) {
@@ -70,7 +71,28 @@ function shoot() {
                 Shot.add(Shot.SHOT_BLASTER, pl.x +  16, pl.y + 56, w, h);
                 Shot.add(Shot.SHOT_BLASTER, pl.x + 144, pl.y + 56, w, h);
             }
-        } 
+        }
+        break;
+    }
+    case Hud.ITEM_BLADES:
+    {
+        pl.cooldown = stuff.offense != Hud.ITEM_SPEED ? 20 : 
+                      stuff.offense_overload ? 3 : 8;
+        const x = pl.x + 24, y = pl.y + 64, 
+              w = S.blade.w << 3, h = S.blade.h;
+        
+        Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h, 0);
+        if (stuff.offense == Hud.ITEM_MULTI) {
+            Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h,  1);
+            Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h, -1);
+            if (stuff.offense_overload) {
+                Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h,  2);
+                Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h, -2);  
+                Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h,  3);
+                Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h, -3);        
+            }
+        }
+    }
     }
 }
 
@@ -165,14 +187,14 @@ export function step() {
 export function render() {
     
     const {x, y, distance, muzzle_flash} = pl;
-    const frame = player[distance < -10 ? 0 :
-                         distance < 0 ? 1 : 
-                         distance == 0 ? 2 : 
-                         distance <= 10 ? 3 : 4];
+    const frame = S.player[distance < -10 ? 0 :
+                           distance < 0 ? 1 : 
+                           distance == 0 ? 2 : 
+                           distance <= 10 ? 3 : 4];
 
     GL.drawSprite(frame, x >> 3, y >> 3);
 
     if (muzzle_flash && opts.UseNewSchool)
-        GL.drawSpriteAdditive(muzzle, (x >> 3) + 2, (y >> 3) - 22, 32);
+        GL.drawSpriteAdditive(S.muzzle, (x >> 3) + 2, (y >> 3) - 22, 32);
 
 }

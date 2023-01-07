@@ -124,8 +124,6 @@ export function drawPoly(points: number[], r: number, g: number, b: number, ax: 
         ++coloredBatched;
     }
 
-    if (points.length != 8) console.log("r:%f g:%f b:%f ax:%f ay:%f", r, g, b, ax, ay)
-
     for (let i = 1; i < points.length/2 - 1; ++i)
     {
         point(points[0], points[1]);

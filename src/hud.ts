@@ -60,7 +60,7 @@ function empty() : Hud {
         combo_timer: 0,
         lives: 3,
         combo_fade: 0,
-        weapon: ITEM_WNONE,
+        weapon: ITEM_BLADES,
         weapon_overload: 0,
         offense: ITEM_ONONE,
         offense_overload: 0,

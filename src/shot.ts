@@ -1,4 +1,5 @@
-import { blast, vblast } from "./sprites"
+import { opts } from "options";
+import { blade, bladestar, blast, vblast } from "./sprites"
 import * as GL from "./webgl"
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -77,6 +78,48 @@ function shotStep(ref: number): boolean {
     } else if (type == SHOT_BLASTER) {
         if ((shots[off + TOP] -= 96) < -96)
             shots[off + TYPE] = SHOT_DEAD;
+    } else if (type == SHOT_BLADE_SPAWN) {
+        switch (shots[off + PARAM0]) {
+            case -3: 
+                shots[off + PARAM0] = -42;
+                shots[off + PARAM1] = -42;
+                break;
+            case -2:
+                shots[off + PARAM0] = -52;
+                shots[off + PARAM1] = -30;
+                break;
+            case -1:
+                shots[off + PARAM0] = -58;
+                shots[off + PARAM1] = -16;
+                break;
+            case 1:
+                shots[off + PARAM0] = -58;
+                shots[off + PARAM1] = 16;
+                break;
+            case 2:
+                shots[off + PARAM0] = -52;
+                shots[off + PARAM1] = 30;
+                break;
+            case 3:
+                shots[off + PARAM0] = -42;
+                shots[off + PARAM1] = 42;
+                break;
+            default:
+                shots[off + PARAM0] = -60;
+                shots[off + PARAM1] = -0;
+                break;
+        }
+        shots[off + TYPE] = SHOT_BLADE;
+        shots[off + LEFT] += 4 * shots[off + PARAM1];
+        shots[off + TOP]  += 4 * shots[off + PARAM0];
+    } else if (type == SHOT_BLADE) {
+        const left = shots[off + LEFT] += shots[off + PARAM1];
+        const top = shots[off + TOP]  += shots[off + PARAM0];
+        if (left < -120 || left > 1920 || top < -120 || top > 2560) 
+            shots[off + TYPE] = SHOT_DEAD;
+    } else if (type == SHOT_BLADE_STAR) {
+        if (++shots[off + TIMER] >= 30) 
+            shots[off + TYPE] = SHOT_DEAD;
     } else {
         throw "Unknown shot type"
     }
@@ -109,12 +152,29 @@ export function step() {
 function shotRender(ref: number): number {
 
     const off = shots[ref];
-    
+    const x = shots[off+LEFT] >>3;
+    const y = shots[off+TOP] >> 3;
+
     const type = shots[off + TYPE];
     if (type == SHOT_DEAD) {
         // Nothing
     } else if (type == SHOT_BLASTER) {
-        GL.drawSprite(blast, shots[off + LEFT] >> 3, shots[off + TOP] >> 3)
+        GL.drawSprite(blast, x, y)
+    } else if (type == SHOT_BLADE_SPAWN) {
+        // Nothing
+    } else if (type == SHOT_BLADE) {
+        if (opts.LodWeaponDetail)
+            GL.drawSpriteAdditive(blade, x, y, 32)
+        else
+            GL.drawSprite(blade, x, y)
+    } else if (type == SHOT_BLADE_STAR) {
+        const timer = shots[off + TIMER];
+        if (opts.LodExplosions) {
+            GL.drawSpriteAdditive(blade, x, y, 32 - timer)
+            GL.drawSpriteAdditive(bladestar[timer >> 1], x-26, y-32, 32 - timer);
+        } else if (opts.LodWeaponDetail) {
+            GL.drawSpriteAdditive(blade, x, y, 32 - timer)
+        }
     } else {
         throw "Unknown shot type"
     }
@@ -141,11 +201,25 @@ export function add(
     h: number,
     p0?: number,
     p1?: number,
+    p2?: number): boolean 
+{ 
+    return addRaw(type, x, y, w, h, p0, p1, p2) >= 0 
+}
+
+// Add a shot, return its offset if added, -1 otherwise
+function addRaw(
+    type: number,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    p0?: number,
+    p1?: number,
     p2?: number
 ) {
 
     const off = shots[1];
-    if (off < 0) return false;
+    if (off < 0) return -1;
 
     shots[1] = shots[off + NEXT];
     shots[off + NEXT] = shots[0];
@@ -162,19 +236,17 @@ export function add(
     shots[off + HIT] = 0;
     shots[off + TIMER] = 0;
 
-    return true;
+    return off;
 }
+
 
 // COLLISION =================================================================
 
 // A collision has occurred with the shot at the specified position. Return
 // the amount of damage, and apply per-shot on-hit behavior. 
-function onShotCollide(off: number): number {
+function onShotCollide(off: number, tx: number, ty: number, tw: number, th: number): number {
 
     const type = shots[off + TYPE];
-    
-    if (type == SHOT_DEAD) 
-        return 0;
     
     if (type == SHOT_BLASTER || type == SHOT_FBLASTER) {
         shots[off + TYPE] = SHOT_DEAD;
@@ -182,7 +254,42 @@ function onShotCollide(off: number): number {
         return 64;
     }
 
-    throw "Unknown shot type"
+    if (type == SHOT_BLADE) {
+        const tcx = tx + tw/2;
+        const tcy = ty + th/2;
+
+        shots[off + HIT] = 1;
+        
+        // Vector to target
+        let ttx = tcx - shots[off + LEFT] - shots[off + WIDTH]/2;
+        let tty = tcy - shots[off + TOP] - shots[off + HEIGHT]/2;
+        const tsize = Math.sqrt(ttx * ttx + tty * tty);
+        ttx /= tsize;
+        tty /= tsize;
+
+        // Project speed along vector to target
+        const vx = shots[off+PARAM1], vy = shots[off+PARAM0];
+        const dot = ttx * vx + tty * vy;
+
+        // Apply reflection vector in order to 'bounce'
+        shots[off + PARAM1] -= Math.floor(2 * ttx * dot);
+        shots[off + PARAM0] -= Math.floor(2 * tty * dot);
+
+        addRaw(
+            SHOT_BLADE_STAR,
+            shots[off+LEFT],
+            shots[off+TOP],
+            shots[off+WIDTH],
+            shots[off+HEIGHT]);
+                
+        return 400; 
+    }
+
+    if (type == SHOT_BLADE_STAR) {
+        return (32 - shots[off + TIMER]) >> 4;
+    }
+ 
+    return 0;
 }
 
 // Return the damage amount if at least one shot intersects the rectangle, or
@@ -214,7 +321,7 @@ export function collideEnemy(x: number, y: number, w: number, h: number) {
         if (sh + sy <= y) continue;
         
         // We do collide, but does it register as such ?
-        damage += onShotCollide(off);
+        damage += onShotCollide(off, x, y, w, h);
     }
 
     return damage;
