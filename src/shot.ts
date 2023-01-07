@@ -133,7 +133,7 @@ export function render() {
 // CREATION ==================================================================
 
 // Add a shot, return true if the shot was added, false otherwise. 
-export function add(s: {
+export function add(
     type: number,
     x: number,
     y: number,
@@ -142,7 +142,7 @@ export function add(s: {
     p0?: number,
     p1?: number,
     p2?: number
-}) {
+) {
 
     const off = shots[1];
     if (off < 0) return false;
@@ -151,14 +151,14 @@ export function add(s: {
     shots[off + NEXT] = shots[0];
     shots[0] = off;
 
-    shots[off + TYPE] = s.type;
-    shots[off + LEFT] = s.x;
-    shots[off + TOP] = s.y;
-    shots[off + WIDTH] = s.w;
-    shots[off + HEIGHT] = s.h;
-    shots[off + PARAM0] = s.p0 || 0;
-    shots[off + PARAM1] = s.p1 || 0;
-    shots[off + PARAM2] = s.p2 || 0;
+    shots[off + TYPE] = type;
+    shots[off + LEFT] = x;
+    shots[off + TOP] = y;
+    shots[off + WIDTH] = w;
+    shots[off + HEIGHT] = h;
+    shots[off + PARAM0] = p0 || 0;
+    shots[off + PARAM1] = p1 || 0;
+    shots[off + PARAM2] = p2 || 0;
     shots[off + HIT] = 0;
     shots[off + TIMER] = 0;
 

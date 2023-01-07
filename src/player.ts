@@ -2,6 +2,7 @@ import * as GL from "./webgl"
 import { blast, muzzle, player } from "./sprites"
 import { key } from "./input"
 import { opts } from "./options"
+import * as Hud from "./hud"
 import * as Shot from "./shot"
 
 type Player = {
@@ -52,16 +53,25 @@ const pl : Player = {
 
 function shoot() {
 
-    pl.muzzle_flash = 2;
-    pl.cooldown = 6;
-    Shot.add({
-        type: Shot.SHOT_BLASTER,
-        x: pl.x + 80,
-        y: pl.y + 8,
-        w: blast.w << 3,
-        h: blast.h << 3
-    })
+    const stuff = Hud.stuff();
 
+    switch (stuff.weapon) {
+    case Hud.ITEM_WNONE:
+        pl.muzzle_flash = 2;
+        pl.cooldown = stuff.offense != Hud.ITEM_SPEED ? 6 : 
+                      stuff.offense_overload ? 1 : 3;
+        const w = blast.w << 3, h = blast.h << 3;
+        
+        Shot.add(Shot.SHOT_BLASTER, pl.x + 80, pl.y + 8, w, h);
+        if (stuff.offense == Hud.ITEM_MULTI) {
+            Shot.add(Shot.SHOT_BLASTER, pl.x +  48, pl.y + 32, w, h);
+            Shot.add(Shot.SHOT_BLASTER, pl.x + 112, pl.y + 32, w, h);
+            if (stuff.offense_overload) {
+                Shot.add(Shot.SHOT_BLASTER, pl.x +  16, pl.y + 56, w, h);
+                Shot.add(Shot.SHOT_BLASTER, pl.x + 144, pl.y + 56, w, h);
+            }
+        } 
+    }
 }
 
 export function pos() {
