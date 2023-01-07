@@ -14,6 +14,9 @@ export const opts = {
     // Automatically shooting without pressing the button ?
     ModAutoFire: false,
 
+    // Frequency at which pickups change
+    ModChangePickup: 1,
+
     // Player movement speed, 0..5
     ModPlayerSpeed: 2,
 

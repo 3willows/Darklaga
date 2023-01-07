@@ -1,6 +1,7 @@
 import * as S from "./sprites";
 import * as Shot from "./shot";
 import * as GL from "./webgl";
+import * as Pickups from "./pickup"
 import { opts } from "options";
 
 export type Mode = "n"|"v"|"d"
@@ -53,8 +54,10 @@ export class Enemy {
             
             if (dmg > 0) {
                 if (this.flash <= 30) this.flash = 34; 
-                if ((this.health -= dmg) <= 0)
+                if ((this.health -= dmg) <= 0) {
+                    Pickups.onEnemyDeath(this.x, this.y);
                     return new Dying(this.x, this.y, this.hit, this.mode);
+                }
             }
         }
 
@@ -194,3 +197,5 @@ export function add(e: Enemy) {
 
     return false;
 }
+
+export function count() { return enemies.length }

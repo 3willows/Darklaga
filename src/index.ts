@@ -4,13 +4,15 @@ import * as Shot from "./shot"
 import * as Background from "./background"
 import * as Enemy from "./enemy"
 import * as Dan from "./dan"
-import { Hunter3 } from "enemy.types"
+import * as Pickup from "./pickup"
+import { Sweep } from "enemy.types"
 
-// Rendering happens every time setInterval() triggers.
+// Rendering happens every time requestAnimationFrame() triggers.
 function render() {
     GL.startRender();
     Background.render();
     Shot.render();
+    Pickup.render();
     Enemy.render();
     Player.render();
     Dan.render();
@@ -24,16 +26,18 @@ function step() {
     Shot.step();
     Enemy.step();
     Player.step();
+    Pickup.step();
     Dan.step();
+
+    if (Enemy.count() == 0) {        
+        for (var i = 0; i < 6; ++i) {
+            Enemy.add(new Sweep(256 + 256*i, 256, "n", [1]));
+            Enemy.add(new Sweep(256 + 256*i, 512, "n", [1]));
+            Enemy.add(new Sweep(256 + 256*i, 768, "d", [1]));
+            Enemy.add(new Sweep(256 + 256*i, 1024, "v", [1]));
+        }
+    }
 }
-
-Enemy.add(new Hunter3(256, 256, "n"));
-
-Enemy.add(new Hunter3(512, 512, "n"));
-
-Enemy.add(new Hunter3(768, 768, "d"));
-
-Enemy.add(new Hunter3(1024, 1024, "v"));
 
 export function run() {
     let nextFrame = +new Date();
