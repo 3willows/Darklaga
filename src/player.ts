@@ -80,16 +80,18 @@ function shoot() {
                       stuff.offense_overload ? 3 : 8;
         const x = pl.x + 24, y = pl.y + 64, 
               w = S.blade.w << 3, h = S.blade.h;
-        
-        Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h, 0);
+        const s = stuff.weapon_overload ? Shot.SHOT_OBLADE_SPAWN   
+                                        : Shot.SHOT_BLADE_SPAWN;
+
+        Shot.add(s, x, y, w, h, 0);
         if (stuff.offense == Hud.ITEM_MULTI) {
-            Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h,  1);
-            Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h, -1);
+            Shot.add(s, x, y, w, h,  1);
+            Shot.add(s, x, y, w, h, -1);
             if (stuff.offense_overload) {
-                Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h,  2);
-                Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h, -2);  
-                Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h,  3);
-                Shot.add(Shot.SHOT_BLADE_SPAWN, x, y, w, h, -3);        
+                Shot.add(s, x, y, w, h,  2);
+                Shot.add(s, x, y, w, h, -2);  
+                Shot.add(s, x, y, w, h,  3);
+                Shot.add(s, x, y, w, h, -3);        
             }
         }
     }

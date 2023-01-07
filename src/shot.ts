@@ -1,5 +1,5 @@
 import { opts } from "options";
-import { blade, bladestar, blast, vblast } from "./sprites"
+import { blade, bladestar, bladet, blast, vblast } from "./sprites"
 import * as GL from "./webgl"
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -74,11 +74,17 @@ function shotStep(ref: number): boolean {
 
     const type = shots[off + TYPE];
     if (type == SHOT_DEAD) {
+
         // Nothing, will be removed at end of step.
+
     } else if (type == SHOT_BLASTER) {
+
         if ((shots[off + TOP] -= 96) < -96)
             shots[off + TYPE] = SHOT_DEAD;
-    } else if (type == SHOT_BLADE_SPAWN) {
+
+    } else if (type == SHOT_BLADE_SPAWN ||
+               type == SHOT_OBLADE_SPAWN) {
+
         switch (shots[off + PARAM0]) {
             case -3: 
                 shots[off + PARAM0] = -42;
@@ -109,17 +115,24 @@ function shotStep(ref: number): boolean {
                 shots[off + PARAM1] = -0;
                 break;
         }
-        shots[off + TYPE] = SHOT_BLADE;
+        shots[off + TYPE] = type == SHOT_OBLADE_SPAWN ? SHOT_OBLADE : SHOT_BLADE;
         shots[off + LEFT] += 4 * shots[off + PARAM1];
         shots[off + TOP]  += 4 * shots[off + PARAM0];
-    } else if (type == SHOT_BLADE) {
+
+    } else if (type == SHOT_BLADE || 
+               type == SHOT_OBLADE || 
+               type == SHOT_FBLASTER) {
+
         const left = shots[off + LEFT] += shots[off + PARAM1];
         const top = shots[off + TOP]  += shots[off + PARAM0];
         if (left < -120 || left > 1920 || top < -120 || top > 2560) 
             shots[off + TYPE] = SHOT_DEAD;
+
     } else if (type == SHOT_BLADE_STAR) {
+
         if (++shots[off + TIMER] >= 30) 
             shots[off + TYPE] = SHOT_DEAD;
+
     } else {
         throw "Unknown shot type"
     }
@@ -160,9 +173,21 @@ function shotRender(ref: number): number {
         // Nothing
     } else if (type == SHOT_BLASTER) {
         GL.drawSprite(blast, x, y)
-    } else if (type == SHOT_BLADE_SPAWN) {
+    } else if (type == SHOT_BLADE_SPAWN || type == SHOT_OBLADE_SPAWN) {
         // Nothing
-    } else if (type == SHOT_BLADE) {
+    } else if (type == SHOT_BLADE || type == SHOT_OBLADE) {
+
+        if (type == SHOT_OBLADE) {
+            GL.drawSpriteAlpha(bladet, 
+                (shots[off + LEFT] - 2*shots[off + PARAM1]) >> 3,
+                (shots[off + TOP]  - 2*shots[off + PARAM0]) >> 3,
+                opts.LodWeaponDetail ? 16 : 32);
+            GL.drawSpriteAlpha(bladet, 
+                (shots[off + LEFT] - 4*shots[off + PARAM1]) >> 3,
+                (shots[off + TOP]  - 4*shots[off + PARAM0]) >> 3,
+                opts.LodWeaponDetail ? 8 : 32);
+        }
+
         if (opts.LodWeaponDetail)
             GL.drawSpriteAdditive(blade, x, y, 32)
         else
@@ -255,6 +280,7 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
     }
 
     if (type == SHOT_BLADE) {
+
         const tcx = tx + tw/2;
         const tcy = ty + th/2;
 
@@ -275,14 +301,42 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
         shots[off + PARAM1] -= Math.floor(2 * ttx * dot);
         shots[off + PARAM0] -= Math.floor(2 * tty * dot);
 
-        addRaw(
+        const o = addRaw(
             SHOT_BLADE_STAR,
             shots[off+LEFT],
             shots[off+TOP],
             shots[off+WIDTH],
             shots[off+HEIGHT]);
                 
+        if (o >= 0)
+            shots[o + HIT] = 1;
+
         return 400; 
+    }
+
+    if (type == SHOT_OBLADE) {
+
+        shots[off + HIT] = 1;
+
+        let a = Math.random();
+        
+        for (let i = 0; i < 3; ++i) {
+            const o = addRaw(
+                SHOT_BLADE,
+                shots[off + LEFT],
+                shots[off + TOP],
+                shots[off + WIDTH],
+                shots[off + HEIGHT],
+                Math.floor(60 * Math.cos((a + i/3) * 2 * Math.PI)),
+                Math.floor(60 * Math.sin((a + i/3) * 2 * Math.PI)));
+            
+            if (o >= 0)
+                shots[o + HIT] = 1;
+        }
+
+        shots[off + TYPE] = SHOT_DEAD;
+
+        return 200;
     }
 
     if (type == SHOT_BLADE_STAR) {
