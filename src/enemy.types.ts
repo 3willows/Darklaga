@@ -1,7 +1,6 @@
 import { Enemy, Mode } from "./enemy"
 import * as S from "./sprites"
 import * as Player from "./player"
-import * as GL from "./webgl"
 import * as Dan from "./dan"
 import { opts } from "options"
 
@@ -955,4 +954,80 @@ export class Sweep extends Enemy {
 
         return this;
     }    
+}
+
+const hunter = {
+    n: twoSide(S.ehuntern),
+    d: twoSide(S.ehunterd),
+    v: twoSide(S.ehunterv)
+}
+
+class Hunter extends Enemy {
+    constructor(x: number, y: number, mode: Mode, health: number) {
+        super(x, y, health, mode, hunter[mode], 
+                mode == "n" ? S.ehunternh : 
+                mode == "d" ? S.ehunterdh : S.ehuntervh);
+    }
+}
+
+export class Hunter1 extends Hunter {
+    private stimer : number
+    private arrived : boolean
+    private readonly dy : number
+    private readonly spd : number
+    constructor(x: number, y: number, mode: Mode) {
+        super(x, y, mode, mode == "n" ? 10 : 11)
+        this.stimer = 0;
+        this.arrived = false;
+        this.dy = mode == "n" ? 320 : 
+                  mode == "d" ? 480 : 640;
+        this.spd = mode == "v" ? 16 : 8;
+    }
+
+    step() : Enemy|null {
+        
+        const self = super.step();
+        if (self !== this) return self;
+
+        this.stimer--;
+
+        if (this.arrived) 
+        {
+            if (this.stimer <= 0) {
+                if (this.mode == "n") {
+                    Dan.fireStandard(this.cx(), this.cy(), 0, 8, "b1n")
+                    this.stimer = 40;
+                } else if (this.mode == "d") {
+                    Dan.fireStandard(this.cx(), this.cy(), 0, 16, "b1d")
+                    this.stimer = 30;
+                } else {
+                    Dan.fireStandard(this.cx(), this.cy(), 0, 16, "b1v")
+                    this.stimer = 20;
+                }
+            }
+            this.arrived = false;
+        }
+
+        const pp = Player.pos();
+        const tx = pp.x;
+        const ty = pp.y - this.dy;
+
+        const spd = this.spd;
+
+        const dx = tx - this.x;
+        const dy = ty - this.y;
+
+        if (dx * dx < 6400) this.arrived = true;
+
+        if (dx > -spd && dx < spd) 
+            if (dy > -spd && dy < spd)
+                this.arrived = true;
+            
+        if (dy < -spd) this.y -= spd;
+        if (dy > spd) this.y += spd; 
+        if (dx < -spd) this.x -= spd;
+        if (dx > spd) this.x += spd;
+
+        return this;
+    }
 }
