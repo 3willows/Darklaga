@@ -1032,7 +1032,6 @@ export class Hunter1 extends Hunter {
     }
 }
 
-
 export class Hunter2 extends Hunter {
     private arrived : boolean
     private tx : number
@@ -1075,6 +1074,73 @@ export class Hunter2 extends Hunter {
         if (dy >= spd) this.y += spd; 
         if (dx <= -spd) this.x -= spd;
         if (dx >= spd) this.x += spd;
+
+        return this;
+    }
+}
+
+
+export class Hunter3 extends Hunter {
+    private angle : number
+    private radius : number
+    private stimer : number
+    private readonly mrad : number
+    private readonly aspd : number
+    constructor(x: number, y: number, mode: Mode) {
+        super(x, y, mode, mode == "d" ? 9 : 8)
+        this.aspd = (mode == "v" ? 2 : 1) * 
+                    (Math.random() > 0.5 ? 1 : -1) *
+                    (opts.UseNewSchool ? 2 : 1) *
+                    Math.PI / 128;
+        this.stimer = 0;
+        this.angle = 0;
+        this.radius = 150;
+        this.mrad = mode == "v" ? 48 : 64;
+    }
+
+    step() : Enemy|null {
+        
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.radius > this.mrad) this.radius--;
+
+        const pp = Player.pos();
+
+        this.angle += this.aspd;
+        this.x = pp.x + Math.floor(this.radius * 8 * Math.cos(this.angle));
+        this.y = pp.y + Math.floor(this.radius * 8 * Math.sin(this.angle));
+
+        if (this.stimer-- < 0) {
+            if (this.mode == "n") {
+                this.stimer = 80;
+                Dan.fireStandard(this.cx(), this.cy(), 
+                    -Math.floor(8 * Math.cos(this.angle)),
+                    -Math.floor(8 * Math.sin(this.angle)),
+                    "b1n");
+            } else if (this.mode == "d") {                
+                this.stimer = 80;
+                Dan.fireSeek(this.cx(), this.cy(), 
+                    -Math.floor(4 * Math.cos(this.angle)),
+                    -Math.floor(4 * Math.sin(this.angle)),
+                    3, "b1d");
+                Dan.fireSeek(this.cx(), this.cy(), 
+                    -Math.floor(4 * Math.cos(this.angle-0.2)),
+                    -Math.floor(4 * Math.sin(this.angle-0.2)),
+                    3, "b1d");
+                Dan.fireSeek(this.cx(), this.cy(), 
+                    -Math.floor(4 * Math.cos(this.angle+0.2)),
+                    -Math.floor(4 * Math.sin(this.angle+0.2)),
+                    3, "b1d");
+            } else {
+                this.stimer = 50;
+                for (let off of [-0.4,-0.2,0,0.2,0.4])
+                    Dan.fireStandard(this.cx(), this.cy(), 
+                        -Math.floor(8 * Math.cos(this.angle+off)),
+                        -Math.floor(8 * Math.sin(this.angle+off)),
+                        "b1v");
+            }
+        }
 
         return this;
     }
