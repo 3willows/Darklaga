@@ -764,6 +764,7 @@ export class Warp extends Enemy {
     }
 
     public present() {}
+    public end() : Enemy|null { return null }
 
     public step() : Enemy|null {
 
@@ -781,9 +782,60 @@ export class Warp extends Enemy {
                 this.sprites = warp[this.mode];
             this.alpha = 32 - Math.floor((this.timer - 256) * this.speed);
         } else {
-            return null;
+            return this.end();
         }
 
+        return this;
+    }
+}
+
+// Teleports around the screen
+export class Warp3 extends Warp {
+
+    private spot : number
+    private stimer : number
+    constructor(x: number, y: number, mode: Mode) {
+        super(x, y, mode, mode == "n" ? 7 : 9)
+        this.spot = 0;
+        this.stimer = 0;
+    }
+
+    present() {
+        if (this.stimer-- > 0) return;
+
+        if (this.mode == "n") {
+            Dan.fireStandard(this.cx(), this.cy(),  16,   0, "b5n");
+            Dan.fireStandard(this.cx(), this.cy(), -16,   0, "b5n");
+            Dan.fireStandard(this.cx(), this.cy(),   0,  16, "b5n");
+            Dan.fireStandard(this.cx(), this.cy(),   0, -16, "b5n");
+            this.stimer = 50;
+        } else if (this.mode == "d") {
+            Dan.fireStandard(this.cx(), this.cy(),   4,   12, "b5d");
+            Dan.fireStandard(this.cx(), this.cy(),   4,  -12, "b5d");
+            Dan.fireStandard(this.cx(), this.cy(),  -4,   12, "b5d");
+            Dan.fireStandard(this.cx(), this.cy(),  -4,  -12, "b5d");
+            this.stimer = 30;
+        } else {
+            Dan.fireStandard(this.cx(), this.cy(),   0,  -16, "b5v");
+            Dan.fireStandard(this.cx(), this.cy(),   0,   16, "b5v");
+            Dan.fireStandard(this.cx(), this.cy(),  12,   12, "b5v");
+            Dan.fireStandard(this.cx(), this.cy(),  12,  -12, "b5v");
+            Dan.fireStandard(this.cx(), this.cy(), -12,   12, "b5v");
+            Dan.fireStandard(this.cx(), this.cy(), -12,  -12, "b5v");
+            Dan.fireStandard(this.cx(), this.cy(),  16,    0, "b5v");
+            Dan.fireStandard(this.cx(), this.cy(), -16,    0, "b5v");
+            this.stimer = 30;
+        }
+    }
+
+    public end() : Enemy|null { 
+        this.timer = 0;
+        switch (this.spot++ % 4) {
+            case 0: this.x += 640; break;
+            case 1: this.y += 480; break;
+            case 2: this.x -= 640; break;
+            case 3: this.y -= 480; break;
+        }
         return this;
     }
 }
