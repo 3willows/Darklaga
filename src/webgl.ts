@@ -391,22 +391,63 @@ const spriteTextures  = new Float32Array(maxSpriteData);
 const spriteAlphas    = new Float32Array(maxSpriteData);
 let spritesBatched    = 0;
 
-function drawSpriteRaw(sprite: Sprite, x: number, y: number, srca: number, dsta: number) {
+function drawSpriteRaw(sprite: Sprite, x: number, y: number, srca: number, dsta: number, angle: number) {
 
     if (coloredBatched) drawBatchedColored();
 
     const {tt, tl, tr, tb, h, w} = sprite;
 
-    const x2 = x + w;
-    const y2 = y + h;
+
+    // A --- B
+    // |     |
+    // |     |
+    // D --- C
+
+    let rax: number, ray: number, 
+        rbx: number, rby: number,
+        rcx: number, rcy: number,
+        rdx: number, rdy: number;
+
+    if (angle == 0) {
+        rax = x;
+        ray = y;
+        rbx = x + w;
+        rby = y;
+        rcx = rbx;
+        rcy = y + h;
+        rdx = x;
+        rdy = rcy;
+    } else {
+
+        // Find center of rotation.
+        const cx = x + w/2, cy = y + w/2;
+
+        const xrotx = Math.cos(angle);
+        const xroty = Math.sin(angle);
+
+        const yrotx = -xroty;
+        const yroty = xrotx;
+
+        rax = cx + (- w/2 * xrotx - h/2 * yrotx);
+        ray = cy + (- w/2 * xroty - h/2 * yroty);
+        
+        rbx = cx + (+ w/2 * xrotx - h/2 * yrotx);
+        rby = cy + (+ w/2 * xroty - h/2 * yroty);
+        
+        rcx = cx + (+ w/2 * xrotx + h/2 * yrotx);
+        rcy = cy + (+ w/2 * xroty + h/2 * yroty);
+        
+        rdx = cx + (- w/2 * xrotx + h/2 * yrotx);
+        rdy = cy + (- w/2 * xroty + h/2 * yroty);
+    }
 
     // First triangle
-    spritePositions[spritesBatched +  0] = x;
-    spritePositions[spritesBatched +  1] = y;
-    spritePositions[spritesBatched +  2] = x2;
-    spritePositions[spritesBatched +  3] = y2;
-    spritePositions[spritesBatched +  4] = x;
-    spritePositions[spritesBatched +  5] = y2;
+    spritePositions[spritesBatched +  0] = rax;
+    spritePositions[spritesBatched +  1] = ray;
+    spritePositions[spritesBatched +  2] = rcx;
+    spritePositions[spritesBatched +  3] = rcy;
+    spritePositions[spritesBatched +  4] = rdx;
+    spritePositions[spritesBatched +  5] = rdy;
 
     spriteTextures[spritesBatched +  0] = tl;
     spriteTextures[spritesBatched +  1] = tt;
@@ -416,12 +457,12 @@ function drawSpriteRaw(sprite: Sprite, x: number, y: number, srca: number, dsta:
     spriteTextures[spritesBatched +  5] = tb;
 
     // Second triangle
-    spritePositions[spritesBatched +  6] = x;
-    spritePositions[spritesBatched +  7] = y;
-    spritePositions[spritesBatched +  8] = x2;
-    spritePositions[spritesBatched +  9] = y2;
-    spritePositions[spritesBatched + 10] = x2;
-    spritePositions[spritesBatched + 11] = y;
+    spritePositions[spritesBatched +  6] = rax;
+    spritePositions[spritesBatched +  7] = ray;
+    spritePositions[spritesBatched +  8] = rcx;
+    spritePositions[spritesBatched +  9] = rcy;
+    spritePositions[spritesBatched + 10] = rbx;
+    spritePositions[spritesBatched + 11] = rby;
     
     spriteTextures[spritesBatched +  6] = tl;
     spriteTextures[spritesBatched +  7] = tt;
@@ -440,7 +481,11 @@ function drawSpriteRaw(sprite: Sprite, x: number, y: number, srca: number, dsta:
 }
 
 export function drawSprite(sprite: Sprite, x: number, y: number) {
-    drawSpriteRaw(sprite, x, y, 1, 1)
+    drawSpriteRaw(sprite, x, y, 1, 1, 0)
+}
+
+export function drawSpriteAngle(sprite: Sprite, x: number, y: number, angle: number) {
+    drawSpriteRaw(sprite, x, y, 1, 1, angle)
 }
 
 // Draw all sprites accumulated into the current batch 
@@ -548,12 +593,12 @@ function drawBatchedSprites() {
 
 // mul is 0..32
 export function drawSpriteAdditive(sprite: Sprite, x: number, y: number, mul: number) {
-    drawSpriteRaw(sprite, x, y, (mul / 32), 0);
+    drawSpriteRaw(sprite, x, y, (mul / 32), 0, 0);
 }
 
 // mul is 0..32
 export function drawSpriteAlpha(sprite: Sprite, x: number, y: number, mul: number) {
-    drawSpriteRaw(sprite, x, y, (mul / 32), (mul / 32));
+    drawSpriteRaw(sprite, x, y, (mul / 32), (mul / 32), 0);
 }
 
 // GENERAL ===================================================================

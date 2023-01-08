@@ -51,10 +51,12 @@ async function tryPackSlow(images, side) {
     const composites = [];
 
     // True if the rectangle collides with any of the existing
-    // rects. 
+    // rects. Allows for a one-pixel empty space between rectangles.
     function collides(x, y, w, h) {
-        const x2 = x + w;
-        const y2 = y + h;
+        x = x - 1;
+        y = y - 1;
+        const x2 = x + w+2;
+        const y2 = y + h+2;
         
         for (let i = 0; i < composites.length; ++i) {
             let off = 4*i;
@@ -127,60 +129,11 @@ async function tryPackSlow(images, side) {
     return [bindings, await atlas.toBuffer()];
 }
 
-async function tryPack(images, w) {
-
-    let atlas = sharp({
-        create: {
-            width: w,
-            height: w,
-            channels: 4,
-            background: { r: 0, g: 0, b: 0, alpha: 0 }
-        }
-    });
-
-    const bindings = {};
-    const composites = [];
-
-    let y = 0;
-    let x = 0;
-    let maxY = 0;
-
-    for (let path in images) {
-        
-        const img = images[path]
-
-        if (img.meta.width + x > w) {
-            x = 0;
-            y = maxY;
-        }
-
-        if (img.meta.height + y > w) 
-            return null;
-
-        composites.push({ input: img.path, left: x, top: y });
-
-        bindings[path] = {
-            x, 
-            y, 
-            w: img.meta.width,
-            h: img.meta.height
-        }
-
-        x += img.meta.width;
-        maxY = Math.max(maxY, y + img.meta.height);
-    }
-
-    atlas = atlas.composite(composites)
-                 .png({compressionLevel: 9, palette: true});
-
-    return [bindings, await atlas.toBuffer()];
-}
-
 async function packImages() {
 
     const images = await loadImages();
 
-    for (let w = 512; w < 4096; w *= 2) {
+    for (let w = 1024; w < 4096; w *= 2) {
         const pack = await tryPackSlow(images, w);
         if (pack) return [pack[0], pack[1], w];
     }
