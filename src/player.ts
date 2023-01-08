@@ -76,6 +76,7 @@ function shoot() {
     }
     case Hud.ITEM_BLADES:
     {
+        pl.muzzle_flash = 2;
         pl.cooldown = stuff.offense != Hud.ITEM_SPEED ? 20 : 
                       stuff.offense_overload ? 3 : 8;
         const x = pl.x + 24, y = pl.y + 64, 
@@ -94,6 +95,29 @@ function shoot() {
                 Shot.add(s, x, y, w, h, -3);        
             }
         }
+        break;
+    }
+    case Hud.ITEM_ROCKETS:
+    {
+        pl.cooldown = stuff.offense != Hud.ITEM_SPEED ? 9 : 
+                      stuff.offense_overload ? 2 : 5;
+        const x = pl.x + 64, y = pl.y + 8, 
+              w = S.rocket.w << 3, h = S.rocket.h;
+        const s = stuff.weapon_overload ? Shot.SHOT_ROCKET_SPAWN   
+                                        : Shot.SHOT_ROCKET_SPAWN;
+        
+        Shot.add(s, x, y, w, h,  1);
+        Shot.add(s, x, y, w, h, -1);
+        if (stuff.offense == Hud.ITEM_MULTI) {
+            Shot.add(s, x, y, w, h,  2);
+            Shot.add(s, x, y, w, h, -2);
+            if (stuff.offense_overload) {  
+                Shot.add(s, x, y, w, h,  3);
+                Shot.add(s, x, y, w, h, -3);   
+                Shot.add(s, x, y, w, h,  4);
+                Shot.add(s, x, y, w, h, -4);      
+            }
+        }    
     }
     }
 }

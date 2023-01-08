@@ -1,5 +1,5 @@
 import { opts } from "options";
-import { blade, bladestar, bladet, blast, vblast } from "./sprites"
+import { blade, bladestar, bladet, blast, rocket, rocketf, smaball, vblast } from "./sprites"
 import * as GL from "./webgl"
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -82,6 +82,45 @@ function shotStep(ref: number): boolean {
         if ((shots[off + TOP] -= 96) < -96)
             shots[off + TYPE] = SHOT_DEAD;
 
+    } else if (type == SHOT_ROCKET_SPAWN ||
+               type == SHOT_OROCKET_SPAWN) {
+
+        const p0 = shots[off + PARAM0];
+        shots[off + TIMER] = Math.abs(p0) * 6;
+        shots[off + PARAM0] = p0 > 0 ? 38 - 4 * p0 : - 38 - 4 * p0;
+        shots[off + TYPE] = type == SHOT_ROCKET_SPAWN 
+            ? SHOT_ROCKET_MOVE
+            : SHOT_OROCKET_MOVE; 
+
+    } else if (type == SHOT_ROCKET_MOVE ||
+               type == SHOT_OROCKET_MOVE) {
+                
+        const t = shots[off + TIMER]--;
+        shots[off + LEFT] += shots[off + PARAM0] * ((t >> 3) + 1);
+        
+        if (type == SHOT_OROCKET_MOVE)
+            shots[off + TOP] += 8;
+
+        if (t <= 1)
+            shots[off + TYPE] = SHOT_ROCKET;
+
+    } else if (type == SHOT_ROCKET) {
+        
+        const p = shots[off + PARAM1];
+        
+        if (p < 64) 
+            shots[off + PARAM1] = p + 1;
+        
+        if ((shots[off + TOP] -= p) < -120) 
+            shots[off + TYPE] = SHOT_DEAD;
+
+        shots[off + TIMER]++;
+
+    } else if (type == SHOT_OROCKET_DIE) {
+
+        if (shots[off + PARAM0]-- <= 1)
+            shots[off + TYPE] = SHOT_DEAD;
+    
     } else if (type == SHOT_BLADE_SPAWN ||
                type == SHOT_OBLADE_SPAWN) {
 
@@ -173,7 +212,20 @@ function shotRender(ref: number): number {
         // Nothing
     } else if (type == SHOT_BLASTER) {
         GL.drawSprite(blast, x, y)
-    } else if (type == SHOT_BLADE_SPAWN || type == SHOT_OBLADE_SPAWN) {
+    } else if (type == SHOT_ROCKET_MOVE || type == SHOT_OROCKET_MOVE) {
+        GL.drawSprite(rocket, x, y);
+    } else if (type == SHOT_ROCKET) {
+        if (opts.LodWeaponDetail) {
+            const t = shots[off + TIMER];            
+			GL.drawSpriteAlpha(rocketf[(t>>2)&1], x+1, y+15, 24 );
+			GL.drawSpriteAlpha(rocketf[(1+(t>>2))&1], x+1, y+15, 8 );
+        }
+        GL.drawSprite(rocket, x, y);
+    } else if (type == SHOT_OROCKET_DIE) {
+        const w = smaball.w;
+        GL.drawSpriteAdditive(smaball, x-1-w/2, y+1-w/2, shots[off + PARAM0]);
+    } else if (type == SHOT_BLADE_SPAWN || type == SHOT_OBLADE_SPAWN ||
+               type == SHOT_ROCKET_SPAWN || type == SHOT_OROCKET_SPAWN) {
         // Nothing
     } else if (type == SHOT_BLADE || type == SHOT_OBLADE) {
 
@@ -277,6 +329,17 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
         shots[off + TYPE] = SHOT_DEAD;
         shots[off + HIT] = 1;
         return 64;
+    }
+
+    if (type == SHOT_ROCKET) {
+        shots[off + HIT] = 1;
+        shots[off + TYPE] = SHOT_OROCKET_DIE;
+        shots[off + PARAM0] = 32;
+        return 200;
+    }
+
+    if (type == SHOT_OROCKET_DIE) {
+        return 3;
     }
 
     if (type == SHOT_BLADE) {
