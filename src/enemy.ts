@@ -182,6 +182,11 @@ export function step() {
             enemies[i] = next;
         }
     }
+
+    if (enemies.length > 0)
+        // Always use enemy zero as the target, as it is the one 
+        // that never moves in the array (unless it dies).
+        Shot.setTarget(enemies[0].cx(), enemies[0].cy());
 }
 
 export function render() {

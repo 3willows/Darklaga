@@ -1,5 +1,5 @@
 import { opts } from "options";
-import { blade, bladestar, bladet, blast, rocket, rocketf, smaball, vblast } from "./sprites"
+import { blade, bladestar, bladet, blast, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
 import * as GL from "./webgl"
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -101,8 +101,18 @@ function shotStep(ref: number): boolean {
         if (type == SHOT_OROCKET_MOVE)
             shots[off + TOP] += 8;
 
-        if (t <= 1)
-            shots[off + TYPE] = SHOT_ROCKET;
+        if (t <= 1) {
+            if (type == SHOT_ROCKET_MOVE) {
+                shots[off + TYPE] = SHOT_ROCKET;
+                shots[off + PARAM1] = 0;
+            } else {
+                shots[off + TYPE] = SHOT_OROCKET;
+                shots[off + TOP] -= 8<<3 
+                shots[off + LEFT] -= 8<<3;
+                shots[off + PARAM0] = -128;
+                shots[off + PARAM1] = 0;
+            }
+        }
 
     } else if (type == SHOT_ROCKET) {
         
@@ -115,6 +125,36 @@ function shotStep(ref: number): boolean {
             shots[off + TYPE] = SHOT_DEAD;
 
         shots[off + TIMER]++;
+
+    } else if (type == SHOT_OROCKET) {
+
+        const t = shots[off + TIMER]++;
+        const a = shots[off + PARAM0] / 256 * Math.PI;
+        const p = shots[off + PARAM1];
+        
+        if (p < 64)
+            shots[off + PARAM1] = p + 1;
+
+        const x = shots[off + LEFT] += Math.floor(p * Math.cos(a));
+        const y = shots[off + TOP] += Math.floor(p * Math.sin(a));
+
+        if (t > 16 && tx != 0 && ty != 0) {
+            // Track the current target
+            const cx = x + shots[off + WIDTH]/2;
+            const cy = y + shots[off + HEIGHT]/2;
+            const aim = Math.atan2(ty - cy, tx - cx);
+
+            const adjaim = 
+                Math.abs(aim - a) < Math.PI ? aim :
+                Math.abs(aim - a + 2 * Math.PI) < Math.PI ? aim + 2 * Math.PI : 
+                                                            aim - 2 * Math.PI; 
+            
+            shots[off + PARAM0] += a > adjaim ? -3 : 3;
+        }
+
+        if (t > 64)
+            if (x < -120 || x > 1920 || y < -120 || y > 2560) 
+                shots[off + TYPE] = SHOT_DEAD;
 
     } else if (type == SHOT_OROCKET_DIE) {
 
@@ -196,6 +236,10 @@ export function step() {
         if (shotStep(ref))
             ref = shots[ref + NEXT]
 
+    // Reset the target enemy ; it will be provided again on 
+    // the next step if there are enemies.
+    tx = 0; ty = 0;
+
 }
 
 // RENDERING =================================================================
@@ -221,6 +265,9 @@ function shotRender(ref: number): number {
 			GL.drawSpriteAlpha(rocketf[(1+(t>>2))&1], x+1, y+15, 8 );
         }
         GL.drawSprite(rocket, x, y);
+    } else if (type == SHOT_OROCKET) {
+        const a = shots[off + PARAM0] / 256 * Math.PI + Math.PI/2;
+        GL.drawSpriteAngle(orocket, x, y, a);
     } else if (type == SHOT_OROCKET_DIE) {
         const w = smaball.w;
         GL.drawSpriteAdditive(smaball, x-1-w/2, y+1-w/2, shots[off + PARAM0]);
@@ -338,6 +385,13 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
         return 200;
     }
 
+    if (type == SHOT_OROCKET) {
+        shots[off + HIT] = 1;
+        shots[off + TYPE] = SHOT_OROCKET_DIE;
+        shots[off + PARAM0] = 32;
+        return 400;
+    }
+
     if (type == SHOT_OROCKET_DIE) {
         return 3;
     }
@@ -407,6 +461,15 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
     }
  
     return 0;
+}
+
+// Center of an enemy target, if any. Otherwise (0, 0)
+let tx = 0, ty = 0;
+
+// Specify a target for homing shots.
+export function setTarget(x: number, y: number) {
+    tx = x;
+    ty = y;
 }
 
 // Return the damage amount if at least one shot intersects the rectangle, or
