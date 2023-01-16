@@ -1,5 +1,5 @@
 import { opts } from "options";
-import { blade, bladestar, bladet, blast, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
+import { blade, bladestar, bladet, blast, lasbme, lasbml, lasbmm, lasbse, lasbsl, lasbsm, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
 import * as GL from "./webgl"
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -212,6 +212,21 @@ function shotStep(ref: number): boolean {
         if (++shots[off + TIMER] >= 30) 
             shots[off + TYPE] = SHOT_DEAD;
 
+    } else if (type == SHOT_LASER) {
+        shots[off + TOP] -= 16;
+        shots[off + HEIGHT] += 16; 
+        shots[off + TYPE] = SHOT_LASER_DEAD;
+    } else if (type == SHOT_LASERM) {
+        shots[off + TOP] -= 16;
+        shots[off + HEIGHT] += 16;
+        shots[off + TYPE] = SHOT_LASERM_DEAD;
+    } else if (type == SHOT_LASER_DEAD ||
+               type == SHOT_OLASER_DEAD ||
+               type == SHOT_LASERM_DEAD ||
+               type == SHOT_OLASERM_DEAD ||
+               type == SHOT_INVISIBLE) {
+
+        shots[off + TYPE] = SHOT_DEAD;
     } else {
         throw "Unknown shot type"
     }
@@ -244,16 +259,74 @@ export function step() {
 
 // RENDERING =================================================================
 
+function renderLaser(off: number) {
+
+    const t = shots[off + TYPE];
+    const x = shots[off + LEFT] >> 3;
+    const p = shots[off + PARAM2];
+
+    let y = shots[off + TOP] >> 3;
+    let h = shots[off + HEIGHT] >> 3;
+    if (shots[off + HIT]) h++;
+    const max = y + h;
+    if (y < 0) y = 0;
+
+    const alpha = Math.floor(24 + Math.sin(p / 4) * 8);
+
+    if (t == SHOT_LASER_DEAD) {
+        for (let i = y - (p&3); i <= max-6; i += 3) 
+        {
+            const a = (i + p * 4) / 16;
+            const xoff = Math.floor(
+                Math.cos(a) *
+                Math.min(8, (i - y)/4, (max-6-i)/4));
+            
+            if (i + 3 > y)
+                GL.drawSpriteAdditive(lasbsl, x-1+xoff, i, alpha);
+        }
+
+        if (y != 0 && h > 0)
+            GL.drawSpriteAdditive(lasbse, x-6, y-8, alpha);
+
+        GL.drawSpriteAdditive(lasbsm, x-7, max-9, alpha);
+
+    } else {
+        
+        for (let i = y ; i <= max-4; i += 2) 
+        {
+            const a = (i + p * 4) / 16;
+            const xoff = Math.floor(
+                Math.cos(a) *
+                Math.min(6, (i - y)/4, (max-6-i)/4));
+            
+            if (i + 3 > y)
+                GL.drawSpriteAdditive(lasbml, x+2+xoff, i, alpha);
+        }
+
+        if (y != 0 && h > 0)
+            GL.drawSpriteAdditive(lasbme, x-2, y-8, alpha);
+
+        GL.drawSpriteAdditive(lasbmm, x-2, max-6, alpha);
+    }
+}
+
 // Render a shot and return the offset of the next shot
 function shotRender(ref: number): number {
 
     const off = shots[ref];
-    const x = shots[off+LEFT] >>3;
+    const x = shots[off+LEFT] >> 3;
     const y = shots[off+TOP] >> 3;
 
     const type = shots[off + TYPE];
-    if (type == SHOT_DEAD) {
+    if (type == SHOT_DEAD || 
+        type == SHOT_LASER ||
+        type == SHOT_LASERM ||
+        type == SHOT_INVISIBLE ||
+        type == SHOT_OLASER ||
+        type == SHOT_OLASERM) {
         // Nothing
+    } else if (type == SHOT_LASER_DEAD || type == SHOT_LASERM_DEAD) {
+        renderLaser(off);
     } else if (type == SHOT_BLASTER) {
         GL.drawSprite(blast, x, y)
     } else if (type == SHOT_ROCKET_MOVE || type == SHOT_OROCKET_MOVE) {
@@ -458,6 +531,22 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
 
     if (type == SHOT_BLADE_STAR) {
         return (32 - shots[off + TIMER]) >> 4;
+    }
+
+    if (type == SHOT_LASER || type == SHOT_LASERM) {
+        shots[off + HIT] = 1;
+        const top = shots[off + TOP];
+        if (top <= (ty + th)) {
+            shots[off + HEIGHT] -= (ty+th) - top;
+            shots[off + TOP] = ty+th;
+        }
+        return 0;
+    }
+
+    if (type == SHOT_LASER_DEAD || type == SHOT_LASERM_DEAD) {
+        shots[off + HIT] = 1;
+        shots[off + PARAM1] = 1;
+        return shots[off + PARAM2];
     }
  
     return 0;

@@ -914,8 +914,8 @@ export class Sweep extends Enemy {
 
     constructor(x: number, y: number, mode: Mode, params: number[]) {
         super(x, y - 1600, 
-            /* health */ mode == "n" ? 6 : 
-                         mode == "d" ? 7 : 8,
+            /* health */ mode == "n" ? 7 : 
+                         mode == "d" ? 8 : 9,
             mode,
             sweep[mode],
             mode == "n" ? S.esweepnh : 

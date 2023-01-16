@@ -23,6 +23,7 @@ type Player = {
     shooting: number
     muzzle_flash: number
     timer: number
+    laser_timer: number
     mousedown: number
     anim: number
     modules1: number
@@ -44,6 +45,7 @@ const pl : Player = {
     shooting: 0,
     muzzle_flash: 0,
     timer: 0,
+    laser_timer: 0,
     mousedown: 0,
     anim: 0,
     modules1: 0,
@@ -117,7 +119,31 @@ function shoot() {
                 Shot.add(s, x, y, w, h,  4);
                 Shot.add(s, x, y, w, h, -4);      
             }
-        }    
+        }
+        break;    
+    }
+    case Hud.ITEM_LASER: 
+    {
+        pl.cooldown = 1;
+        const x = pl.x, y = 0,
+              w = 60, h = pl.y + 16;
+        const s = Shot.SHOT_LASER;
+        const sm = Shot.SHOT_LASERM;
+        const d = stuff.offense != Hud.ITEM_SPEED ? 33 : 
+                  stuff.offense_overload ? 33 * 5 : 33 * 3;
+        const sh = (pl.distance >> 1) << 1;
+        Shot.add(s, x + 72, y, w, h, d, sh, pl.laser_timer);
+        if (stuff.offense == Hud.ITEM_MULTI) {
+            Shot.add(sm, x + 56 - 96, y, w, h, d, sh, pl.laser_timer);
+            Shot.add(sm, x + 56 + 96, y, w, h, d, sh, pl.laser_timer);
+            if (stuff.offense_overload) {  
+                Shot.add(sm, x + 56 - 64*3, y, w, h, d, sh, pl.laser_timer);
+                Shot.add(sm, x + 56 + 64*3, y, w, h, d, sh, pl.laser_timer);   
+            }
+        }
+
+        pl.laser_timer += stuff.offense != Hud.ITEM_SPEED ? 1 : 
+                          stuff.offense_overload ? 3 : 2;
     }
     }
 }

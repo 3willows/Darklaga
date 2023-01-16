@@ -169,7 +169,7 @@ export function onEnemyDeath(x: number, y: number) {
         add(x, y, BONUS_SHIELD);
     } else if (Math.random() < 1/16) {
         add(x, y, BONUS_SUPER);
-    } else if (Math.random() < 1/16) {
+    } else if (Math.random() < 1/2) {
         add(x, y, [BONUS_WO, BONUS_OO, BONUS_DO][Math.floor(Math.random() * 3)]);
     } else {
         add(x, y, [BONUS_MULTI, BONUS_ROCKETS, BONUS_SHIELD][Math.floor(Math.random() * 3)]);

@@ -12,9 +12,9 @@ import { Sweep } from "enemy.types"
 function render() {
     GL.startRender();
     Background.render();
+    Enemy.render();
     Shot.render();
     Pickup.render();
-    Enemy.render();
     Player.render();
     Dan.render();
     Hud.render();
@@ -25,8 +25,8 @@ function render() {
 const stepDurationMilliseconds = 16.666; 
 function step() {
     Background.step();
-    Shot.step();
     Enemy.step();
+    Shot.step();
     Player.step();
     Pickup.step();
     Hud.step();
