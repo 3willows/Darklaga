@@ -125,8 +125,8 @@ function shoot(stuff: Hud.Stuff) {
         pl.cooldown = 1;
         const x = pl.x, y = 0,
               w = 60, h = pl.y + 16;
-        const s = Shot.SHOT_LASER;
-        const sm = Shot.SHOT_LASERM;
+        const s = stuff.weapon_overload ? Shot.SHOT_OLASER : Shot.SHOT_LASER;
+        const sm = stuff.weapon_overload ? Shot.SHOT_OLASERM : Shot.SHOT_LASERM;
         const d = stuff.offense != Hud.ITEM_SPEED ? 33 : 
                   stuff.offense_overload ? 33 * 5 : 33 * 3;
         const sh = (pl.distance >> 1) << 1;

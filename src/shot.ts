@@ -1,5 +1,5 @@
 import { opts } from "options";
-import { blade, bladestar, bladet, blast, lasbme, lasbml, lasbmm, lasbse, lasbsl, lasbsm, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
+import { blade, bladestar, bladet, blast, lasbme, lasbml, lasbmm, lasbse, lasbsl, lasbsm, lasoml, lasomm, lasosl, lasosm, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
 import * as GL from "./webgl"
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -227,6 +227,34 @@ function shotStep(ref: number): boolean {
                type == SHOT_INVISIBLE) {
 
         shots[off + TYPE] = SHOT_DEAD;
+    } else if (type == SHOT_OLASER) {
+        shots[off + TYPE] = SHOT_OLASER_DEAD;
+        const x = shots[off + LEFT];
+        const y = shots[off + TOP] >> 3;
+        const h = shots[off + HEIGHT] >> 3;
+        const p0 = shots[off + PARAM0];
+        const p1 = shots[off + PARAM1];
+        let dec = 0;
+        for (let j = y; j < y + h; j += 3) dec += p1;
+        for (let i = y; i < y + h - 3; i += 36) {
+            let o = addRaw(SHOT_INVISIBLE, x - 32 + (dec>>2), i << 3, lasosl.w << 3, 36<<3, p0 << 3);
+            if (o >= 0) shots[o + HIT] = 1;
+            dec -= 12*p1;
+        }
+    } else if (type == SHOT_OLASERM) {
+        shots[off + TYPE] = SHOT_OLASERM_DEAD;
+        const x = shots[off + LEFT];
+        const y = shots[off + TOP] >> 3;
+        const h = shots[off + HEIGHT] >> 3;
+        const p0 = shots[off + PARAM0];
+        const p1 = shots[off + PARAM1];
+        let dec = 0;
+        for (let j = y; j < y + h; j += 3) dec += p1;
+        for (let i = y; i < y + h - 3; i += 54) {
+            let o = addRaw(SHOT_INVISIBLE, x - 32 + (dec>>2), i << 3, lasosm.w << 3, 54<<3, p0 << 2);
+            if (o >= 0) shots[o + HIT] = 1;
+            dec -= 18*p1;
+        }
     } else {
         throw "Unknown shot type"
     }
@@ -248,8 +276,10 @@ export function step() {
     // Traverse all live shots while updating them.
     let ref = 0;
     while (shots[ref] > 0)
-        if (shotStep(ref))
-            ref = shots[ref + NEXT]
+    {
+        const next = shots[ref + NEXT];
+        if (shotStep(ref)) ref = next;
+    }
 
     // Reset the target enemy ; it will be provided again on 
     // the next step if there are enemies.
@@ -258,6 +288,47 @@ export function step() {
 }
 
 // RENDERING =================================================================
+
+function renderOLaser(off: number) {
+
+    const t = shots[off + TYPE];
+    const x = shots[off + LEFT] >> 3;
+    const p1 = shots[off + PARAM1];
+    const p2 = shots[off + PARAM2];
+
+    let y = shots[off + TOP] >> 3;
+    const h = shots[off + HEIGHT] >> 3;
+    if (y < 0) y = 0;
+    const max = y + h;
+
+    let dec = 0;
+    for (let j = y - ((p2>>1)&3); j < max; j += 3)
+        dec += p1;
+
+    if (t == SHOT_OLASER_DEAD) {
+
+        for (let i = y - ((p2>>1)&3); i < max; i += 3) 
+        {
+            if (i+3 > y)
+                GL.drawSprite(lasosl, x-5+(dec>>5), i);
+            dec -= p1;
+        }
+
+        GL.drawSprite(lasosm, x-7, max-8);
+
+    } else {
+
+        for (let i = y - ((p2>>1)&3); i < max; i += 3) 
+        {
+            if (i+3 > y)
+                GL.drawSprite(lasoml, x+(dec>>5), i);
+            dec -= p1;
+        }
+
+        GL.drawSprite(lasomm, x-2, max-8);
+
+    }
+}
 
 function renderLaser(off: number) {
 
@@ -318,6 +389,7 @@ function shotRender(ref: number): number {
     const y = shots[off+TOP] >> 3;
 
     const type = shots[off + TYPE];
+    
     if (type == SHOT_DEAD || 
         type == SHOT_LASER ||
         type == SHOT_LASERM ||
@@ -327,6 +399,8 @@ function shotRender(ref: number): number {
         // Nothing
     } else if (type == SHOT_LASER_DEAD || type == SHOT_LASERM_DEAD) {
         renderLaser(off);
+    } else if (type == SHOT_OLASER_DEAD || type == SHOT_OLASERM_DEAD) {
+        renderOLaser(off);
     } else if (type == SHOT_BLASTER) {
         GL.drawSprite(blast, x, y)
     } else if (type == SHOT_ROCKET_MOVE || type == SHOT_OROCKET_MOVE) {
@@ -549,6 +623,11 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
         return shots[off + PARAM2];
     }
  
+    if (type == SHOT_INVISIBLE) {
+        shots[off + HIT] = 1;
+        return shots[off + PARAM0];
+    }
+
     return 0;
 }
 
