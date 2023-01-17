@@ -116,11 +116,28 @@ export function step() {
     if (hud.weapon_overload) hud.weapon_overload--;
     if (hud.offense_overload) hud.offense_overload--;
     if (hud.defense_overload) hud.defense_overload--;
+    hud.score += 1;
 }
 
 export function render() {
     GL.drawRect(0, 0, 240, 20, (hud.danger << 2) / 256, 0, 0, 1);
     GL.drawRect(0, 300, 240, 20, (hud.danger << 2) / 256, 0, 0, 1);
+
+    // score =================================================================
+
+    {
+        let txtscore = "P1 - " + hud.score.toFixed();
+        if (hud.score >= 1000) 
+            txtscore = txtscore.slice(0, txtscore.length - 3) +
+                       "." + 
+                       txtscore.slice(txtscore.length - 3);
+        if (hud.score >= 1000000) 
+            txtscore = txtscore.slice(0, txtscore.length - 7) +
+                       "." + 
+                       txtscore.slice(txtscore.length - 7);
+
+        GL.drawText(txtscore, S.font, S.texyellow, 4, 4, 1, 1);
+    }
 
     // items =================================================================
 

@@ -1,4 +1,4 @@
-import type { Sprite } from "./sprites"
+import { Sprite, texwhite } from "./sprites"
 
 // Global rendering context used by all methods in this module
 const gl : WebGLRenderingContext = (function() {
@@ -273,9 +273,9 @@ const spriteProgram = (function() {
     //  - the texture coordinates
     const vertexShader = compileShader(gl.VERTEX_SHADER, `
 attribute vec2 aVertexPosition;
-attribute vec2 aTexCoord;
+attribute vec4 aTexCoord;
 attribute vec2 aAlphas;
-varying highp vec2 vTexCoord;
+varying highp vec4 vTexCoord;
 varying highp vec2 vAlphas;
 void main() {
     gl_Position = vec4(
@@ -295,17 +295,18 @@ void main() {
     //   buffer * (1 - x) + sprite * y
     // For alpha-blending 'x = y' ; for additive-blending 'x = 0'.
     const pixelShader = compileShader(gl.FRAGMENT_SHADER, `
-varying highp vec2 vTexCoord;
+varying highp vec4 vTexCoord;
 varying highp vec2 vAlphas;
 uniform sampler2D uTexData;
 void main() {
-    lowp vec4 texColor = texture2D(uTexData, vTexCoord);
+    lowp vec4 texColor1 = texture2D(uTexData, vec2(vTexCoord.x, vTexCoord.y));
+    lowp vec4 texColor2 = texture2D(uTexData, vec2(vTexCoord.z, vTexCoord.w));
     // Pre-multiplied alpha
     gl_FragColor = vec4(
-        texColor.r * texColor.a * vAlphas.y,
-        texColor.g * texColor.a * vAlphas.y,
-        texColor.b * texColor.a * vAlphas.y,
-        texColor.a * vAlphas.x);
+        texColor1.r * texColor1.a * texColor2.r * vAlphas.y,
+        texColor1.g * texColor1.a * texColor2.g * vAlphas.y,
+        texColor1.b * texColor1.a * texColor2.b * vAlphas.y,
+        texColor1.a * vAlphas.x);
 }
 `);
 
@@ -387,16 +388,21 @@ const atlas = (function() {
 // 1000 sprites each.
 const maxSpriteData   = 12000;
 const spritePositions = new Float32Array(maxSpriteData);
-const spriteTextures  = new Float32Array(maxSpriteData);
+const spriteTextures  = new Float32Array(2*maxSpriteData);
 const spriteAlphas    = new Float32Array(maxSpriteData);
 let spritesBatched    = 0;
 
-function drawSpriteRaw(sprite: Sprite, x: number, y: number, srca: number, dsta: number, angle: number) {
+function drawSpriteRaw(
+    sprite: Sprite, 
+    mult: Sprite,
+    x: number, y: number,
+    srca: number, dsta: number, 
+    angle: number) {
 
     if (coloredBatched) drawBatchedColored();
 
     const {tt, tl, tr, tb, h, w} = sprite;
-
+    const {tt:mt, tl:ml, tr:mr, tb:mb} = mult;
 
     // A --- B
     // |     |
@@ -449,12 +455,18 @@ function drawSpriteRaw(sprite: Sprite, x: number, y: number, srca: number, dsta:
     spritePositions[spritesBatched +  4] = rdx;
     spritePositions[spritesBatched +  5] = rdy;
 
-    spriteTextures[spritesBatched +  0] = tl;
-    spriteTextures[spritesBatched +  1] = tt;
-    spriteTextures[spritesBatched +  2] = tr;
-    spriteTextures[spritesBatched +  3] = tb;
-    spriteTextures[spritesBatched +  4] = tl;
-    spriteTextures[spritesBatched +  5] = tb;
+    spriteTextures[2*spritesBatched +  0] = tl;
+    spriteTextures[2*spritesBatched +  1] = tt;
+    spriteTextures[2*spritesBatched +  2] = ml;
+    spriteTextures[2*spritesBatched +  3] = mt;
+    spriteTextures[2*spritesBatched +  4] = tr;
+    spriteTextures[2*spritesBatched +  5] = tb;
+    spriteTextures[2*spritesBatched +  6] = mr;
+    spriteTextures[2*spritesBatched +  7] = mb;
+    spriteTextures[2*spritesBatched +  8] = tl;
+    spriteTextures[2*spritesBatched +  9] = tb;
+    spriteTextures[2*spritesBatched + 10] = ml;
+    spriteTextures[2*spritesBatched + 11] = mb;
 
     // Second triangle
     spritePositions[spritesBatched +  6] = rax;
@@ -464,12 +476,18 @@ function drawSpriteRaw(sprite: Sprite, x: number, y: number, srca: number, dsta:
     spritePositions[spritesBatched + 10] = rbx;
     spritePositions[spritesBatched + 11] = rby;
     
-    spriteTextures[spritesBatched +  6] = tl;
-    spriteTextures[spritesBatched +  7] = tt;
-    spriteTextures[spritesBatched +  8] = tr;
-    spriteTextures[spritesBatched +  9] = tb;
-    spriteTextures[spritesBatched + 10] = tr;
-    spriteTextures[spritesBatched + 11] = tt;
+    spriteTextures[2*spritesBatched + 12] = tl;
+    spriteTextures[2*spritesBatched + 13] = tt;
+    spriteTextures[2*spritesBatched + 14] = ml;
+    spriteTextures[2*spritesBatched + 15] = mt;
+    spriteTextures[2*spritesBatched + 16] = tr;
+    spriteTextures[2*spritesBatched + 17] = tb;
+    spriteTextures[2*spritesBatched + 18] = mr;
+    spriteTextures[2*spritesBatched + 19] = mb;
+    spriteTextures[2*spritesBatched + 20] = tr;
+    spriteTextures[2*spritesBatched + 21] = tt;
+    spriteTextures[2*spritesBatched + 22] = mr;
+    spriteTextures[2*spritesBatched + 23] = mt;
 
     // Additional alpha channels
     for (let i = 0; i < 12; i += 2) {
@@ -481,11 +499,11 @@ function drawSpriteRaw(sprite: Sprite, x: number, y: number, srca: number, dsta:
 }
 
 export function drawSprite(sprite: Sprite, x: number, y: number) {
-    drawSpriteRaw(sprite, x, y, 1, 1, 0)
+    drawSpriteRaw(sprite, texwhite, x, y, 1, 1, 0)
 }
 
 export function drawSpriteAngle(sprite: Sprite, x: number, y: number, angle: number) {
-    drawSpriteRaw(sprite, x, y, 1, 1, angle)
+    drawSpriteRaw(sprite, texwhite, x, y, 1, 1, angle)
 }
 
 // Draw all sprites accumulated into the current batch 
@@ -515,10 +533,10 @@ function drawBatchedSprites() {
 
     gl.bufferData(
         gl.ARRAY_BUFFER, 
-        spriteTextures.subarray(0, spritesBatched), 
+        spriteTextures.subarray(0, 2*spritesBatched), 
         gl.STATIC_DRAW);
 
-    statBytes += spritesBatched * 4;
+    statBytes += spritesBatched * 8;
 
     // Allocate and fill alphas buffer
     const alphasBuf = gl.createBuffer();
@@ -550,7 +568,7 @@ function drawBatchedSprites() {
     gl.bindBuffer(gl.ARRAY_BUFFER, texturesBuf);
     gl.vertexAttribPointer(
         spriteProgram.attribLocations.texCoord,
-        /* size */ 2,
+        /* size */ 4,
         /* type */ gl.FLOAT,
         /* normalize */ false,
         /* stride */ 0,
@@ -593,12 +611,65 @@ function drawBatchedSprites() {
 
 // mul is 0..32
 export function drawSpriteAdditive(sprite: Sprite, x: number, y: number, mul: number) {
-    drawSpriteRaw(sprite, x, y, (mul / 32), 0, 0);
+    drawSpriteRaw(sprite, texwhite, x, y, (mul / 32), 0, 0);
 }
 
 // mul is 0..32
 export function drawSpriteAlpha(sprite: Sprite, x: number, y: number, mul: number) {
-    drawSpriteRaw(sprite, x, y, (mul / 32), (mul / 32), 0);
+    drawSpriteRaw(sprite, texwhite, x, y, (mul / 32), (mul / 32), 0);
+}
+
+// Use 'fontmap[s.charCodeAt(i)]' to get the sprite for character i. 
+const fontmap = (function(){
+    const s = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}'
+    const a : number[] = [];
+    for (let i = 0; i < s.length; ++i)
+        a[s.charCodeAt(i)] = i;
+    return a;
+}());
+
+export function drawText(
+    text: string, 
+    font: Sprite[], 
+    texture: Sprite, 
+    x: number, 
+    y: number, 
+    srca: number, 
+    dsta: number)
+{
+    const tpw = (texture.tr-texture.tl)/texture.w;
+    const tph = (texture.tb-texture.tt)/texture.h;
+
+    // Mutable texture used to pass in the actual values.
+    let tex = {
+        tl: texture.tl,
+        tr: 0,
+        tt: texture.tt,
+        tb: 0,
+        w: 0,
+        h: 0
+    }
+
+    for (let i = 0; i < text.length; ++i) {
+        
+        const s = fontmap[text.charCodeAt(i)];
+        
+        if (typeof s !== "number") {
+            // For unknown characters (including whitespace), 
+            // skip ahead by width of '-' character 
+            x += font[45].w - 1; 
+            continue;     
+        }
+
+        const letter = font[s];
+        
+        tex.tr = letter.w >= texture.w ? texture.tr : texture.tl + tpw * letter.w;
+        tex.tb = letter.h >= texture.h ? texture.tb : texture.tt + tph * letter.h;
+        
+        drawSpriteRaw(letter, tex, x, y, srca, dsta, 0);
+        
+        x += letter.w - 1;
+    }
 }
 
 // GENERAL ===================================================================
