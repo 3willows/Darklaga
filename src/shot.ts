@@ -620,7 +620,7 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
     if (type == SHOT_LASER_DEAD || type == SHOT_LASERM_DEAD) {
         shots[off + HIT] = 1;
         shots[off + PARAM1] = 1;
-        return shots[off + PARAM2];
+        return shots[off + PARAM0];
     }
  
     if (type == SHOT_INVISIBLE) {
