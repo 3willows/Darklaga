@@ -94,14 +94,16 @@ const items = [
     [S.id, S.id, S.id, S.id],
 ]
 
-export function stuff() : { 
+export type Stuff = {
     readonly weapon: number
     readonly weapon_overload: number
     readonly offense: number
     readonly offense_overload: number
     readonly defense: number
     readonly defense_overload: number
-} {
+}
+
+export function stuff() : Stuff {
     return hud;
 }
 

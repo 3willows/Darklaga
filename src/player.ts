@@ -53,9 +53,7 @@ const pl : Player = {
     distance: 0
 }
 
-function shoot() {
-
-    const stuff = Hud.stuff();
+function shoot(stuff: Hud.Stuff) {
 
     switch (stuff.weapon) {
     case Hud.ITEM_WNONE:
@@ -232,13 +230,41 @@ export function step() {
     if (pl.shooting) --pl.shooting;
     if (pl.muzzle_flash) --pl.muzzle_flash;
 
+    const stuff = Hud.stuff();
+
     if (pl.controllable && !pl.cooldown && (opts.ModAutoFire || pl.shooting))
-        shoot()
+        shoot(stuff)
+
+    // Laser
+
+    if (pl.modules1) pl.modules1--;
+    if (pl.modules2) pl.modules2--;
+
+    if (stuff.weapon == Hud.ITEM_LASER &&
+        stuff.offense == Hud.ITEM_MULTI) {
+        pl.modules1 = Math.min(128, 16 + pl.modules1);
+        if (stuff.offense_overload) {
+            pl.modules2 = Math.min(128, 16 + pl.modules2);
+        }
+    }
+
+
 }
 
 export function render() {
     
-    const {x, y, distance, muzzle_flash} = pl;
+    const {x, y, distance, muzzle_flash, modules1, modules2} = pl;
+
+    if (modules1) {
+        GL.drawSprite(S.lasmod, (x + 56 - ((modules1*6)>>3))>>3, (y >> 3) + 8 - (modules1>>4));
+        GL.drawSprite(S.lasmod, (x + 56 + ((modules1*6)>>3))>>3, (y >> 3) + 8 - (modules1>>4));
+    }
+        
+    if (modules2) {
+        GL.drawSprite(S.lasmod, (x + 56 - ((modules2*12)>>3))>>3, (y >> 3) + 10 - (modules2>>4));
+        GL.drawSprite(S.lasmod, (x + 56 + ((modules2*12)>>3))>>3, (y >> 3) + 10 - (modules2>>4));
+    }
+
     const frame = S.player[distance < -10 ? 0 :
                            distance < 0 ? 1 : 
                            distance == 0 ? 2 : 
