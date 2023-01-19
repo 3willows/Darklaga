@@ -2,6 +2,7 @@ export const opts = {
 
     UseVertical: true,
 
+    UseScore: true,
     UseCombo: true,
 
     // New-school graphics

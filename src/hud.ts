@@ -123,7 +123,15 @@ export function step() {
     if (hud.weapon_overload) hud.weapon_overload--;
     if (hud.offense_overload) hud.offense_overload--;
     if (hud.defense_overload) hud.defense_overload--;
-    hud.score += 1;
+    
+    if (opts.UseScore) {
+        
+        if (hud.real_score > hud.score) {
+            const delta = hud.real_score - hud.score;
+            const add = Math.max(1, Math.floor(delta / 8));
+            hud.score += add;
+        }
+    }
 
     if (opts.UseCombo) {
         if (hud.combo > 1 && hasTarget() && hud.combo_timer-- <= 1) {
@@ -135,6 +143,34 @@ export function step() {
     }
 }
 
+// Compute the current score multiplier
+function multiplier() {
+
+    let multiplier = 1;
+    if (opts.UseCombo) multiplier *= hud.combo;
+    if (hud.offense == ITEM_OFFP)
+        if (hud.offense_overload) multiplier *= 5;
+        else multiplier *= 2;
+    if (hud.defense == ITEM_DEFP)
+        if (hud.defense_overload) multiplier *= 5;
+        else multiplier *= 2;
+
+    return multiplier;
+}
+
+function addScore(
+    x: number, 
+    y: number, 
+    value: number, 
+    log_value: number)
+{
+    if (opts.UseNewSchool) {
+        hud.real_score += value * log_value * multiplier();
+    } else {
+        hud.real_score += (2 * log_value - 10) * 50;
+    }
+}
+
 // Invoked when an enemy dies
 export function onEnemyDeath(
     x: number, 
@@ -142,6 +178,8 @@ export function onEnemyDeath(
     value: number, 
     log_value: number)
 {
+    addScore(x, y, value, log_value)
+
     if (opts.UseCombo) {
         hud.combo_timer = COMBO_DELAY;
         hud.combo++;
@@ -201,6 +239,18 @@ export function render() {
             GL.drawText(comboscore, S.font, 
                 S.texcombo[(hud.fire_timer >> 2) % S.texcombo.length],
                 170, 4, alpha, alpha);
+        }
+    }
+
+    // multiplier ============================================================
+
+    if (opts.UseScore) {
+        const mul = multiplier();
+        if (mul > 1) {
+            const str = "x " + mul.toFixed();
+            const tex = mul < 1000 ? S.texgreen : 
+                        mul < 5000 ? S.texyellow : S.texred;
+            GL.drawText(str, S.font, tex, 100, 4, 1, 1);
         }
     }
 
