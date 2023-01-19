@@ -3,6 +3,7 @@ import * as Shot from "./shot";
 import * as GL from "./webgl";
 import * as Pickups from "./pickup"
 import { opts } from "options";
+import * as Hud from "hud";
 
 export type Mode = "n"|"v"|"d"
 
@@ -56,6 +57,7 @@ export class Enemy {
                 if (this.flash <= 30) this.flash = 34; 
                 if ((this.health -= dmg) <= 0) {
                     Pickups.onEnemyDeath(this.x, this.y);
+                    Hud.onEnemyDeath(this.x, this.y, 1, this.basehealth);
                     return new Dying(this.x, this.y, this.hit, this.mode);
                 }
             }

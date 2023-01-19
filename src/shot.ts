@@ -640,6 +640,11 @@ export function setTarget(x: number, y: number) {
     ty = y;
 }
 
+// True if there is currently a valid target on the field.
+export function hasTarget() {
+    return tx != 0 || ty != 0;
+}
+
 // Return the damage amount if at least one shot intersects the rectangle, or
 // zero if no shots intersect it. 
 // Triggers enemy-hit behavior for colliding shots (which usually causes the shot

@@ -26,10 +26,10 @@ const stepDurationMilliseconds = 16.666;
 function step() {
     Background.step();
     Enemy.step();
+    Hud.step();
     Shot.step();
     Player.step();
     Pickup.step();
-    Hud.step();
     Dan.step();
 
     if (Enemy.count() == 0) {        

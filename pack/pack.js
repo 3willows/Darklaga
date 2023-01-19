@@ -124,7 +124,7 @@ async function tryPackSlow(images, side) {
     }
 
     atlas = atlas.composite(composites)
-        .png({compressionLevel: 9, palette: true});
+        .png({compressionLevel: 9, palette: false});
 
     return [bindings, await atlas.toBuffer()];
 }

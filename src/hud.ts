@@ -1,5 +1,7 @@
 import * as GL from "./webgl"
 import * as S from "./sprites"
+import { opts } from "options"
+import { hasTarget } from "shot"
 
 export const ITEM_LASER = 0
 export const ITEM_ROCKETS = 1
@@ -13,6 +15,8 @@ export const ITEM_DEFP = 8
 export const ITEM_WNONE = 9
 export const ITEM_ONONE = 10
 export const ITEM_DNONE = 11
+
+const COMBO_DELAY = 170
 
 type Hud = {
     score: number
@@ -28,6 +32,7 @@ type Hud = {
     combo_timer: number
     lives: number
     combo_fade: number
+    combo_fade_value: number
 
     weapon: number
     weapon_overload: number
@@ -57,9 +62,10 @@ function empty() : Hud {
         frenzy_progress: 0,
         displayed_frenzy: 0,
         combo: 1,
-        combo_timer: 0,
+        combo_timer: COMBO_DELAY,
         lives: 3,
         combo_fade: 0,
+        combo_fade_value: 1,
         weapon: ITEM_LASER,
         weapon_overload: 0,
         offense: ITEM_ONONE,
@@ -113,10 +119,33 @@ export function hasItem(item: number) {
 
 export function step() {
     hud.timer++;
+    hud.fire_timer++;
     if (hud.weapon_overload) hud.weapon_overload--;
     if (hud.offense_overload) hud.offense_overload--;
     if (hud.defense_overload) hud.defense_overload--;
     hud.score += 1;
+
+    if (opts.UseCombo) {
+        if (hud.combo > 1 && hasTarget() && hud.combo_timer-- <= 1) {
+            hud.combo_fade_value = hud.combo;
+            hud.combo_fade = 128;
+            hud.combo = 1;
+        }
+        if (hud.combo_fade > 0) hud.combo_fade--;
+    }
+}
+
+// Invoked when an enemy dies
+export function onEnemyDeath(
+    x: number, 
+    y: number, 
+    value: number, 
+    log_value: number)
+{
+    if (opts.UseCombo) {
+        hud.combo_timer = COMBO_DELAY;
+        hud.combo++;
+    }    
 }
 
 export function render() {
@@ -137,6 +166,42 @@ export function render() {
                        txtscore.slice(txtscore.length - 7);
 
         GL.drawText(txtscore, S.font, S.texyellow, 4, 4, 1, 1);
+    }
+
+    // combo =================================================================
+
+    if (true || opts.UseCombo) {
+
+        if (hud.combo > 2) {
+
+            const combow = Math.floor(S.combo.w * hud.combo_timer / COMBO_DELAY);
+            const combor = S.combo.tl + (S.combo.tr - S.combo.tl) / S.combo.w * combow;
+            const combo = {
+                tl: S.combo.tl,
+                tr: combor,
+                tt: S.combo.tt,
+                tb: S.combo.tb,
+                w: combow,
+                h: S.combo.h
+            };
+
+            GL.drawSprite(combo, 165, 3);
+
+            const comboscore = "COMBO x" + (hud.combo - 1).toFixed();
+
+            GL.drawText(comboscore, S.font, 
+                S.texcombo[(hud.fire_timer >> 2) % S.texcombo.length],
+                170, 4, 1, 1);
+
+        } else if ((hud.combo_fade > 0) && (hud.combo_fade_value > 2)) {
+
+            const comboscore = "COMBO x" + (hud.combo_fade_value - 1).toFixed();
+            const alpha = hud.combo_fade/128;
+
+            GL.drawText(comboscore, S.font, 
+                S.texcombo[(hud.fire_timer >> 2) % S.texcombo.length],
+                170, 4, alpha, alpha);
+        }
     }
 
     // items =================================================================
