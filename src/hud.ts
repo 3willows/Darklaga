@@ -17,6 +17,7 @@ export const ITEM_ONONE = 10
 export const ITEM_DNONE = 11
 
 const COMBO_DELAY = 170
+const GRAZE_DELAY = 170
 
 type Hud = {
     score: number
@@ -34,6 +35,10 @@ type Hud = {
     combo_fade: number
     combo_fade_value: number
 
+    graze: number,
+    graze_anim: number,
+    graze_timer: number,
+
     weapon: number
     weapon_overload: number
 
@@ -48,6 +53,9 @@ type Hud = {
     danger: number
     fire_timer: number
     tatk_lost_lives: number
+
+    player_x: number,
+    player_y: number
 }
 
 function empty() : Hud {
@@ -59,6 +67,9 @@ function empty() : Hud {
         frl1: 0,
         frl2: 0,
         frl3: 0,
+        graze: 1,
+        graze_anim: 0,
+        graze_timer: 0,
         frenzy_progress: 0,
         displayed_frenzy: 0,
         combo: 1,
@@ -77,6 +88,8 @@ function empty() : Hud {
         danger: 0,
         fire_timer: 0,
         tatk_lost_lives: 0,
+        player_x: 0,
+        player_y: 0
     }
 }
 
@@ -113,6 +126,11 @@ export function stuff() : Stuff {
     return hud;
 }
 
+export function setPlayer(x: number, y: number) {
+    hud.player_x = x;
+    hud.player_y = y;
+}
+
 export function hasItem(item: number) {
     return item == hud.weapon || item == hud.offense || item == hud.defense;
 }
@@ -140,6 +158,19 @@ export function step() {
             hud.combo = 1;
         }
         if (hud.combo_fade > 0) hud.combo_fade--;
+    }
+
+    if (opts.UseGraze) {
+
+        hud.graze_anim = hud.graze_anim == 0 
+            ? GRAZE_DELAY 
+            : hud.graze_anim - 1
+
+        if (hud.graze > 1) {
+        }   
+
+        // If disrupted, slowly time out.
+        if (hud.graze < 0 && hud.graze_timer-- <= 1) hud.graze = 0;
     }
 }
 
@@ -208,7 +239,7 @@ export function render() {
 
     // combo =================================================================
 
-    if (true || opts.UseCombo) {
+    if (opts.UseCombo) {
 
         if (hud.combo > 2) {
 
@@ -251,6 +282,39 @@ export function render() {
             const tex = mul < 1000 ? S.texgreen : 
                         mul < 5000 ? S.texyellow : S.texred;
             GL.drawText(str, S.font, tex, 100, 4, 1, 1);
+        }
+    }
+
+    // graze =================================================================
+
+    if (opts.UseGraze) {
+        const x = (hud.player_x + 96) >> 3;
+        const y = (hud.player_y - 32) >> 3;
+        if (hud.graze < 0) {
+            const alpha = hud.graze_timer/128;
+            GL.drawText("Disrupted", S.font, S.texred, x + 2, y - 2, 0, alpha);
+        } else if (hud.graze > 0) {
+            const anim = hud.graze_anim;
+            const t = anim + 16 - GRAZE_DELAY;
+            const txt = "x" + hud.graze.toFixed();
+            const tex = S.texgraze[(anim >> 2) % S.texgraze.length];
+            if (t <= 0) {
+                GL.drawText("Graze", S.mini, tex, x+3, y-3, 1, 0);
+                GL.drawText(txt, S.font, tex, x+27, y-2, 1, 0);
+            } else {
+                GL.drawText("Graze", S.mini, tex, x+3, y-3, 1, 0);
+                if (hud.graze == 1) {
+                    GL.drawText("Graze", S.mini, tex, x+3 + (t << 1), y-3, t/16, 0);
+                    GL.drawText("Graze", S.mini, tex, x+3 - (t << 1), y-3, t/16, 0);
+                }
+                GL.drawText(txt, S.font, tex, x+27, y-2, 1, 0);
+                GL.drawText(txt, S.font, tex, x+27 + (t << 1), y-2, t/16, 0);
+                GL.drawText(txt, S.font, tex, x+27 - (t << 1), y-2, t/16, 0);
+            }
+            if (opts.UseScore) {
+                const score = "+" + (53 * hud.graze - 52).toFixed();
+                GL.drawText(score, S.mini, S.texyellow, x + 3, y + 4, 1, 0);
+            }
         }
     }
 

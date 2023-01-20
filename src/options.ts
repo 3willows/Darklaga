@@ -2,6 +2,7 @@ export const opts = {
 
     UseVertical: true,
 
+    UseGraze: true,
     UseScore: true,
     UseCombo: true,
 

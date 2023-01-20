@@ -224,6 +224,8 @@ export function step() {
         pl.y_speed *= bounce;
     }
 
+    Hud.setPlayer(pl.x + 88, pl.y + 88);
+
     // Shots
 
     if (pl.cooldown) --pl.cooldown;
