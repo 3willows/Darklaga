@@ -1,5 +1,6 @@
 import * as GL from "./webgl"
 import * as S from "./sprites"
+import * as Float from "./float"
 import { opts } from "options"
 import { hasTarget } from "shot"
 
@@ -211,6 +212,7 @@ function addScoreBonus(
 ) {
     if (opts.UseScore) {
         hud.real_score += value;
+        Float.add(x, y, value);
     }
 }
 
@@ -220,11 +222,14 @@ function addScore(
     value: number, 
     log_value: number)
 {
+    let added : number;
     if (opts.UseNewSchool) {
-        hud.real_score += value * log_value * multiplier();
+        hud.real_score += (added = value * log_value * multiplier());
     } else {
-        hud.real_score += (2 * log_value - 10) * 50;
+        hud.real_score += (added = (2 * log_value - 10) * 50);
     }
+
+    Float.add(x, y, added);
 }
 
 // Invoked when an enemy dies

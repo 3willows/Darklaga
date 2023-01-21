@@ -6,6 +6,7 @@ import * as Enemy from "./enemy"
 import * as Dan from "./dan"
 import * as Pickup from "./pickup"
 import * as Hud from "./hud"
+import * as Float from "./float"
 import { Tank } from "enemy.types"
 
 // Rendering happens every time requestAnimationFrame() triggers.
@@ -18,6 +19,7 @@ function render() {
     Player.render();
     Dan.render();
     Hud.render();
+    Float.render();
     GL.endRender();
 }
 
@@ -31,6 +33,7 @@ function step() {
     Player.step();
     Pickup.step();
     Dan.step();
+    Float.step();
 
     if (Enemy.count() == 0) {        
         for (var i = 0; i < 6; ++i) {
