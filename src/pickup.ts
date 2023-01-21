@@ -3,6 +3,7 @@ import * as S from "./sprites"
 import * as Hud from "./hud"
 import * as Player from "./player"
 import * as GL from "./webgl"
+import * as Float from "./float"
 
 type Pickups = {
     timer: number
@@ -161,6 +162,9 @@ export function onEnemyDeath(x: number, y: number) {
     if (!pickups.did_offense) {
         pickups.did_offense = true;
         add(x, y, BONUS_MULTI);
+        if (opts.UseTourist) {
+            Float.addInfo(S.imulti[0], ["Equipment. Touch it to pick it up."])
+        }
     } else if (!pickups.did_weapon) {
         pickups.did_weapon = true;
         add(x, y, BONUS_ROCKETS);

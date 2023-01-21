@@ -366,30 +366,88 @@ export function render() {
 export function pickup(pickup: number) {
     switch (pickup) {
         case ITEM_ROCKETS: 
+            if (opts.UseTourist)
+                Float.addInfo(S.irocket[0], [
+                    "Rockets equipment. Low damage, good fire rate,",
+                    "slow projectiles."
+                ])
+            hud.weapon = pickup;
+            return;
         case ITEM_BLADES: 
+            if (opts.UseTourist)
+                Float.addInfo(S.iblade[0], [
+                    "Blade equipment. Wide spray, slow fire rate,",
+                    "bouncing projectiles"
+                ])
+            hud.weapon = pickup;
+            return;
         case ITEM_LASER: 
+            if (opts.UseTourist)
+                Float.addInfo(S.ilaser[0], [
+                    "Laser equipment. High damage, narrow spray,",
+                    "instant hit."
+                ])
             hud.weapon = pickup; 
             return;
-        case ITEM_MULTI: 
+        case ITEM_MULTI:
+            if (opts.UseTourist)
+                Float.addInfo(S.imulti[0], [
+                    "Multi-shot equipment. Widens weapon spray."
+                ])
+            hud.offense = pickup; 
+            return;
         case ITEM_SPEED: 
+            if (opts.UseTourist)
+                Float.addInfo(S.ispeed[0], [
+                    "Fire rate equipment. Increases weapon fire rate."
+                ])
+            hud.offense = pickup; 
+            return;
         case ITEM_OFFP: 
+            if (opts.UseTourist)
+                Float.addInfo(S.ioplus[0], [
+                    "Bonus equipment. Increases score multiplier."
+                ])
             hud.offense = pickup; 
             return;
         case ITEM_SHIELD:
+            if (opts.UseTourist)
+                Float.addInfo(S.ishield[0], [
+                    "Shield equipment. Protects from enemy ships,",
+                    "but not from enemy fire."
+                ])
+            hud.defense = pickup;
+            return;
         case ITEM_FURY:
+            if (opts.UseTourist)
+                Float.addInfo(S.ifury[0], [
+                    "Fury equipment. Fury bar fills faster."
+                ])
+            hud.defense = pickup;
+            return;
         case ITEM_DEFP:
+            if (opts.UseTourist)
+                Float.addInfo(S.idplus[0], [
+                    "Bonus equipment. Increases score,",
+                    "but you cannot gain lives."
+                ])
             hud.defense = pickup;
             return;
         case ITEM_WNONE: 
+        if (opts.UseTourist)
+            Float.addInfo(S.iwover[0], ["Overload! Temporary equipment enhancer."])
             hud.weapon_overload += 100;
             return;
         case ITEM_ONONE: 
+            Float.addInfo(S.ioover[0], ["Overload! Temporary equipment enhancer."])
             hud.offense_overload += 100;
             return;
         case ITEM_DNONE:
+            Float.addInfo(S.idover[0], ["Overload! Temporary equipment enhancer."])
             hud.defense_overload += 100;
             return;
-        default:
+        default:            
+            Float.addInfo(S.iwover[0], ["Overload! Temporary equipment enhancer."])
             hud.weapon_overload += 100;
             hud.offense_overload += 100;
             hud.defense_overload += 100;

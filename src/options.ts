@@ -1,7 +1,10 @@
 export const opts = {
 
-    UseVertical: true,
+    // Display helper messages.
+    UseTourist: true,
 
+    UseVertical: true,
+    
     UseGraze: true,
     UseScore: true,
     UseCombo: true,
