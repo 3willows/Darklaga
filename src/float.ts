@@ -9,7 +9,7 @@ type Float = {
     timer: number
     value: number
     text: readonly string[]
-    sprite?: S.Sprite
+    sprite?: readonly S.Sprite[]
 }
 
 const fl : Float[] = []
@@ -26,6 +26,11 @@ function stepInfo(this: Float) {
     const t = ++this.timer;
     if (t <= 16) this.x = 4 + (16-t) * 15;
     return t < 184; 
+}
+
+function stepGraze(this: Float) {
+    const t = ++this.timer;
+    return t < 32;
 }
 
 export function step() {
@@ -53,8 +58,9 @@ function renderInfo(this: Float) {
     let y = this.y >> 3;
     
     if (this.sprite) {
-        GL.drawSpriteAlpha(this.sprite, x, y, a*32);
-        x += this.sprite.w;
+        const s = this.sprite[(this.timer >> 4) % this.sprite.length];
+        GL.drawSpriteAlpha(s, x, y, a*32);
+        x += s.w;
     }
 
     x += 2;
@@ -63,6 +69,14 @@ function renderInfo(this: Float) {
     for (let line of this.text) {
         GL.drawText(line, S.mini, S.texwhite, x, y, a, a);
         y += 8;
+    }
+}
+
+function renderGraze(this: Float) {
+    const a = (32 - this.timer)/2;
+    if (this.sprite) {
+        const s = this.sprite[(10 * this.timer) >> 5];
+        GL.drawSpriteAdditive(s, this.x >> 3, this.y >> 3, a);
     }
 }
 
@@ -83,7 +97,7 @@ export function add(x: number, y: number, value: number) {
 }
 
 export function addInfo(
-    sprite: S.Sprite,
+    sprite: S.Sprite[],
     text: string[]) 
 {
     fl.push({
@@ -97,3 +111,14 @@ export function addInfo(
         step: stepInfo
     })
 }
+
+export function addGraze(x: number, y: number, sprite: readonly S.Sprite[]) {
+    fl.push({
+        x, y, sprite, 
+        value: 0, 
+        timer: 0,
+        text: [],
+        render: renderGraze,
+        step: stepGraze
+    })
+} 

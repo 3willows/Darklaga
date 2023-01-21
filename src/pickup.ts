@@ -163,7 +163,7 @@ export function onEnemyDeath(x: number, y: number) {
         pickups.did_offense = true;
         add(x, y, BONUS_MULTI);
         if (opts.UseTourist) {
-            Float.addInfo(S.imulti[0], ["Equipment. Touch it to pick it up."])
+            Float.addInfo(S.imulti, ["Equipment. Touch it to pick it up."])
         }
     } else if (!pickups.did_weapon) {
         pickups.did_weapon = true;
