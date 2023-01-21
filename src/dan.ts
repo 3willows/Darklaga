@@ -4,6 +4,7 @@
 import * as S from "./sprites"
 import * as GL from "./webgl"
 import * as Player from "./player"
+import * as Hud from "./hud"
 import { Mode } from "enemy";
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -128,18 +129,34 @@ dan[2 + (maxDanAmount - 1) * danSize + NEXT] = -1;
 // Logic step for the shot referenced by the cell at position
 // 'ref'. Returns true if the shot survives the step, false
 // if it needs to be removed. 
-function danStep(ref: number) {
+function danStep(ref: number, px: number, py: number) {
     const off = dan[ref];
 
-    if (dan[off + DIE] < 64) 
-        if(--dan[off + DIE] <= 0)
-            return false;
-    
-    // TODO: graze
+    const dying = dan[off + DIE] < 64;
+    if (dying && --dan[off + DIE] <= 0)
+        return false;
 
     const type = dan[off + TYPE];
     if (type == DAN_DEAD) 
         return false;
+        
+    // Graze and collision 
+    const ix = dan[off + LEFT];
+    if (Math.abs(ix - px) <= 176) {
+        const iy = dan[off + TOP];
+        if (Math.abs(iy - py) <= 176) {
+            // We are touching the player sprite! 
+            if (Math.abs(ix - px) <= 16 && Math.abs(iy - py) <= 16) {
+                // Touch the player center: it's a hit !
+                Hud.playerHit()
+                return false;
+            }
+            if (dan[off + GRAZE] == 0) { 
+                dan[off + GRAZE] = 1;
+                Hud.graze(ix, iy);
+            }
+        }
+    }
 
     if (type == DAN_STD) {
         
@@ -158,11 +175,8 @@ function danStep(ref: number) {
         ++dan[off + ANIM];
         const timer = (dan[off + TIMER] += 4);
         if (timer >= 128) {
-            const pp = Player.pos();
-            const x = pp.x + 80;
-            const y = pp.y + 80;
-            const dx = x - dan[off + LEFT];
-            const dy = y - dan[off + TOP];
+            const dx = px - dan[off + LEFT];
+            const dy = py - dan[off + TOP];
             const norm = Math.sqrt(dx * dx + dy * dy);
             dan[off + PARAM0] = Math.floor(dan[off + PARAM2] * dx / norm);
             dan[off + PARAM1] = Math.floor(dan[off + PARAM2] * dy / norm);
@@ -234,11 +248,8 @@ function danStep(ref: number) {
         const maxSpeed = 1 << 6;
         
         // Shift direction towards player
-        const pp = Player.pos();
-        const x = pp.x + 80;
-        const y = pp.y + 80;
-        const dx = x - dan[off + LEFT];
-        const dy = y - dan[off + TOP];
+        const dx = px - dan[off + LEFT];
+        const dy = py - dan[off + TOP];
         const dux = (type == DAN_CARN ? 1 : 2) * (dx > 0 ? 1 : dx < 0 ? -1 : 0);
         const duy = (type == DAN_CARN ? 1 : 2) * (dy > 0 ? 1 : dy < 0 ? -1 : 0);
 
@@ -272,10 +283,14 @@ function danStep(ref: number) {
 
 
 export function step() {
+
+    const pp = Player.pos();
+    const px = pp.x + 88;
+    const py = pp.y + 88;
     // Traverse all live shots while updating them.
     let ref = 0;
     while (dan[ref] > 0) {
-        if (danStep(ref)) {
+        if (danStep(ref, px, py)) {
             ref = dan[ref] + NEXT
         } else {
             // Remove shot
@@ -358,18 +373,19 @@ function add(s: {
 
     const sprite = typeof s.sprite == "string" ? spriteByName[s.sprite] : s.sprite;
     dan[off + TYPE] = s.type;
+    dan[off + PARAM0] = s.p0 || 0;
+    dan[off + PARAM1] = s.p1 || 0;
+    dan[off + PARAM2] = s.p2 || 0;
+    dan[off + PARAM3] = s.p3 || 0;
+    dan[off + GRAZE] = 0;
     dan[off + SPRITE] = sprite;
     dan[off + LEFT] = s.x;
     dan[off + TOP] = s.y;
     dan[off + WIDTH] = sprites[sprite][0].w;
     dan[off + HEIGHT] = sprites[sprite][0].h;
-    dan[off + PARAM0] = s.p0 || 0;
-    dan[off + PARAM1] = s.p1 || 0;
-    dan[off + PARAM2] = s.p2 || 0;
-    dan[off + PARAM3] = s.p3 || 0;
-    dan[off + DIE] = s.life;
     dan[off + TIMER] = 0;
     dan[off + ANIM] = 0;
+    dan[off + DIE] = s.life;
 
     return true;
 }

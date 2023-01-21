@@ -163,10 +163,25 @@ export function step() {
     if (opts.UseGraze) {
 
         hud.graze_anim = hud.graze_anim == 0 
-            ? GRAZE_DELAY 
+            ? 16 
             : hud.graze_anim - 1
 
         if (hud.graze > 1) {
+            
+            if (hasTarget() && hud.graze_timer-- <= 1) {
+                addScoreBonus(hud.player_x, hud.player_y, 53*hud.graze - 52);
+                hud.graze = 0;
+            }
+
+            if (hud.graze > 20 && (hasTarget() || 
+                                    !hud.weapon_overload || 
+                                    !hud.defense_overload || 
+                                    !hud.offense_overload)) 
+            {
+                ++hud.weapon_overload;
+                ++hud.offense_overload;
+                ++hud.defense_overload;
+            }
         }   
 
         // If disrupted, slowly time out.
@@ -187,6 +202,16 @@ function multiplier() {
         else multiplier *= 2;
 
     return multiplier;
+}
+
+function addScoreBonus(
+    x: number, 
+    y: number, 
+    value: number 
+) {
+    if (opts.UseScore) {
+        hud.real_score += value;
+    }
 }
 
 function addScore(
@@ -364,4 +389,13 @@ export function pickup(pickup: number) {
             hud.offense_overload += 100;
             hud.defense_overload += 100;
     }
+}
+
+export function playerHit() {}
+
+export function graze(x: number, y: number) {
+
+    const g = ++hud.graze;
+    hud.graze_timer = Math.max(1, GRAZE_DELAY - (3 * g));
+    hud.graze_anim = GRAZE_DELAY;
 }
