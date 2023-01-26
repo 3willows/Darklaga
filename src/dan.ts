@@ -428,6 +428,40 @@ export function fireSeek(
     })
 }
 
+export function fireAimed(
+    x: number,
+    y: number,
+    v: number,
+    sprite: string 
+) {
+    const pp = Player.pos();
+    let dx = pp.x - x;
+    let dy = pp.y - y;
+    const norm = Math.sqrt(dx * dx + dy * dy);
+    dx = Math.round(dx / norm * v);
+    dy = Math.round(dy / norm * v);
+    fireStandard(x, y, dx, dy, sprite);
+}
+
+export function fireAimedTrine(
+    x: number,
+    y: number,
+    v: number,
+    spread: number,
+    sprite: string
+) {
+    const pp = Player.pos();
+    const dx = pp.x - x;
+    const dy = pp.y - y;
+    const aim = Math.atan2(dy, dx);
+    
+    for (let angle = aim - spread; angle <= aim + spread; angle += spread)
+        fireStandard(x, y, 
+            Math.floor(v * Math.cos(angle)),
+            Math.floor(v * Math.sin(angle)),
+            sprite);
+}
+
 export function fireMissile(
     x: number, 
     y: number, 

@@ -707,7 +707,8 @@ export class Suicide extends Enemy {
             mode == "n" ? S.esuicidenh :
             mode == "d" ? S.esuicidedh : S.esuicidevh);
 
-        this.dir = params[0]
+        this.dir = params[0] == 1 ? 0 : 
+                   x < 0 ? 8 : -8;
     }
 
     public step() : Enemy|null {
@@ -907,8 +908,8 @@ const sweep = {
 // Moves in a square, sometimes shoots
 export class Sweep extends Enemy {
 
-    public shoots : boolean
     public dir : number
+    public rot : number
     public wait : number
     public stimer : number
 
@@ -921,8 +922,8 @@ export class Sweep extends Enemy {
             mode == "n" ? S.esweepnh : 
             mode == "d" ? S.esweepdh : S.esweepvh);
 
-        this.shoots = !!params[0];
-        this.dir = 0;
+        this.rot = params[0] == 1 ? -1 : 1;
+        this.dir = 65536;
         this.wait = 3200;
         this.stimer = 300 + Math.floor(300 * Math.random());
     }
@@ -941,7 +942,7 @@ export class Sweep extends Enemy {
                 default: this.x += 8; break;
             }
         } else {
-            this.dir++;
+            this.dir += this.rot;
             this.wait = 640;
         }
 
@@ -950,6 +951,62 @@ export class Sweep extends Enemy {
                           this.mode == "d" ? 50 + Math.floor(Math.random() * 128) :                  
                                              300 + Math.floor(Math.random() * 64);
             Dan.fireStandard(this.cx(), this.cy(), 0, 16, "b2");
+        }
+
+        return this;
+    }    
+}
+
+// Moves left-right
+export class Sweep3 extends Enemy {
+
+    public vx : number
+    public stimer : number
+
+    constructor(x: number, y: number, mode: Mode) {
+        super(x, y, 
+            /* health */ mode == "n" ? 9 : 
+                         mode == "d" ? 10 : 11,
+            mode,
+            sweep[mode],
+            mode == "n" ? S.esweepnh : 
+            mode == "d" ? S.esweepdh : S.esweepvh);
+
+        this.vx = 8;
+        this.stimer = 0;
+    }
+
+    public step() : Enemy|null {
+
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.x <= 10) this.vx = 8;
+        if (this.x >= 1714) this.vx = -8;
+
+        this.x += this.vx;
+
+        if (this.mode == "n") {
+            if (this.stimer-- == 0) 
+                this.stimer = 300;
+            
+            if (this.stimer < 75 && (this.stimer & 15) == 0)
+                Dan.fireAimed(this.cx(), this.cy(), 20, "b5n");
+            
+        } else if (this.mode == "d") {
+            
+            if (this.stimer-- == 0) {
+                this.stimer = 20;
+                Dan.fireAimed(this.cx(), this.cy(), 20, "b1d");
+            }
+            
+        } else {
+            
+            if (this.stimer-- == 0) {
+                this.stimer = 100;
+                Dan.fireAimedTrine(this.cx(), this.cy(), 20, Math.PI * 0.15, "b1v");
+            }
+            
         }
 
         return this;

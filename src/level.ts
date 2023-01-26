@@ -52,10 +52,10 @@ function enemyOfSeed(s: EnemySeed): Enemy.Enemy {
     {
         case 3: 
         case 4: 
-        case 5: return new E.Sweep(x, y, m, [0]);
+        case 5: return new E.Sweep(x, y, m, [1]);
         case 6: 
         case 7: 
-        case 8: return new E.Sweep(x, y, m, [1]);
+        case 8: return new E.Sweep(x, y, m, [2]);
         case 9:
         case 10:
         case 11: return new E.Suicide(x, y, m, [1]);
@@ -64,13 +64,13 @@ function enemyOfSeed(s: EnemySeed): Enemy.Enemy {
         case 14: return new E.Suicide(x, y, m, [2]);
         case 15: 
         case 16: 
-        case 17: return new E.Sweep(x, y, m, [2]);
+        case 17: return new E.Sweep3(x, y, m);
         case 18: 
         case 19: 
         case 20: return new E.Suicide(x, y, m, [3]);
         case 21: 
         case 22: 
-        case 23: return new E.Sweep(x, y, m, [3]);
+        case 23: throw "Sweep4"
         case 24:
         case 25: 
         case 26: return new E.Static(x, y, m, [1]);
