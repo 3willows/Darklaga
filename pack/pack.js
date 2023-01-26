@@ -1,6 +1,8 @@
 const fs = require("fs");
 const sharp = require("sharp");
 
+// Images ====================================================================
+
 async function loadImages() {
     const result = {}
     const dir = fs.opendirSync("img")
@@ -165,7 +167,7 @@ function mergeBindings(bindings, side) {
     return out;
 }
 
-async function emit() {
+async function emitImages() {
 
     const [bindings, atlas, side] = await packImages();
 
@@ -197,4 +199,48 @@ async function emit() {
     fs.writeFileSync("src/sprites.ts", sprites + "\n" + boundsStr);
 }
 
-emit();
+emitImages();
+
+// Levels ====================================================================
+
+function loadLevels() {
+    let count = 0;
+    const levels = {}
+    const dir = fs.opendirSync("levels")
+    while (true)
+    {
+        const next = dir.readSync();
+        if (!next) break;
+
+        if (!next.isFile()) continue;
+
+        const path = "levels/" + next.name;
+        const buf = fs.readFileSync(path);
+
+        const id = next.name.replace(".dlg", "");
+        levels[id] = buf;
+        ++count;
+    }
+
+    return {levels, count};
+}
+
+function emitLevels() {
+
+    const {levels, count} = loadLevels();
+    
+    let accum = "window.levels = [";
+
+    for (let n = 0; n < count; ++n) {
+        const level = levels["level" + (n + 1)];
+        accum += "new Uint8Array([";
+        accum += new Uint8Array(level).map(b => b.toString()).join(",");
+        accum += "]),";
+    }
+
+    accum += "];"
+
+    fs.writeFileSync("dist/levels.js", accum);
+}
+
+emitLevels();
