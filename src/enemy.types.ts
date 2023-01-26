@@ -297,7 +297,7 @@ export class Tank extends Enemy {
     // Threshold regen if wounded
     private readonly tregen : number
 
-    constructor(x: number, y: number, mode: Mode, params: number[]) {
+    constructor(x: number, y: number, mode: Mode) {
         super(x, y, 
             /* health */ mode == "v" ? 11 : 10,
             mode, 

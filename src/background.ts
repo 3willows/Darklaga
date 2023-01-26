@@ -26,7 +26,7 @@ const LEVEL9 = 11
 const BOSS3  = 12
 
 const bg = {
-    current: LEVEL9,
+    current: LEVEL1,
     next: 0,
     timer: 0,
 

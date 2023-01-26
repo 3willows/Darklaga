@@ -7,7 +7,7 @@ import * as Dan from "./dan"
 import * as Pickup from "./pickup"
 import * as Hud from "./hud"
 import * as Float from "./float"
-import { Tank } from "enemy.types"
+import * as Level from "./level"
 
 // Rendering happens every time requestAnimationFrame() triggers.
 function render() {
@@ -34,15 +34,16 @@ function step() {
     Pickup.step();
     Dan.step();
     Float.step();
+    Level.step();
 
-    if (Enemy.count() == 0) {        
-        for (var i = 0; i < 6; ++i) {
-            Enemy.add(new Tank(256 + 256*i, 256-1024, "n", [1]));
-            Enemy.add(new Tank(256 + 256*i, 512-1024, "n", [1]));
-            Enemy.add(new Tank(256 + 256*i, 768-1024, "d", [1]));
-            Enemy.add(new Tank(256 + 256*i, 1024-1024, "v", [1]));
-        }
-    }
+    // if (Enemy.count() == 0) {        
+    //     for (var i = 0; i < 6; ++i) {
+    //         Enemy.add(new Tank(256 + 256*i, 256-1024, "n", [1]));
+    //         Enemy.add(new Tank(256 + 256*i, 512-1024, "n", [1]));
+    //         Enemy.add(new Tank(256 + 256*i, 768-1024, "d", [1]));
+    //         Enemy.add(new Tank(256 + 256*i, 1024-1024, "v", [1]));
+    //     }
+    // }
 }
 
 export function run() {
