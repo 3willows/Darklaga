@@ -33,24 +33,36 @@ type Player = {
     distance: number
 }
 
-const pl : Player = {
-    x: 880,
-    y: 1960,
-    x_speed: 0,
-    y_speed: 0,
-    controllable: true,
-    r_x_speed: 0,
-    r_y_speed: 0,
-    cooldown: 0,
-    shooting: 0,
-    muzzle_flash: 0,
-    timer: 0,
-    laser_timer: 0,
-    mousedown: 0,
-    anim: 0,
-    modules1: 0,
-    modules2: 0,
-    distance: 0
+function initial() : Player {
+    return {
+        x: 880,
+        y: 1960,
+        x_speed: 0,
+        y_speed: 0,
+        controllable: false,
+        r_x_speed: 0,
+        r_y_speed: 0,
+        cooldown: 0,
+        shooting: 0,
+        muzzle_flash: 0,
+        timer: 0,
+        laser_timer: 0,
+        mousedown: 0,
+        anim: 0,
+        modules1: 0,
+        modules2: 0,
+        distance: 0
+    }
+}
+
+let pl : Player = initial();
+
+export function reset() {
+    pl = initial();  
+}
+
+export function setControllable(c: boolean) {
+    pl.controllable = c;
 }
 
 function shoot(stuff: Hud.Stuff) {
@@ -277,4 +289,10 @@ export function render() {
     if (muzzle_flash && opts.UseNewSchool)
         GL.drawSpriteAdditive(S.muzzle, (x >> 3) + 2, (y >> 3) - 22, 32);
 
+}
+
+// t is 0..63
+export function prerender(t: number) {
+    if (t > 26)
+        GL.drawSprite(S.player[2], 110, 373 - (t << 1));
 }

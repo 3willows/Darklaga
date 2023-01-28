@@ -11,22 +11,22 @@ function randomizeStars() : Int32Array {
     return stars;
 }
 
-const LEVEL0 = 0
-const LEVEL1 = 1
-const LEVEL2 = 2
-const LEVEL3 = 3
-const BOSS1  = 4
-const LEVEL4 = 5
-const LEVEL5 = 6
-const LEVEL6 = 7
-const BOSS2  = 8
-const LEVEL7 = 9
-const LEVEL8 = 10
-const LEVEL9 = 11
-const BOSS3  = 12
+export const LEVEL0 = 0
+export const LEVEL1 = 1
+export const LEVEL2 = 2
+export const LEVEL3 = 3
+export const BOSS1  = 4
+export const LEVEL4 = 5
+export const LEVEL5 = 6
+export const LEVEL6 = 7
+export const BOSS2  = 8
+export const LEVEL7 = 9
+export const LEVEL8 = 10
+export const LEVEL9 = 11
+export const BOSS3  = 12
 
 const bg = {
-    current: LEVEL1,
+    current: LEVEL0,
     next: 0,
     timer: 0,
 
@@ -68,7 +68,7 @@ function renderStars() {
     }
 }
 
-export function renderColuBack() {
+function renderColuBack() {
     for (let cb of coluback) 
         for (let y = (cb.o>>6) - cb.h; y < 320; y += cb.h)
             GL.drawSprite(cb.s, cb.x, y);
@@ -257,6 +257,11 @@ export function render() {
         break;
     }
     }
+
+    if (bg.lfactor) {
+        GL.drawRect(0, 0, 240, 320, 0, 1/16, 1/4, bg.lfactor/255);
+        renderStars();
+    }
 }
 
 function stepColuBack() {
@@ -264,7 +269,65 @@ function stepColuBack() {
         col.o = (col.o + col.v) % (col.h << 6);
 }
 
-export function step() {
+export function warp(planet: number) {
+    bg.warpstate = 1;
+    bg.next = planet;
+} 
+
+export function set(planet: number) {
+    bg.warpstate = 0;
+    bg.current = planet;
+    bg.timer = 0;
+}
+
+function stepWarp()
+{
+    switch (bg.warpstate) 
+    {
+        case 0: break;
+        case 1: 
+            if (bg.lfactor < 255) {
+                bg.lfactor += 3;
+            } else {
+                bg.warpstate = 2;
+                bg.current = bg.next;
+            }
+            break;
+        case 64: 
+            if (bg.lfactor) {
+                bg.lfactor -= 3;
+            } else {
+                bg.warpstate = 0;
+                bg.timer = 0;
+            }
+            break;
+        default: 
+            ++bg.warpstate;
+            break;
+    }
+}
+
+export function warping() {
+    return !!bg.warpstate;
+} 
+
+export function animated() {
+    if (bg.timer >= 256) return false;
+    switch (bg.current) {
+    case LEVEL2:
+    case LEVEL5:
+    case BOSS2: 
+    case LEVEL8: 
+        return true;
+    default:
+        return false;
+    }
+} 
+
+export function step(canWarp: boolean = true) {
+
+    if (canWarp)
+        stepWarp();
 
     bg.timer++;
 

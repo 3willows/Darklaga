@@ -8,43 +8,11 @@ import * as Pickup from "./pickup"
 import * as Hud from "./hud"
 import * as Float from "./float"
 import * as Level from "./level"
+import * as Game from "./game"
 
 // Rendering happens every time requestAnimationFrame() triggers.
-function render() {
-    GL.startRender();
-    Background.render();
-    Enemy.render();
-    Shot.render();
-    Pickup.render();
-    Player.render();
-    Dan.render();
-    Hud.render();
-    Float.render();
-    GL.endRender();
-}
-
-// Simulation is based on a fixed-duration step
+// Simulation is based on a fixed-duration step.
 const stepDurationMilliseconds = 16.666; 
-function step() {
-    Background.step();
-    Enemy.step();
-    Hud.step();
-    Shot.step();
-    Player.step();
-    Pickup.step();
-    Dan.step();
-    Float.step();
-    Level.step();
-
-    // if (Enemy.count() == 0) {        
-    //     for (var i = 0; i < 1; ++i) {
-    //         Enemy.add(new Sweep4(256 + 256*i, 256, "n"));
-    //         Enemy.add(new Sweep4(256 + 256*i, 512, "n"));
-    //         Enemy.add(new Sweep4(256 + 256*i, 768, "d"));
-    //         Enemy.add(new Sweep4(256 + 256*i, 1024, "v"));
-    //     }
-    // }
-}
 
 export function run() {
     let nextFrame = +new Date();
@@ -61,12 +29,12 @@ export function run() {
         // Step based on actual time elapsed, rather than expecting
         // setInterval to be precise. 
         while (now > nextFrame) {
-            step();
+            Game.step();
             nextFrame += stepDurationMilliseconds;
         } 
 
         // Render once per wake-up
-        render();
+        Game.render();
 
         requestAnimationFrame(frame);
     }

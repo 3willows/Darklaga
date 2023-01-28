@@ -247,6 +247,21 @@ export function onEnemyDeath(
     }    
 }
 
+// t in 0..31
+export function prerender(t: number) {
+    
+    if (t > 24) {
+        GL.drawRect(0, 0, 240, t-12, 0, 0, 0, 1);
+        GL.drawRect(0, 332-t, 240, t-12, 0, 0, 0, 1);
+    }
+
+    if (t > 15) {
+        GL.drawSprite(items[ITEM_WNONE][0], 112, 333-t);
+        GL.drawSprite(items[ITEM_ONONE][0], 92, 333-t);
+        GL.drawSprite(items[ITEM_DNONE][0], 132, 333-t);
+    }
+}
+
 export function render() {
     GL.drawRect(0, 0, 240, 20, (hud.danger << 2) / 256, 0, 0, 1);
     GL.drawRect(0, 300, 240, 20, (hud.danger << 2) / 256, 0, 0, 1);

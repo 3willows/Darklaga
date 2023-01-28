@@ -1,5 +1,6 @@
 import * as Enemy from "./enemy";
 import * as E from "./enemy.types";
+import * as Background from "./background"
 
 type EnemySeed = {
     readonly before: number,
@@ -148,8 +149,17 @@ function enemyOfSeed(s: EnemySeed): Enemy.Enemy {
 let current = parseLevel(1);
 
 export function step() {
+    console.log("Level step!")
     while (current.length > 0 && current[0].before <= (40 - Enemy.count())) {
         const enemy = enemyOfSeed(current.shift()!);
         Enemy.add(enemy);
     }
+}
+
+export function spawn(level: number) {
+    current = parseLevel(level);
+}
+
+export function over() {
+    return current.length == 0;
 }
