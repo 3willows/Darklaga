@@ -150,7 +150,6 @@ let current = parseLevel(1);
 export function step() {
     while (current.length > 0 && current[0].before <= (40 - Enemy.count())) {
         const enemy = enemyOfSeed(current.shift()!);
-        console.log("Spawn %o", enemy   )
         Enemy.add(enemy);
     }
 }
