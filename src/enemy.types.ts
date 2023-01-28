@@ -1013,6 +1013,75 @@ export class Sweep3 extends Enemy {
     }    
 }
 
+// Moves left-right, and up/down when outside the screen
+export class Sweep4 extends Enemy {
+
+    public vx : number
+    public tx : number
+    public dy : number
+    public stimer : number
+    public angle : number
+
+    constructor(x: number, y: number, mode: Mode) {
+        super(x, y, 
+            /* health */ mode == "v" ? 14 : 9,
+            mode,
+            sweep[mode],
+            mode == "n" ? S.esweepnh : 
+            mode == "d" ? S.esweepdh : S.esweepvh);
+
+        this.tx = 1728 - x;
+        this.dy = mode == "n" ? 200 : 400;
+        this.vx = 8;
+        this.alpha = 0;
+        this.stimer = 0;
+        this.angle = 0;
+    }
+
+    public step() : Enemy|null {
+
+        const self = super.step();
+        if (self !== this) return self;
+
+        if (this.mode == "v") {
+            if (this.alpha < 32) ++this.alpha;
+            if (this.x < 900) {
+                this.x += 16;
+            } else if (this.alpha == 32 && this.stimer-- == 0) {
+                this.stimer = 3;
+                const cx = this.cx();
+                const cy = this.cy();
+                Dan.fireQuad(cx, cy, "b1v", this.angle);
+                Dan.fireQuad(cx, cy, "b1v", -this.angle);
+                this.angle += Math.PI * 5 / 128;
+            }
+            return self;
+        }
+
+        const dx = this.x - this.tx;
+
+        if (dx < 0) this.x += 8;
+        if (dx > 0) this.x -= 8;
+        if (dx == 0) {
+            this.tx = 1728 - this.x;
+            this.y += this.dy;
+            this.dy = - this.dy;
+        }
+
+        if (dx * dx <= (32 << 10)) 
+            this.alpha = (dx * dx) >> 10;
+        else if (this.alpha < 32)
+            ++this.alpha;
+
+        if (this.alpha == 32 && this.stimer-- == 0) {
+            this.stimer = 100;
+            Dan.fireStandard(this.cx(), this.cy(), 0, 16, "b2");
+        }
+
+        return this;
+    }    
+}
+
 const hunter = {
     n: twoSide(S.ehuntern),
     d: twoSide(S.ehunterd),

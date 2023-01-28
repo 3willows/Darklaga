@@ -37,11 +37,11 @@ function step() {
     Level.step();
 
     // if (Enemy.count() == 0) {        
-    //     for (var i = 0; i < 6; ++i) {
-    //         Enemy.add(new Tank(256 + 256*i, 256-1024, "n", [1]));
-    //         Enemy.add(new Tank(256 + 256*i, 512-1024, "n", [1]));
-    //         Enemy.add(new Tank(256 + 256*i, 768-1024, "d", [1]));
-    //         Enemy.add(new Tank(256 + 256*i, 1024-1024, "v", [1]));
+    //     for (var i = 0; i < 1; ++i) {
+    //         Enemy.add(new Sweep4(256 + 256*i, 256, "n"));
+    //         Enemy.add(new Sweep4(256 + 256*i, 512, "n"));
+    //         Enemy.add(new Sweep4(256 + 256*i, 768, "d"));
+    //         Enemy.add(new Sweep4(256 + 256*i, 1024, "v"));
     //     }
     // }
 }

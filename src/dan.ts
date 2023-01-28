@@ -110,7 +110,7 @@ for (let k in spriteNames) {
     sprites.push((spriteNames as { [key:string]: S.Sprite[] })[k]);
 }
 
-const maxDanAmount = 200;
+const maxDanAmount = 400;
 const danSize = 15;
 
 const dan = new Int32Array(maxDanAmount * danSize);
@@ -554,4 +554,14 @@ export function fireCarrier(x: number, y: number, mode: Mode) {
     add({ type, sprite, x, y, life: 64, p0:  60, p1:  60 })
     add({ type, sprite, x, y, life: 64, p0: -60, p1: -60 })
     add({ type, sprite, x, y, life: 64, p0:  60, p1: -60 })
+}
+
+// Four shots in four orthogonal directions, with an angle
+export function fireQuad(x: number, y: number, sprite: string, angle: number) {
+    for (let i = 0; i < 4; i++) {
+        const a = angle + i * Math.PI/2;
+        const dx = Math.floor(8 * Math.cos(a));
+        const dy = Math.floor(8 * Math.sin(a));
+        fireStandard(x, y, dx, dy, sprite);
+    }
 }
