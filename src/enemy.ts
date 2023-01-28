@@ -29,7 +29,10 @@ export class Enemy {
         this.flash = 0
         this.w = sprites[0].w << 3;
         this.h = sprites[0].h << 3;
-        this.basehealth = this.health = 1 << health;
+        this.basehealth = health + 1;
+        if (!opts.UseWeakerEnemies) ++this.basehealth;
+        if (opts.UseStrongerEnemies) ++this.basehealth;
+        this.health = 1 << this.basehealth;
         this.alpha = 33;
     }
 

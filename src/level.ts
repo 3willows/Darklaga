@@ -70,7 +70,7 @@ function enemyOfSeed(s: EnemySeed): Enemy.Enemy {
         case 20: return new E.Suicide(x, y, m, [3]);
         case 21: 
         case 22: 
-        case 23: throw "Sweep4"
+        case 23: return new E.Sweep4(x, y, m);
         case 24:
         case 25: 
         case 26: return new E.Static(x, y, m, [1]);

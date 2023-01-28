@@ -9,6 +9,9 @@ export const opts = {
     UseScore: true,
     UseCombo: true,
 
+    UseWeakerEnemies: false,
+    UseStrongerEnemies: false, 
+
     // New-school graphics
     UseNewSchool: true,
 

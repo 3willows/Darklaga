@@ -366,7 +366,7 @@ export class Group extends Enemy {
     private readonly rf : number
     
     constructor(x: number, y: number, mode: Mode, params: number[]) {
-        super(x, y, 
+        super(x, y - 800, 
             /* health */mode == "v" ? 13 : 11,
             mode, 
             group[mode],
