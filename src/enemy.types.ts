@@ -316,7 +316,7 @@ export class Tank extends Enemy {
         const self = super.step();
         if (self !== this) return self;
 
-        if (this.timer * this.m <= 100)
+        if (this.timer * this.m <= 200)
             this.y += this.m * 8;
         
         if (this.threshold > this.health) {
