@@ -1,13 +1,3 @@
-import * as GL from "./webgl"
-import * as Player from "./player"
-import * as Shot from "./shot"
-import * as Background from "./background"
-import * as Enemy from "./enemy"
-import * as Dan from "./dan"
-import * as Pickup from "./pickup"
-import * as Hud from "./hud"
-import * as Float from "./float"
-import * as Level from "./level"
 import * as Game from "./game"
 
 // Rendering happens every time requestAnimationFrame() triggers.

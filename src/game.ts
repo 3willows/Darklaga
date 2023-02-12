@@ -7,6 +7,7 @@ import * as Enemy from "./enemy"
 import * as Dan from "./dan"
 import * as Hud from "./hud"
 import * as Float from "./float"
+import * as Boss from "./boss"
 import * as GL from "./webgl"
 
 const gLEVEL1 = 0
@@ -65,7 +66,7 @@ type Game = {
 
 const g : Game = {
     state: GS_STARTING_LEVEL,
-    level: gLEVEL1,
+    level: gBOSS1,
     prerender: 0,
     player_enter: 64,
     specialscreen: 0
@@ -229,6 +230,7 @@ function playStep() {
 
     Background.step();
     Enemy.step();
+    Boss.step();
     Hud.step();
     Shot.step();
     Player.step();
@@ -241,7 +243,8 @@ function playStep() {
 
     if (Level.over() && 
         g.player_enter == 64 && 
-        Enemy.count() == 0) 
+        Enemy.count() == 0 && 
+        Boss.over()) 
     {
         endLevel();
     }
@@ -257,6 +260,7 @@ function endLevelStep() {
     Pickup.step();
     Dan.step();
     Float.step();
+    Boss.step();
 
     nextLevel();
 }
@@ -277,6 +281,7 @@ function startingLevelStep() {
     Pickup.step();
     Dan.step();
     Float.step();
+    Boss.step();
 
     if (Background.warping()) return;
 
@@ -307,10 +312,12 @@ startLevel();
 export function playRender() {
     Background.render();
     Enemy.render();
+    Boss.render();
     Shot.render();
     Pickup.render();
     Player.render();
     Dan.render();
+    Boss.renderTop();
     Hud.render();
     Float.render();
 }
@@ -318,10 +325,12 @@ export function playRender() {
 export function endLevelRender() {
     Background.render();
     Enemy.render();
+    Boss.render();
     Shot.render();
     Pickup.render();
     Player.render();
     Dan.render();
+    Boss.renderTop();
     Hud.render();
     Float.render();
 }
