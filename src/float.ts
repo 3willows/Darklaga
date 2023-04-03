@@ -33,6 +33,11 @@ function stepGraze(this: Float) {
     return t < 32;
 }
 
+function stepExplosion(this: Float) {
+    const t = ++this.timer;
+    return t < 72;
+}
+
 export function step() {
     for (let i = 0; i < fl.length; ++i) {
         if (!fl[i].step()) {
@@ -80,6 +85,23 @@ function renderGraze(this: Float) {
     }
 }
 
+function renderExplosion(this: Float) {
+    const x = (this.x >> 3) - 4;
+    const y = (this.y >> 3) - 4;
+    if (this.timer < 8) {
+        const s = S.explon[this.timer];
+        GL.drawSprite(s, x, y);
+        GL.drawSpriteAdditive(s, x, y, 32);
+    } else {        
+        const s = S.explon[(this.timer + 8) >> 2]
+        GL.drawSpriteAlpha(s, x, y, (72 - this.timer) >> 1);
+        if (this.timer < 40) {
+            const s2 = S.explon[(this.timer + 8) >> 1];
+            GL.drawSpriteAdditive(s2, x, y, 40 - this.timer);
+        }
+    }
+}
+
 export function render() {
     for (let f of fl) f.render();
 }
@@ -122,3 +144,12 @@ export function addGraze(x: number, y: number, sprite: readonly S.Sprite[]) {
         step: stepGraze
     })
 } 
+
+export function addExplosion(x: number, y: number) {
+    fl.push({
+        x, y,         
+        value: 0, timer: 0, text: [],
+        render: renderExplosion,
+        step: stepExplosion
+    })
+}

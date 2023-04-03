@@ -6,6 +6,7 @@ import * as GL from "./webgl"
 import * as Player from "./player"
 import * as Hud from "./hud"
 import { Mode } from "enemy";
+import { opts } from "options";
 
 // Shot data is encoded as consecutive Int32 values, 
 // with the meanings:
@@ -51,6 +52,11 @@ const DAN_CARB			= 0x0005
 //  PARAMS1 = y-velocity
 //  PARAMS2 = velocity of the standard bullet
 const DAN_DAIM			= 0x0006
+
+// ADN-like shape. Negative angles decrease, positive angles
+// increase.
+// PARAMS0 = x-center
+// PARAMS3 = angle (255 = full circle)
 const DAN_ADN			= 0x0007
 
 // Homing missile
@@ -101,7 +107,8 @@ const spriteNames = {
     "b5v": twoSide(S.bullet5v),
     "exv": S.explov,
     "hb3": S.hb3f,
-    "hb4": S.hb4f
+    "hb4": S.hb4f,
+    "hb5": S.hb5f
 }
 
 // Index and reverse-index sprite names
@@ -241,6 +248,25 @@ function danStep(ref: number, px: number, py: number) {
                 return false;
 
         return true;
+    }
+
+    if (type == DAN_ADN) {
+        ++dan[off + ANIM];
+
+        const p3 = dan[off + PARAM3] += dan[off + PARAM3] < 0 ? -2 : 2;
+        const a = p3 * Math.PI / 128;
+        dan[off + LEFT] = dan[off + PARAM0] + Math.floor(160 * Math.sin(a));
+        const top = dan[off + TOP] += 8;
+
+        // In hard mode, turn into aiming shot when at the bottom
+        if (top + 8 >= 2560 && opts.UseStrongerEnemies) {
+            dan[off + TYPE] = DAN_DAIM;
+            dan[off + PARAM0] = dan[off + PARAM1] = 0;
+            dan[off + PARAM2] = 20;
+        }
+
+        // Die if out-of-bounds
+        return top <= 2560;
     }
 
     if (type == DAN_CARN || type == DAN_CARD || type == DAN_CARV) {
@@ -578,4 +604,8 @@ export function fireQuad(x: number, y: number, sprite: string, angle: number) {
         const dy = Math.floor(8 * Math.sin(a));
         fireStandard(x, y, dx, dy, sprite);
     }
+}
+
+export function fireAdn(x: number, y: number, sprite: string, angle: number) {
+    add({ type: DAN_ADN, sprite, x, y, life: 64, p0: x, p3: angle })
 }

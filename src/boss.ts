@@ -5,6 +5,7 @@ import * as GL from "./webgl"
 import * as Dan from "./dan"
 import * as Shot from "shot"
 import * as Hud from "./hud"
+import * as Float from "./float"
 
 class BossBase {
 
@@ -63,7 +64,7 @@ class BossBase {
             this.hitTimer = 0;
         }
 
-        if (this.hitPrev && this.shootable()) {
+        if (this.hitPrev && !this.suffering && this.shootable()) {
 
             this.health -= 16;
             if (Hud.stuff().offense_overload > 0) 
@@ -71,6 +72,10 @@ class BossBase {
 
             if (this.health <= 0)
                 this.die();
+        }
+
+        if (this.suffering > 0) {
+            --this.suffering;
         }
     }
 
@@ -149,6 +154,21 @@ class HalfBoss1 extends BossBase {
 
     public shootable(): boolean {
         return this.stage > 0;
+    }
+
+    public die() {
+        if (this.stage < 4) {
+            ++this.stage;
+            --this.lives;
+            this.baseHealth = 
+                (this.stage == 2 ? 12 : 14)
+                + (opts.UseStrongerEnemies ? 1 : 0);
+            this.health = 1 << this.baseHealth;
+            this.suffering = 300;
+            this.timer = this.mstimer1 = this.mstimer2 = 
+                this.ctimer = this.stimer = this.srtimer1 = 
+                this.srtimer2 = 0;
+        }
     }
 
     public step() {
@@ -251,12 +271,128 @@ class HalfBoss1 extends BossBase {
 
             break;
         }
+        case 2:
+        {
+            if (this.timer % (this.suffering ? 30 : 50) == 0) {
+                Float.addExplosion(
+                    Math.floor(this.x + Math.random() * 256 - 140),
+                    Math.floor(this.y + Math.random() * 256 - 140));
+            }
+
+            if (this.suffering) break;
+
+            const {x: px, y: py} = pos();
+
+            const speed = 6;
+
+            const dx = this.x - px + 60;
+            const dy = this.y - py + 60;
+            const n  = Math.sqrt(dx * dx + dy * dy);
+            this.x -= Math.floor(dx / n * speed);
+            this.y -= Math.floor(dy / n * speed);
+
+            if (++this.srtimer1 > 80) {
+                this.srtimer1 = 0;
+                this.stimer = 40;
+            }
+
+            // Proximity gun
+            if (this.timer % 3 == 0) {
+                if ((py - this.y) * (py - this.y) + (px - this.x) * (px - this.x) < 50000) {
+                    const a = Math.random() * Math.PI;
+                    const vx = Math.floor(10 * Math.cos(a));
+                    const vy = Math.floor(10 * Math.sin(a)); 
+                    Dan.fireCarrier(this.x, this.y, vx, vy, "v", "hb3");
+                }
+            }
+            
+            // Normal fire
+            if (this.stimer > 0) {
+                if (--this.stimer == 0)
+                    Dan.fireAimed(this.x+18, this.y+18, 20, "hb5");
+            }
+
+            // Rotating fire 
+            if (++this.rstimer1 >= 20) {
+                this.rstimer1 = 0;
+
+                const x1 = - Math.floor(dx / n * 12);
+                const y1 = - Math.floor(dy / n * 12);
+                Dan.fireStandard(this.x+18, this.y+18, x1, y1, "hb4");
+                Dan.fireStandard(this.x+18, this.y+18, y1, -x1, "hb4");
+                Dan.fireStandard(this.x+18, this.y+18, -x1, -y1, "hb4");
+                Dan.fireStandard(this.x+18, this.y+18, -y1, x1, "hb4");
+            }
+            break;
+        }
+        case 3:
+        {
+            if (this.timer % (this.suffering ? 10 : 20) == 0) {
+                Float.addExplosion(
+                    Math.floor(this.x + Math.random() * 256 - 140),
+                    Math.floor(this.y + Math.random() * 256 - 140));
+            }
+
+            if (this.suffering) break;
+            
+            const {x: px, y: py} = pos();
+
+            const period = this.timer % 128;
+            if (period < 12) {
+                this.ctimer = Math.floor(period/3);
+            }
+            
+            if (period <= 64) {
+                const tx = px + 32;
+                const ty = 320 + ((2560 - py) >> 2);
+        
+                if (Math.abs(ty - this.y) >= 8) 
+                    this.y += ty < this.y ? -8 : 8;
+            
+                if (Math.abs(tx - this.x) >= 8)
+                    this.x += tx < this.x ? -8 : 8;
+            }
+
+            // Proximity gun
+            if (this.timer % 3 == 0) {
+                if ((py - this.y) * (py - this.y) + (px - this.x) * (px - this.x) < 50000) {
+                    const a = Math.random() * Math.PI;
+                    const vx = Math.floor(10 * Math.cos(a));
+                    const vy = Math.floor(10 * Math.sin(a)); 
+                    Dan.fireCarrier(this.x, this.y, vx, vy, "v", "hb3");
+                }
+            }
+
+            if (period > 64 && period < 76) {
+                this.ctimer = 3 - Math.floor((period - 64) / 3)
+                console.log("%d", this.ctimer);
+            }
+
+            // Shoot when not moving
+            if (period > 76) {
+                
+                if (this.timer % 8 == 0) {
+                    Dan.fireAdn(this.x + 32, this.y + 76, "hb3",  255);
+                    Dan.fireAdn(this.x + 32, this.y + 76, "hb3", -255);
+                }
+
+                if (this.timer % 3 == 0 && opts.UseStrongerEnemies) {
+                    const a = Math.random() * Math.PI;
+                    const vx = Math.floor(10 * Math.cos(a));
+                    const vy = Math.floor(10 * Math.sin(a)); 
+                    Dan.fireStandard(this.x + 18, this.y + 18, vx, vy, "hb4");
+                }
+
+            }
+
+            break;
+        }
         }
     }
 
     public render() {
         super.render();
-        const sprite = S.halfboss[3 - (this.ctimer >> 2)];
+        const sprite = S.halfboss[3 - this.ctimer];
         GL.drawSprite(sprite, (this.x >> 3) - 15, (this.y >> 3) - 15);        
     }
 }
