@@ -117,6 +117,7 @@ function startLevel() {
         case gBOSSMODE1:
             Pickup.generateChoices();
         case gBOSS1:
+            Level.spawn(0);
             Background.set(Background.BOSS1);
             g.prerender = 64;
             break;

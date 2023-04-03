@@ -552,7 +552,7 @@ export class Carrier extends Enemy {
         if (!ready) return this;
 
         if (this.timer > 64 && (this.timer % freq) == 0) {
-            Dan.fireCarrier(this.cx(), this.cy(), this.mode);
+            Dan.fireCarrier6(this.cx(), this.cy(), this.mode, "b1v");
         }
         
         return this;

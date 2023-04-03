@@ -157,7 +157,7 @@ export function step() {
 }
 
 export function spawn(level: number) {
-    current = parseLevel(level);
+    current = level == 0 ? [] : parseLevel(level);
 }
 
 export function over() {

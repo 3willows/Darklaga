@@ -100,6 +100,7 @@ const spriteNames = {
     "b5d": twoSide(S.bullet5d),
     "b5v": twoSide(S.bullet5v),
     "exv": S.explov,
+    "hb3": S.hb3f
 }
 
 // Index and reverse-index sprite names
@@ -544,10 +545,22 @@ export function fireAroundSeek(x: number, y: number, sprite: string) {
     add({ type: DAN_DAIM, sprite, x, y, life: 64, p0: -3, p1: -3, p2: 20 })
 }
 
-export function fireCarrier(x: number, y: number, mode: Mode) {
+export function fireCarrier(
+    x: number, 
+    y: number, 
+    vx: number, 
+    vy: number,
+    mode: Mode, 
+    sprite: string) 
+{
     const type = mode == "n" ? DAN_CARN :
                  mode == "d" ? DAN_CARD : DAN_CARV;
-    const sprite = "b1v";
+    add({ type, sprite, x, y, life: 64, p0: vx, p1: vy })
+}
+
+export function fireCarrier6(x: number, y: number, mode: Mode, sprite: string) {
+    const type = mode == "n" ? DAN_CARN :
+                 mode == "d" ? DAN_CARD : DAN_CARV;
     add({ type, sprite, x, y, life: 64, p0: -80, p1:   0 })
     add({ type, sprite, x, y, life: 64, p0:  80, p1:   0 })
     add({ type, sprite, x, y, life: 64, p0: -60, p1:  60 })

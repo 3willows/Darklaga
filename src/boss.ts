@@ -1,6 +1,8 @@
+import { pos } from "player"
 import { opts } from "./options"
 import * as S from "./sprites"
 import * as GL from "./webgl"
+import * as Dan from "./dan"
 
 class BossBase {
 
@@ -56,6 +58,22 @@ class BossBase {
 
 class HalfBoss1 extends BossBase {
 
+    // 'close' animation timer
+    private ctimer = 0;
+
+    // shooting-reload timer 1 
+    private srtimer1 = 0;
+
+    // shooting-reload timer 2
+    private srtimer2 = 0;
+
+    // main shooting timer
+    private stimer = 0;
+
+    // missile shooting timers
+    private mstimer1 = 0;
+    private mstimer2 = 0;
+
     constructor() {
         super(/* Health */ 14 + (opts.UseStrongerEnemies ? 1 : 0),
             960, -820, 
@@ -77,9 +95,64 @@ class HalfBoss1 extends BossBase {
             }
             break;
         }
+        case 1:
+        {
+            const {x: px, y: py} = pos();
+            const tx = this.srtimer2 >= 480 ? px : 1920 - px;
+            const ty = 320 + ((2560 - py) >> 2);
+
+            if (Math.abs(ty - this.y) >= 4) 
+                this.y += ty < this.y ? -4 : 4;
+            
+            if (Math.abs(tx - this.x) >= 4)
+                this.x += tx < this.x ? -4 : 4;
+
+            if (++this.srtimer1 > 80) {
+                this.srtimer1 = 0;
+                this.stimer += 40;
+            }
+
+            if (++this.srtimer2 >= 960) {
+                this.srtimer2 = 0;
+                this.stimer += 360;
+            }
+
+            // Proximity gun
+            if (this.timer % 3 == 0) {
+                if ((py - this.y) * (py - this.y) + (px - this.x) * (px - this.x) < 50000) {
+                    const a = Math.random() * Math.PI;
+                    const vx = Math.floor(10 * Math.cos(a));
+                    const vy = Math.floor(10 * Math.sin(a)); 
+                    Dan.fireCarrier(this.x, this.y, vx, vy, "v", "hb3");
+                }
+            }
+
+            // Shooting missiles
+            let missiles = false;
+            if (++this.mstimer1 >= 1920) {
+                this.mstimer1 = 960;
+                missiles = true;
+            }
+            if (++this.mstimer2 >= 2840) {
+                this.mstimer2 = 1900;
+                missiles = true;
+            }
+            if (missiles) {
+                for (let a = 0; a < 2 * Math.PI; a += Math.PI / 8) {
+                    const vx = Math.floor(50 * Math.cos(a));
+                    const vy = Math.floor(50 * Math.sin(a)); 
+                    Dan.fireCarrier(this.x, this.y, vx, vy, "d", "hb3");
+                }
+            }
+            break;
+        }
         }
     }
 
+    public render() {
+        const sprite = S.halfboss[3 - (this.ctimer >> 2)];
+        GL.drawSprite(sprite, (this.x >> 3) - 15, (this.y >> 3) - 15);
+    }
 }
 
 let active : BossBase|undefined = new HalfBoss1();
