@@ -149,7 +149,6 @@ function enemyOfSeed(s: EnemySeed): Enemy.Enemy {
 let current = parseLevel(1);
 
 export function step() {
-    console.log("Level step!")
     while (current.length > 0 && current[0].before <= (40 - Enemy.count())) {
         const enemy = enemyOfSeed(current.shift()!);
         Enemy.add(enemy);

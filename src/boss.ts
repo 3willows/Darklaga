@@ -3,6 +3,8 @@ import { opts } from "./options"
 import * as S from "./sprites"
 import * as GL from "./webgl"
 import * as Dan from "./dan"
+import * as Shot from "shot"
+import * as Hud from "./hud"
 
 class BossBase {
 
@@ -16,11 +18,18 @@ class BossBase {
     public stage : number = 0
     public warningTimer : number = 0
     public timer : number = 0
+    public lives : number = 2
 
     constructor(
         public baseHealth : number,
         public x : number,
         public y : number,
+        // X- and Y-coordinate offset for collision
+        private cdx : number,
+        private cdy : number,
+        // Width and height offsets for collision
+        private cdw : number, 
+        private cdh : number,
         seconds: number) 
     {
         this.health = this.healthGhost = 1 << this.baseHealth;
@@ -35,10 +44,60 @@ class BossBase {
             if (this.suffering != 150) this.suffering--;
         }
 
+        if (this.shootable()) {
+            if (Shot.collideEnemy(
+                this.x + this.cdx, 
+                this.y + this.cdy,
+                this.cdw,
+                this.cdh))
+            {
+                if (!this.suffering) {
+                    this.hit = true;
+                }
+            }
+        }
+
+        if (++this.hitTimer >= 25) {
+            this.hitPrev = this.hit;
+            this.hit = false;
+            this.hitTimer = 0;
+        }
+
+        if (this.hitPrev && this.shootable()) {
+
+            this.health -= 16;
+            if (Hud.stuff().offense_overload > 0) 
+                this.health -= 16;
+
+            if (this.health <= 0)
+                this.die();
+        }
     }
 
+    public die() {}
+
+    public shootable() { return false; }
+
     // Rendered in the enemy layer.
-    public render() {}
+    public render() {
+        if (this.health < (1 << this.baseHealth) || this.lives < 2) {
+            const healthx = 20;
+            const healthy = 30;
+            
+            if (this.lives > 0) {
+                const back = S.bossbartex[this.lives - 1];
+                for (let x = 0; x < 198; x += back.w)
+                    GL.drawSprite(back, healthx + 1 + x, healthy + 3);
+            }
+
+            const front = S.bossbartex[this.lives];
+            const maxx = (this.health * 198) >> this.baseHealth;
+            for (let x = 0; x < maxx; x += front.w) 
+                GL.drawSprite(front, healthx + 1 + x, healthy + 3);
+            
+            GL.drawSprite(S.bossbar, healthx, healthy);
+        }
+    }
 
     // Rendered on top of everything else but the HUD. 
     public renderTop() {
@@ -80,8 +139,16 @@ class HalfBoss1 extends BossBase {
 
     constructor() {
         super(/* Health */ 14 + (opts.UseStrongerEnemies ? 1 : 0),
-            960, -820, 
+            /* xy */ 960, -820, 
+            /* collision offset */ -120, -120,
+            /* collision box */ 
+                S.halfboss[0].w << 3, 
+                S.halfboss[0].h << 3,
             /* timer */ 45)
+    }
+
+    public shootable(): boolean {
+        return this.stage > 0;
     }
 
     public step() {
@@ -153,7 +220,7 @@ class HalfBoss1 extends BossBase {
             if (this.stimer > 0) {
                 this.stimer--;
                 if (this.timer % 16 == 1) 
-                    Dan.fireAimed(this.x, this.y, 10, "hb4");
+                    Dan.fireAimed(this.x+18, this.y+18, 10, "hb4");
             }
 
             // Rotating shots
@@ -168,7 +235,7 @@ class HalfBoss1 extends BossBase {
                     const a = Math.PI * rs1 / 128;
                     const vx = Math.floor(10 * Math.cos(a));
                     const vy = Math.floor(10 * Math.sin(a));
-                    Dan.fireStandard(this.x, this.y, vx, vy, "hb4"); 
+                    Dan.fireStandard(this.x+18, this.y+18, vx, vy, "hb4"); 
                 }
             }
 
@@ -178,7 +245,7 @@ class HalfBoss1 extends BossBase {
                     const a = Math.PI * (rs2 - 128) / 128;
                     const vx = Math.floor(10 * Math.cos(a));
                     const vy = Math.floor(10 * Math.sin(a));
-                    Dan.fireStandard(this.x, this.y, vx, vy, "hb4"); 
+                    Dan.fireStandard(this.x+18, this.y+18, vx, vy, "hb4"); 
                 }
             }
 
@@ -188,8 +255,9 @@ class HalfBoss1 extends BossBase {
     }
 
     public render() {
+        super.render();
         const sprite = S.halfboss[3 - (this.ctimer >> 2)];
-        GL.drawSprite(sprite, (this.x >> 3) - 15, (this.y >> 3) - 15);
+        GL.drawSprite(sprite, (this.x >> 3) - 15, (this.y >> 3) - 15);        
     }
 }
 

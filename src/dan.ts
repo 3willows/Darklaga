@@ -437,8 +437,8 @@ export function fireAimed(
     sprite: string 
 ) {
     const pp = Player.pos();
-    let dx = pp.x - x;
-    let dy = pp.y - y;
+    let dx = pp.x - x + 32;
+    let dy = pp.y - y + 32;
     const norm = Math.sqrt(dx * dx + dy * dy);
     dx = Math.round(dx / norm * v);
     dy = Math.round(dy / norm * v);
