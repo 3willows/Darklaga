@@ -117,6 +117,14 @@ class BossBase {
             GL.drawSpriteAdditive(S.warningsma, smax - S.warningsma.w, 350 - dy, alpha);
             GL.drawSpriteAdditive(S.warningsma, smax, 350 - dy, alpha);
         } 
+
+        if (this.suffering > 150) {
+            const a = (300 - this.suffering) / 256;
+            GL.drawRectAdditive(0, 20, 240, 280, a, a, a, 1);
+        } else if (this.suffering > 0) {
+            const a = this.suffering / 256;
+            GL.drawRectAdditive(0, 20, 240, 280, a, a, a, 1);
+        }
     }
 }
 
