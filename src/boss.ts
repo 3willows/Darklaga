@@ -74,6 +74,10 @@ class HalfBoss1 extends BossBase {
     private mstimer1 = 0;
     private mstimer2 = 0;
 
+    // rotating shots timers
+    private rstimer1 = 0;
+    private rstimer2 = 0;
+
     constructor() {
         super(/* Health */ 14 + (opts.UseStrongerEnemies ? 1 : 0),
             960, -820, 
@@ -107,9 +111,9 @@ class HalfBoss1 extends BossBase {
             if (Math.abs(tx - this.x) >= 4)
                 this.x += tx < this.x ? -4 : 4;
 
-            if (++this.srtimer1 > 80) {
+            if (++this.srtimer1 > 90) {
                 this.srtimer1 = 0;
-                this.stimer += 40;
+                this.stimer += 45;
             }
 
             if (++this.srtimer2 >= 960) {
@@ -144,6 +148,40 @@ class HalfBoss1 extends BossBase {
                     Dan.fireCarrier(this.x, this.y, vx, vy, "d", "hb3");
                 }
             }
+           
+            // Normal fire
+            if (this.stimer > 0) {
+                this.stimer--;
+                if (this.timer % 16 == 1) 
+                    Dan.fireAimed(this.x, this.y, 10, "hb4");
+            }
+
+            // Rotating shots
+            if (this.timer % 320 == 0) {
+                this.rstimer1 = 128;
+                this.rstimer2 = 0;
+            }
+
+            if (this.rstimer1 > 0) {
+                const rs1 = this.rstimer1 -= 2;
+                if (rs1 % 16 == 0) {
+                    const a = Math.PI * rs1 / 128;
+                    const vx = Math.floor(10 * Math.cos(a));
+                    const vy = Math.floor(10 * Math.sin(a));
+                    Dan.fireStandard(this.x, this.y, vx, vy, "hb4"); 
+                }
+            }
+
+            if (this.rstimer2 < 256) {
+                const rs2 = this.rstimer2 += 2;
+                if (rs2 > 128 && rs2 % 8 == 0) {
+                    const a = Math.PI * (rs2 - 128) / 128;
+                    const vx = Math.floor(10 * Math.cos(a));
+                    const vy = Math.floor(10 * Math.sin(a));
+                    Dan.fireStandard(this.x, this.y, vx, vy, "hb4"); 
+                }
+            }
+
             break;
         }
         }
