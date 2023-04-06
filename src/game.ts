@@ -66,7 +66,7 @@ type Game = {
 
 const g : Game = {
     state: GS_STARTING_LEVEL,
-    level: gBOSS1,
+    level: gLEVEL1,
     prerender: 0,
     player_enter: 64,
     specialscreen: 0
@@ -155,6 +155,8 @@ function startLevel() {
         case gBOSSMODE2:
             Pickup.generateChoices();
         case gBOSS2:
+            Level.spawn(0);
+            Boss.start(1);
             Background.set(Background.BOSS2);
             g.prerender = 64;
             break;

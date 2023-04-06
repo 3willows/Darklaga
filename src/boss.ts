@@ -128,6 +128,18 @@ class BossBase {
             GL.drawRectAdditive(0, 20, 240, 280, a, a, a, 1);
         }
     }
+
+    // Shoot bullets if close to the player 
+    protected proximityGun(px: number, py: number) {
+        if (this.timer % 3 == 0) {
+            if ((py - this.y) * (py - this.y) + (px - this.x) * (px - this.x) < 50000) {
+                const a = Math.random() * Math.PI;
+                const vx = Math.floor(10 * Math.cos(a));
+                const vy = Math.floor(10 * Math.sin(a)); 
+                Dan.fireCarrier(this.x, this.y, vx, vy, "v", "hb3");
+            }
+        }
+    }
 }
 
 class HalfBoss1 extends BossBase {
@@ -220,15 +232,7 @@ class HalfBoss1 extends BossBase {
                 this.stimer += 360;
             }
 
-            // Proximity gun
-            if (this.timer % 3 == 0) {
-                if ((py - this.y) * (py - this.y) + (px - this.x) * (px - this.x) < 50000) {
-                    const a = Math.random() * Math.PI;
-                    const vx = Math.floor(10 * Math.cos(a));
-                    const vy = Math.floor(10 * Math.sin(a)); 
-                    Dan.fireCarrier(this.x, this.y, vx, vy, "v", "hb3");
-                }
-            }
+            this.proximityGun(px, py);
 
             // Shooting missiles
             let missiles = false;
@@ -308,15 +312,7 @@ class HalfBoss1 extends BossBase {
                 this.stimer = 40;
             }
 
-            // Proximity gun
-            if (this.timer % 3 == 0) {
-                if ((py - this.y) * (py - this.y) + (px - this.x) * (px - this.x) < 50000) {
-                    const a = Math.random() * Math.PI;
-                    const vx = Math.floor(10 * Math.cos(a));
-                    const vy = Math.floor(10 * Math.sin(a)); 
-                    Dan.fireCarrier(this.x, this.y, vx, vy, "v", "hb3");
-                }
-            }
+            this.proximityGun(px, py);
             
             // Normal fire
             if (this.stimer > 0) {
@@ -365,15 +361,7 @@ class HalfBoss1 extends BossBase {
                     this.x += tx < this.x ? -8 : 8;
             }
 
-            // Proximity gun
-            if (this.timer % 3 == 0) {
-                if ((py - this.y) * (py - this.y) + (px - this.x) * (px - this.x) < 50000) {
-                    const a = Math.random() * Math.PI;
-                    const vx = Math.floor(10 * Math.cos(a));
-                    const vy = Math.floor(10 * Math.sin(a)); 
-                    Dan.fireCarrier(this.x, this.y, vx, vy, "v", "hb3");
-                }
-            }
+            this.proximityGun(px, py);
 
             if (period > 64 && period < 76) {
                 this.ctimer = 3 - Math.floor((period - 64) / 3)
@@ -426,6 +414,210 @@ class HalfBoss1 extends BossBase {
     }
 }
 
+class HalfBoss2 extends BossBase 
+{
+    private yy : number = -820
+
+    constructor() {
+        super(/* Health */ 13 + (opts.UseStrongerEnemies ? 1 : 0),
+            /* xy */ 240, -820, 
+            /* collision offset */ 
+                3 * S.halfbossb.w, 
+                5 * S.halfbossb.h,
+            /* collision box */ 
+                2 * S.halfbossb.w, 
+                2 * S.halfbossb.h,
+            /* timer */ 45)
+        this.lives = 3;
+    }
+
+    private angle() {
+        return this.timer * Math.PI / 128;
+    }
+
+    public shootable(): boolean {
+        return this.stage > 0 && !this.dead;
+    }
+
+    public die() {
+        this.suffering = 300;
+        if (this.stage++ < 4) { 
+            --this.lives;
+            this.baseHealth = 14 + (opts.UseStrongerEnemies ? 1 : 0);
+            this.health = 1 << this.baseHealth;
+        } else {
+            super.die();
+        }
+    }
+
+    public step() {
+        super.step();
+        const a = this.angle();
+
+        this.x = (120 - S.halfbossb.w / 2)
+            + Math.floor(42 * Math.cos(a))
+            + Math.floor(10 * Math.cos(a * 0.27)) << 3;
+        this.y = this.yy + 
+            (Math.floor(12 * Math.sin(a * 0.63)) << 3);
+
+        if (this.dead) {
+            this.timer++;
+            if (this.suffering < 200) {
+                this.yy -= 8;
+            }
+            if (this.suffering-- == 0) {
+                active = undefined;
+            }
+        }
+
+        switch (this.stage) {
+        case 0: 
+        {
+            if (this.yy < 600) {
+                this.yy += 4;
+                this.warningTimer = Math.min(1 + this.warningTimer, S.warningback.h);
+            } else if (this.warningTimer > 0) {
+                --this.warningTimer;
+            } else {
+                this.stage = 1;
+            }
+            break;
+        }
+        case 1:
+        {
+            const {x: px, y: py} = pos();
+            
+            this.proximityGun(px, py);
+
+            if ((this.timer % 158) < 128 && (this.timer % 158) % 6 == 0) {
+                Dan.fireAdn(this.x + 256, this.y + 256, "hb4",  255);
+                Dan.fireAdn(this.x + 256, this.y + 256, "hb4", -255);
+            }
+
+            break;
+        }
+        case 2: 
+        {
+            if (this.timer % (this.suffering ? 20 : 30) == 0) {
+                Float.addExplosion(
+                    Math.floor(this.x + Math.random() * 256 - 140),
+                    Math.floor(this.y + Math.random() * 256 - 140));
+            }
+
+            if (this.suffering > 30) {
+                this.timer++;
+            }
+
+            if (this.suffering) break;
+
+            const {x: px, y: py} = pos();
+
+            this.proximityGun(px, py);
+
+            if ((this.timer % 100) == 0 || (this.timer % 100) == 8) {
+                Dan.fireAroundSeek(
+                    this.x + 256, 
+                    this.y + 256,
+                    "hb5");
+            }
+
+            if (this.hitPrev && (this.timer % 6) == 0) {
+                Dan.fireAdn(this.x + 256, this.y + 256, "hb4",  255);
+                Dan.fireAdn(this.x + 256, this.y + 256, "hb4", -255);
+            }
+
+            break;
+        }
+        case 3: 
+        {
+            if (this.timer % (this.suffering ? 10 : 20) == 0) {
+                Float.addExplosion(
+                    Math.floor(this.x + Math.random() * 256 - 140),
+                    Math.floor(this.y + Math.random() * 256 - 140));
+            }
+
+            if (this.suffering > 30) {
+                this.timer++;
+            }
+            
+            if (this.suffering) break;
+
+            if ((this.timer % 200) == 0) {
+                for (let a = 0; a < 2 * Math.PI; a += Math.PI / 4)
+                    Dan.fireMissile(this.x + 256, this.y + 256, a, "hb5");
+            }
+
+            if ((this.timer % 158) == 0) {
+                for (let a = 0; a < Math.PI; a += Math.PI / 4)
+                    Dan.fireWorks(this.x + 256, this.y + 256, 
+                        Math.floor(8 * Math.cos(a)),
+                        Math.floor(8 * Math.sin(a)),
+                        "hb3", "hb4");
+            }
+            break;
+        }
+        case 4: 
+        {
+            if (this.timer % (this.suffering ? 5 : 10) == 0) {
+                Float.addExplosion(
+                    Math.floor(this.x + Math.random() * 256 - 140),
+                    Math.floor(this.y + Math.random() * 256 - 140));
+            }
+
+            if (this.suffering > 30) {
+                this.timer += 2;
+            }
+
+            if (this.suffering) break;
+            if (this.timer % 3 != 0) break;
+
+            const cx = this.x + 256;
+            const cy = this.y + 256;
+
+            const {y: py} = pos();
+
+            if (py < cy) {
+                Dan.fireCarrier(cx, cy, -10, 0, "v", "hb3");
+            }
+
+            Dan.fireStandard(cx, cy + 64, 0, 64, "hbv");
+            Dan.fireStandard(cx - 32, cy + 48, -32, 48, "hbl");
+            Dan.fireStandard(cx + 32, cy + 48, 32, 48, "hbr");
+
+            if ((this.timer % 128) < 50 && (this.timer % 128) % 10 == 0) {
+                const a = Math.random() * Math.PI;
+                Dan.fireWorks(this.x + 256, this.y + 256, 
+                    Math.floor(8 * Math.cos(a)),
+                    Math.floor(8 * Math.sin(a)),
+                    "hb3", "hb4");
+            }
+
+            break;
+        }
+        }
+    }
+
+    public render() {
+        
+        const dying = this.dead 
+            ? Math.min(40, (300 - this.suffering)) 
+            : 0;
+
+        const a = this.angle();
+        for (let i = 9; i >= 0; --i) {
+            const aa = a + i * Math.PI / 8;
+            const x = 120 - S.halfbossb.w / 2 
+                + Math.floor((42 - 2 * i) * Math.cos(aa))
+                + Math.floor(10 * Math.cos(aa * 0.27))
+                + Math.floor(dying * Math.cos(aa * 0.73))
+            const y = (this.yy >> 3) - 8 * i + Math.floor((12 - i) * Math.sin(aa * 0.63));
+            GL.drawSprite(S.halfbossb, x, y);
+        }
+
+        super.render();
+    }
+}
+
 let active : BossBase|undefined = undefined;
 
 export function step() {
@@ -441,7 +633,8 @@ export function renderTop() {
 }
 
 export function start(n: number) {
-    active = n == 0 ? new HalfBoss1() : undefined;
+    active = n == 0 ? new HalfBoss1() : 
+             n == 1 ? new HalfBoss2() : undefined;
 }
 
 export function over() {

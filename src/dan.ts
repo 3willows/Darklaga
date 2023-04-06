@@ -106,6 +106,9 @@ const spriteNames = {
     "b5d": twoSide(S.bullet5d),
     "b5v": twoSide(S.bullet5v),
     "exv": S.explov,
+    "hbv": S.hbv,
+    "hbl": S.hbl,
+    "hbr": S.hbr,
     "hb3": S.hb3f,
     "hb4": S.hb4f,
     "hb5": S.hb5f
