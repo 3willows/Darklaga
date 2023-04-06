@@ -20,6 +20,7 @@ class BossBase {
     public warningTimer : number = 0
     public timer : number = 0
     public lives : number = 2
+    public dead : boolean = false
 
     constructor(
         public baseHealth : number,
@@ -40,10 +41,6 @@ class BossBase {
     public step() {
 
         ++this.timer;
-
-        if (this.suffering > 0) {
-            if (this.suffering != 150) this.suffering--;
-        }
 
         if (this.shootable()) {
             if (Shot.collideEnemy(
@@ -77,15 +74,20 @@ class BossBase {
         if (this.suffering > 0) {
             --this.suffering;
         }
+
+        if (this.suffering == 0 && this.dead)
+            active = undefined;
     }
 
-    public die() {}
+    public die() {
+        this.dead = true;
+    }
 
     public shootable() { return false; }
 
     // Rendered in the enemy layer.
     public render() {
-        if (this.health < (1 << this.baseHealth) || this.lives < 2) {
+        if (!this.dead && (this.health < (1 << this.baseHealth) || this.lives < 2)) {
             const healthx = 20;
             const healthy = 30;
             
@@ -161,21 +163,23 @@ class HalfBoss1 extends BossBase {
     }
 
     public shootable(): boolean {
-        return this.stage > 0;
+        return this.stage > 0 && !this.dead;
     }
 
     public die() {
-        if (this.stage < 4) {
-            ++this.stage;
+        this.suffering = 300;
+        if (this.stage++ < 3) { 
             --this.lives;
             this.baseHealth = 
                 (this.stage == 2 ? 12 : 14)
                 + (opts.UseStrongerEnemies ? 1 : 0);
             this.health = 1 << this.baseHealth;
-            this.suffering = 300;
-            this.timer = this.mstimer1 = this.mstimer2 = 
+            this.mstimer1 = this.mstimer2 = 
                 this.ctimer = this.stimer = this.srtimer1 = 
                 this.srtimer2 = 0;
+            this.timer = 76; // because of phase 3 animation
+        } else {
+            super.die();
         }
     }
 
@@ -373,7 +377,6 @@ class HalfBoss1 extends BossBase {
 
             if (period > 64 && period < 76) {
                 this.ctimer = 3 - Math.floor((period - 64) / 3)
-                console.log("%d", this.ctimer);
             }
 
             // Shoot when not moving
@@ -400,12 +403,30 @@ class HalfBoss1 extends BossBase {
 
     public render() {
         super.render();
-        const sprite = S.halfboss[3 - this.ctimer];
-        GL.drawSprite(sprite, (this.x >> 3) - 15, (this.y >> 3) - 15);        
+        if (!this.dead || this.suffering > 150) {
+            const sprite = S.halfboss[3 - this.ctimer];
+            GL.drawSprite(sprite, (this.x >> 3) - 15, (this.y >> 3) - 15);        
+        }
+    }
+
+    public renderTop(): void {
+        if (this.dead) {
+            const alpha = Math.min(
+                this.suffering, 
+                300 - this.suffering,
+                128);
+
+            GL.drawSpriteAdditive(
+                S.bigball, 
+                (this.x >> 3) - 70, 
+                (this.y >> 3) - 70,
+                alpha >> 2);
+        }
+        super.renderTop();
     }
 }
 
-let active : BossBase|undefined = new HalfBoss1();
+let active : BossBase|undefined = undefined;
 
 export function step() {
     if (active) active.step();
@@ -417,6 +438,10 @@ export function render() {
 
 export function renderTop() {
     if (active) active.renderTop();
+}
+
+export function start(n: number) {
+    active = n == 0 ? new HalfBoss1() : undefined;
 }
 
 export function over() {
