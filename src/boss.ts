@@ -618,6 +618,89 @@ class HalfBoss2 extends BossBase
     }
 }
 
+class Boss1 extends BossBase
+{
+    private s1accrue : number = 0
+    private s1time : number = 0
+
+    constructor() {
+        super(/* Health */ 14 + (opts.UseStrongerEnemies ? 1 : 0),
+            /* xy */ 860, -1638, 
+            /* collision offset */ 
+                64, 
+                64,
+            /* collision box */ 
+                144, 
+                256,
+            /* timer */ 45)
+        this.lives = 3;
+    }
+
+    private angle() {
+        return this.timer * Math.PI / 128;
+    }
+    
+    public shootable(): boolean {
+        return this.stage > 0 && !this.dead;
+    }
+
+    public step() {
+        super.step();
+
+        const rx = 960 - (S.bosshead.w << 2);
+        this.x = rx + Math.floor(120 * Math.cos(this.angle()));
+
+        switch (this.stage) {
+        case 0: 
+        {
+            if (this.y < 410) {
+                this.y += 4;
+                this.warningTimer = Math.min(1 + this.warningTimer, S.warningback.h);
+            } else if (this.warningTimer > 0) {
+                --this.warningTimer;
+            } else {
+                this.stage = 1;
+            }
+            break;
+        }
+        case 1: 
+        {
+            if (--this.s1time <= 0) {
+                if (this.s1accrue < 9) ++this.s1accrue;
+                this.s1time = 50 * this.s1accrue;
+
+                const {x: px, y: py} = pos();
+                         
+                let dx = px - this.x - 96;
+                let dy = py - this.y - 64;
+                const norm = Math.sqrt(dx * dx + dy * dy);
+                dx = Math.round(dx / norm * 10);
+                dy = Math.round(dy / norm * 10);
+
+                Dan.fireFork(this.x + 96, this.y + 64, dx, dy, "b1v", this.s1accrue - 1);
+            }
+        }
+        }
+    }
+
+    public render() {
+        super.render();
+        
+        const rx = 960 - (S.bosshead.w << 2);
+        const w = 120;
+        const a = this.angle();
+        for (let i = 0; i < 5; ++i) {
+            const x = rx + Math.floor(w * Math.cos(a + (i - 5) / 10));
+            const y = this.y + 790 - 80*i;
+            GL.drawSprite(S.bosstail, x >> 3, y >> 3);
+            GL.drawSpriteAlpha(S.bosstaild, x >> 3, y >> 3, (4 - i) * 5);
+        }
+
+        const hx = rx + Math.floor(w * Math.cos(a));
+        GL.drawSprite(S.bosshead, (hx >> 3) - 4, this.y >> 3); 
+    }
+}
+
 let active : BossBase|undefined = undefined;
 
 export function step() {
@@ -634,7 +717,7 @@ export function renderTop() {
 
 export function start(n: number) {
     active = n == 0 ? new HalfBoss1() : 
-             n == 1 ? new HalfBoss2() : undefined;
+             n == 1 ? new HalfBoss2() : new Boss1();
 }
 
 export function over() {

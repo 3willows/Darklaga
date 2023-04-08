@@ -73,12 +73,20 @@ const DAN_MISL			= 0x0008
 //  PARAMS2 = id of the sprite of the created bullets
 const DAN_FWOK			= 0x0009
 
+// Fork bullet: 
+//   Moves in a direction at constant speed, forks two additional 
+//   bullets every X frames
+//   PARAMS0 = x-velocity
+//   PARAMS1 = y-velocity
+//   PARAMS2 = time between forks
+//   PARAMS3 = fork depth (only fork if >0, children have -1)
+const DAN_FORK			= 0x000F
+
 const DAN_WDIA			= 0x000A
 const DAN_WHOR			= 0x000B
 const DAN_MISL2			= 0x000C
 const DAN_BBNC			= 0x000D
 const DAN_GRAV			= 0x000E
-const DAN_FORK			= 0x000F
 const DAN_SPIR			= 0x0010
 const DAN_FWOK2			= 0x0011
 
@@ -307,6 +315,46 @@ function danStep(ref: number, px: number, py: number) {
     if (type == DAN_CARB) {
         if (++dan[off + TIMER] >= 40) return false;
         return true;
+    }
+
+    if (type == DAN_FORK) {
+        
+        ++dan[off + ANIM];
+
+        const dx = dan[off + PARAM0];
+        const x = dan[off + LEFT] += dx;
+        const dy = dan[off + PARAM1];
+        const y = dan[off + TOP] += dy;
+    
+        const p2 = dan[off + PARAM2];
+        if (dan[off + TIMER]++ >= p2) {
+            dan[off + TIMER] = 0;
+            const p3 = --dan[off + PARAM3];
+            if (p3 >= 0) {    
+                add({
+                    type: DAN_FORK,
+                    sprite: dan[off + SPRITE],
+                    x, y, 
+                    life: 64,
+                    p0: -dy,
+                    p1: dx, 
+                    p2,
+                    p3 
+                });
+                add({
+                    type: DAN_FORK,
+                    sprite: dan[off + SPRITE],
+                    x, y, 
+                    life: 64,
+                    p0: dy,
+                    p1: -dx, 
+                    p2,
+                    p3 
+                });
+            }
+        }
+
+        return x > -420 && x < 2420 && y > -420 && y < 2960;
     }
 
     throw "Unknown dan type"
@@ -611,4 +659,8 @@ export function fireQuad(x: number, y: number, sprite: string, angle: number) {
 
 export function fireAdn(x: number, y: number, sprite: string, angle: number) {
     add({ type: DAN_ADN, sprite, x, y, life: 64, p0: x, p3: angle })
+}
+
+export function fireFork(x: number, y: number, vx: number, vy: number, sprite: string, d: number) {
+    add({ type: DAN_FORK, sprite, x, y, life: 64, p0: vx, p1: vy, p2: 24, p3: d })
 }
