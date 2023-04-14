@@ -623,6 +623,8 @@ class Boss1 extends BossBase
     private s1accrue : number = 0
     private s1time : number = 0
 
+    private s2windup : number = 0
+
     constructor() {
         super(/* Health */ 14 + (opts.UseStrongerEnemies ? 1 : 0),
             /* xy */ 860, -1638, 
@@ -642,6 +644,17 @@ class Boss1 extends BossBase
     
     public shootable(): boolean {
         return this.stage > 0 && !this.dead;
+    }
+
+    public die() {
+        this.suffering = 300;
+        if (this.stage++ < 4) { 
+            --this.lives;
+            this.baseHealth = 14 + (opts.UseStrongerEnemies ? 1 : 0);
+            this.health = 1 << this.baseHealth;
+        } else {
+            super.die();
+        }
     }
 
     public step() {
@@ -679,6 +692,30 @@ class Boss1 extends BossBase
 
                 Dan.fireFork(this.x + 96, this.y + 64, dx, dy, "b1v", this.s1accrue - 1);
             }
+            break;
+        }
+        case 2:
+        {
+            if (this.suffering) {
+                this.timer++; 
+                break;
+            }
+
+            if (++this.s2windup > 160) this.s2windup = 0;
+            const early = this.s2windup < 128;
+            if ((this.s2windup % (early ? 16 : 4) == 0)) {
+                const x = this.x + 64;
+                const y = this.y + 96;
+                const dx = Math.random() > 0.5 ? 16 : -16;
+                const dy = Math.floor(Math.random() * 32);
+
+                if (early) 
+                    Dan.fireDiagonal(x, y, dx, dy - 8, "bs3");
+                else
+                    Dan.fireHorizontal(x, y, dx, dy/2 + 8, "bs1");
+            }
+
+            break;
         }
         }
     }

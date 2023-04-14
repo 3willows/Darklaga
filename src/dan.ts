@@ -82,8 +82,20 @@ const DAN_FWOK			= 0x0009
 //   PARAMS3 = fork depth (only fork if >0, children have -1)
 const DAN_FORK			= 0x000F
 
+// Diagonal bullet:
+//   Moves straight until hitting a wall, then moves at a diagonal
+//   back down. Disappears below the bottom.
+//   PARAMS0 = x-velociy
+//   PARAMS1 = y-velocity
 const DAN_WDIA			= 0x000A
+
+// Horizontal bullet: 
+//   Moves straight until hitting a wall, then steps down by a few pixels 
+//   and then moves horizontally. Disappears below the bottom.
+//   PARAMS0 = x-velociy
+//   PARAMS1 = y-velocity
 const DAN_WHOR			= 0x000B
+
 const DAN_MISL2			= 0x000C
 const DAN_BBNC			= 0x000D
 const DAN_GRAV			= 0x000E
@@ -119,7 +131,10 @@ const spriteNames = {
     "hbr": S.hbr,
     "hb3": S.hb3f,
     "hb4": S.hb4f,
-    "hb5": S.hb5f
+    "hb5": S.hb5f,
+    "bs1": S.bs,
+    "bs2": S.bsb,
+    "bs3": S.bsc
 }
 
 // Index and reverse-index sprite names
@@ -314,6 +329,32 @@ function danStep(ref: number, px: number, py: number) {
 
     if (type == DAN_CARB) {
         if (++dan[off + TIMER] >= 40) return false;
+        return true;
+    }
+
+    if (type == DAN_WDIA || type == DAN_WHOR) {
+        const ish = type == DAN_WHOR;
+        ++dan[off + ANIM];
+
+        const dx = dan[off + PARAM0];
+        const x = dan[off + LEFT] += dx;
+        const dy = dan[off + PARAM1];
+        const y = dan[off + TOP] += dy;
+    
+        if (y <= -820 || y >= 3360) return false;
+
+        if (x < -160) {
+            dan[off + PARAM0] = ish ? 8 : 4;
+            dan[off + PARAM1] = ish ? 0 : 4;
+            if (ish) dan[off + TOP] += 320;
+        }
+
+        if (x > 2000) {
+            dan[off + PARAM0] = ish ? -8 : -4;
+            dan[off + PARAM1] = ish ?  0 :  4;
+            if (ish) dan[off + TOP] += 320;
+        }
+
         return true;
     }
 
@@ -663,4 +704,12 @@ export function fireAdn(x: number, y: number, sprite: string, angle: number) {
 
 export function fireFork(x: number, y: number, vx: number, vy: number, sprite: string, d: number) {
     add({ type: DAN_FORK, sprite, x, y, life: 64, p0: vx, p1: vy, p2: 24, p3: d })
+}
+
+export function fireDiagonal(x: number, y: number, vx: number, vy: number, sprite: string) {
+    add({ type: DAN_WDIA, sprite, x, y, life: 64, p0: vx, p1: vy})
+}
+
+export function fireHorizontal(x: number, y: number, vx: number, vy: number, sprite: string) {
+    add({ type: DAN_WHOR, sprite, x, y, life: 64, p0: vx, p1: vy})
 }
