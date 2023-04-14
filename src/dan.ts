@@ -62,6 +62,7 @@ const DAN_ADN			= 0x0007
 // Homing missile
 //  Moves towards an angle, initially adjusts angle to aim at
 //  the player
+//  PARAMS2 = wait until starting to adjust
 //  PARAMS3 = angle 
 const DAN_MISL			= 0x0008
 
@@ -96,7 +97,6 @@ const DAN_WDIA			= 0x000A
 //   PARAMS1 = y-velocity
 const DAN_WHOR			= 0x000B
 
-const DAN_MISL2			= 0x000C
 const DAN_BBNC			= 0x000D
 const DAN_GRAV			= 0x000E
 const DAN_SPIR			= 0x0010
@@ -253,7 +253,7 @@ function danStep(ref: number, px: number, py: number) {
         const a = dan[off + PARAM3] / 256 * Math.PI;
         const left = dan[off + LEFT] += Math.floor(10 * Math.cos(a));
         const top = dan[off + TOP] += Math.floor(10 * Math.sin(a));
-        if (timer < 100 && timer % 2 == 0) {
+        if (timer > dan[off + PARAM2] && timer < 100 && timer % 2 == 0) {
             const pp = Player.pos();
             const dx = pp.x - left;
             const dy = pp.y - top;
@@ -263,7 +263,7 @@ function danStep(ref: number, px: number, py: number) {
                 Math.abs(aim - a) < Math.PI ? aim :
                 Math.abs(aim - a + 2 * Math.PI) < Math.PI ? aim + 2 * Math.PI : 
                                                             aim - 2 * Math.PI; 
-            
+
             dan[off + PARAM3] += a > adjaim ? -3 : 3;
         }
 
@@ -586,7 +586,8 @@ export function fireMissile(
     x: number, 
     y: number, 
     a: number,
-    sprite: string) 
+    sprite: string,
+    wait: number = 0) 
 {
     add({
         type: DAN_MISL,
@@ -594,6 +595,7 @@ export function fireMissile(
         x,
         y,
         life: 64,
+        p2: wait,
         p3: Math.floor(a / Math.PI * 256)
     })
 }

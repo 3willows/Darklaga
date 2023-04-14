@@ -625,6 +625,9 @@ class Boss1 extends BossBase
 
     private s2windup : number = 0
 
+    private s3wave1 : number = 256
+    private s3wave2 : number = 0
+
     constructor() {
         super(/* Health */ 14 + (opts.UseStrongerEnemies ? 1 : 0),
             /* xy */ 860, -1638, 
@@ -672,7 +675,7 @@ class Boss1 extends BossBase
             } else if (this.warningTimer > 0) {
                 --this.warningTimer;
             } else {
-                this.stage = 1;
+                this.stage = 3;
             }
             break;
         }
@@ -713,6 +716,48 @@ class Boss1 extends BossBase
                     Dan.fireDiagonal(x, y, dx, dy - 8, "bs3");
                 else
                     Dan.fireHorizontal(x, y, dx, dy/2 + 8, "bs1");
+            }
+
+            break;
+        }
+        case 3: 
+        {
+            if (this.suffering) {
+                this.timer++; 
+                break;
+            }
+
+            if (this.y < 1000) this.y += 2;
+
+            const cx = this.x + 96;
+            const cy = this.y + 96;
+
+            if (this.s3wave1 > 0) {
+                const s3wave1 = this.s3wave1 -= 3;
+                if (s3wave1 % 8 == 0) {
+                    const a = Math.PI * s3wave1 / 256;
+                    const vx = Math.floor(10 * Math.cos(a));
+                    const vy = Math.floor(10 * Math.sin(a));
+                    Dan.fireStandard(cx, cy, vx, vy, "bs1")
+                }
+                if (s3wave1 <= 0) this.s3wave2 = 256; 
+            }
+
+            if (this.s3wave2 > 0) {
+                const s3wave2 = this.s3wave2 -= 4;
+                if (s3wave2 % 16 == 0) {
+                    const a = Math.PI * (1 - s3wave2 / 256);
+                    const vx = Math.floor(10 * Math.cos(a));
+                    const vy = Math.floor(10 * Math.sin(a));
+                    Dan.fireStandard(cx, cy, vx, vy, "bs1")
+                }
+                if (s3wave2 <= 0) { this.s3wave1 = 256; }
+            }
+
+            const t = this.timer % 64;
+            if (t <= 24 && t % 8 == 0) {
+                Dan.fireMissile(cx, cy, (5 * t) / 256 * Math.PI, "bs2", 25);
+                Dan.fireMissile(cx, cy, (256 - 5 * t) / 256 * Math.PI, "bs2", 25);
             }
 
             break;
