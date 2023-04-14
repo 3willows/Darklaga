@@ -768,14 +768,14 @@ class Boss1 extends BossBase
     public render() {
         super.render();
         
-        const rx = 960 - (S.bosshead.w << 2);
+        const rx = 960 - (S.bosshead.w << 2) + 32;
         const w = 120;
         const a = this.angle();
-        for (let i = 0; i < 5; ++i) {
-            const x = rx + Math.floor(w * Math.cos(a + (i - 5) / 10));
-            const y = this.y + 790 - 80*i;
+        for (let i = 0; i < 6; ++i) {
+            const x = rx + Math.floor(w * (i / 6) * Math.cos(a + (i - 6) / 10));
+            const y = this.y + 870 - 80*i;
             GL.drawSprite(S.bosstail, x >> 3, y >> 3);
-            GL.drawSpriteAlpha(S.bosstaild, x >> 3, y >> 3, (4 - i) * 5);
+            GL.drawSpriteAlpha(S.bosstaild, x >> 3, y >> 3, (5 - i) * 6);
         }
 
         const hx = rx + Math.floor(w * Math.cos(a));
