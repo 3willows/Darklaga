@@ -43,6 +43,9 @@ class BossBase {
         ++this.timer;
 
         if (this.shootable()) {
+
+            Shot.setTarget(this.x, this.y);
+
             if (Shot.collideEnemy(
                 this.x + this.cdx, 
                 this.y + this.cdy,
