@@ -628,6 +628,8 @@ class Boss1 extends BossBase
     private s3wave1 : number = 256
     private s3wave2 : number = 0
 
+    private s4tick : number = 0
+
     constructor() {
         super(/* Health */ 14 + (opts.UseStrongerEnemies ? 1 : 0),
             /* xy */ 860, -1638, 
@@ -675,7 +677,7 @@ class Boss1 extends BossBase
             } else if (this.warningTimer > 0) {
                 --this.warningTimer;
             } else {
-                this.stage = 3;
+                this.stage = 1;
             }
             break;
         }
@@ -760,6 +762,30 @@ class Boss1 extends BossBase
                 Dan.fireMissile(cx, cy, (256 - 5 * t) / 256 * Math.PI, "bs2", 25);
             }
 
+            break;
+        }
+        case 4:
+        {                
+            if (this.suffering) {
+                this.timer++; 
+                break;
+            }
+
+            ++this.s4tick;
+
+            if (this.s4tick % 30 == 0)
+            {
+                const cx = this.x + 96;
+                const cy = this.y + 96;
+                const d = this.s4tick % 60 == 0 ? 1 : -1;
+                const a = 512 + this.timer;
+                for (let i = 0; i < 32; i += 8) {
+                    Dan.fireSpiral(cx, cy, a + i, d, "bs2");
+                    Dan.fireSpiral(cx, cy, a + 64 + i, d, "bs2");
+                    Dan.fireSpiral(cx, cy, a + 128 + i, d, "bs2");
+                    Dan.fireSpiral(cx, cy, a + 192 + i, d, "bs2");
+                }
+            }
             break;
         }
         }

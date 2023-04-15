@@ -97,9 +97,16 @@ const DAN_WDIA			= 0x000A
 //   PARAMS1 = y-velocity
 const DAN_WHOR			= 0x000B
 
+// Spiral bullet: 
+//   Moves in a spiral pattern away from a center
+//   PARAMS0 = x-center
+//   PARAMS1 = y-center
+//   PARAMS2 = initial angle (255 = full circle)
+//   PARAMS3 = direction (1 or -1)
+const DAN_SPIR			= 0x0010
+
 const DAN_BBNC			= 0x000D
 const DAN_GRAV			= 0x000E
-const DAN_SPIR			= 0x0010
 const DAN_FWOK2			= 0x0011
 
 // Given a shot sprite-set 01234, oscillates 23432101 ;
@@ -329,6 +336,23 @@ function danStep(ref: number, px: number, py: number) {
 
     if (type == DAN_CARB) {
         if (++dan[off + TIMER] >= 40) return false;
+        return true;
+    }
+
+    if (type == DAN_SPIR) {
+        const t = ++dan[off + TIMER];
+        const radius = 4 * t;
+        const angle = (dan[off + PARAM2] + (dan[off + PARAM3] * t >> 1)) * Math.PI / 128;
+
+        const left = dan[off + LEFT] = dan[off + PARAM0] + radius * Math.cos(angle);
+        const top  = dan[off + TOP ] = dan[off + PARAM1] + radius * Math.sin(angle);
+
+        
+        if (left <= -20-400 || left > 1920+400 || 
+            top <= -20-400 || top >= 2560+400) 
+            // Die if out-of-bounds
+            return false;
+
         return true;
     }
 
@@ -714,4 +738,11 @@ export function fireDiagonal(x: number, y: number, vx: number, vy: number, sprit
 
 export function fireHorizontal(x: number, y: number, vx: number, vy: number, sprite: string) {
     add({ type: DAN_WHOR, sprite, x, y, life: 64, p0: vx, p1: vy})
+}
+
+// Angle is 0..255 !
+export function fireSpiral(x: number, y: number, a: number, m: number, sprite: string) {
+    const type = DAN_SPIR;
+    const p2 = a % 256;
+    add({ type, sprite, x, y, life: 64, p0: x, p1: y, p2, p3: m })
 }
