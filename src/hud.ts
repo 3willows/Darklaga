@@ -82,7 +82,7 @@ function empty() : Hud {
         weapon_overload: 0,
         offense: ITEM_ONONE,
         offense_overload: 0,
-        defense: ITEM_DNONE,
+        defense: ITEM_SHIELD,
         defense_overload: 0,
         lastlife: 0,
         invulnerable: 0,

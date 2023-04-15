@@ -166,11 +166,14 @@ export function step() {
 
     const friction = opts.ModPlayerFriction * opts.ModPlayerFriction * 4;
     const speed = 5 + opts.ModPlayerSpeed;
+    
+    pl.timer++;
 
     // user input
     
     pl.r_x_speed = 0;
     pl.r_y_speed = 0;
+    
 
     if (pl.controllable) {
 
@@ -261,13 +264,19 @@ export function step() {
             pl.modules2 = Math.min(128, 16 + pl.modules2);
         }
     }
+}
 
-
+// Prepare back-and-forth animation for shield
+const shieldn = S.shieldn.slice();
+const shieldo = S.shieldo.slice();
+for (let i = shieldn.length - 2; i > 0; --i) {
+    shieldn.push(S.shieldn[i]);
+    shieldo.push(S.shieldo[i]);
 }
 
 export function render() {
     
-    const {x, y, distance, muzzle_flash, modules1, modules2} = pl;
+    const {x, y, distance, muzzle_flash, modules1, modules2, timer} = pl;
 
     if (modules1) {
         GL.drawSprite(S.lasmod, (x + 56 - ((modules1*6)>>3))>>3, (y >> 3) + 8 - (modules1>>4));
@@ -277,6 +286,16 @@ export function render() {
     if (modules2) {
         GL.drawSprite(S.lasmod, (x + 56 - ((modules2*12)>>3))>>3, (y >> 3) + 10 - (modules2>>4));
         GL.drawSprite(S.lasmod, (x + 56 + ((modules2*12)>>3))>>3, (y >> 3) + 10 - (modules2>>4));
+    }
+
+    const stuff = Hud.stuff();
+    if (stuff.defense == Hud.ITEM_SHIELD) {
+        const sprites = stuff.defense_overload ? shieldo : shieldn;
+        GL.drawSpriteAlpha(
+            sprites[(timer >> 2) % sprites.length], 
+            (x >> 3) - 9,
+            (y >> 3) - 11,
+            28);
     }
 
     const frame = S.player[distance < -10 ? 0 :

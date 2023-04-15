@@ -66,7 +66,7 @@ type Game = {
 
 const g : Game = {
     state: GS_STARTING_LEVEL,
-    level: gBOSSMODE3,
+    level: gLEVEL1,
     prerender: 0,
     player_enter: 64,
     specialscreen: 0
