@@ -8,6 +8,7 @@ export const opts = {
     UseGraze: true,
     UseScore: true,
     UseCombo: true,
+    UseFury: true,
 
     UseWeakerEnemies: false,
     UseStrongerEnemies: false, 

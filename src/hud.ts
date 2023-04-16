@@ -23,13 +23,13 @@ const GRAZE_DELAY = 170
 type Hud = {
     score: number
     real_score: number
-    frenzied: number
+    using_fury: boolean
     timer: number
     frl1: number
     frl2: number
     frl3: number
-    frenzy_progress: number
-    displayed_frenzy: number
+    fury_progress: number
+    displayed_fury: number
     combo: number
     combo_timer: number
     lives: number
@@ -63,16 +63,16 @@ function empty() : Hud {
     return {
         score: 0,
         real_score: 0,
-        frenzied: 0,
+        using_fury: false,
         timer: 0,
         frl1: 0,
         frl2: 0,
         frl3: 0,
-        graze: 1,
+        graze: 0,
         graze_anim: 0,
         graze_timer: 0,
-        frenzy_progress: 0,
-        displayed_frenzy: 0,
+        fury_progress: 0,
+        displayed_fury: 0,
         combo: 1,
         combo_timer: COMBO_DELAY,
         lives: 3,
@@ -82,7 +82,7 @@ function empty() : Hud {
         weapon_overload: 0,
         offense: ITEM_ONONE,
         offense_overload: 0,
-        defense: ITEM_SHIELD,
+        defense: ITEM_DNONE,
         defense_overload: 0,
         lastlife: 0,
         invulnerable: 0,
@@ -188,6 +188,27 @@ export function step() {
         // If disrupted, slowly time out.
         if (hud.graze < 0 && hud.graze_timer-- <= 1) hud.graze = 0;
     }
+
+    if (opts.UseFury) {
+        
+		if( hud.displayed_fury > 87381 ) { ++hud.frl1; } else { --hud.frl1; }
+		if( hud.frl1 > 64 ) { hud.frl1 = 64; }
+		if( hud.frl1 < 0 ) { hud.frl1 = 0; }
+		if( hud.displayed_fury > 2*87381 ) { ++hud.frl2; } else { --hud.frl2; }
+		if( hud.frl2 > 64 ) { hud.frl2 = 64; }
+		if( hud.frl2 < 0 ) { hud.frl2 = 0; }
+		if( hud.displayed_fury > 262114 ) { ++hud.frl3; } else { --hud.frl3; }
+		if( hud.frl3 > 64 ) { hud.frl3 = 64; }
+		if( hud.frl3 < 0 ) { hud.frl3 = 0; }
+
+        if (hud.fury_progress > hud.displayed_fury) {
+            const delta = hud.fury_progress - hud.displayed_fury;
+            const add = Math.max(1, Math.floor(delta / 8));
+            hud.displayed_fury += add;
+        } else {
+            hud.displayed_fury = hud.fury_progress;
+        }
+    }
 }
 
 // Compute the current score multiplier
@@ -232,6 +253,24 @@ function addScore(
     Float.add(x, y, added);
 }
 
+function furyProgress(log_value: number) {
+
+    if (hud.using_fury) return;
+
+    let multiplier = 40;
+    if (hud.fury_progress < 131072) multiplier = 180;
+    if (hud.defense == ITEM_FURY) 
+        multiplier *= hud.defense_overload ? 4 : 2.5;
+
+    console.log("Multiplier: %d, log_value: %d", multiplier, log_value);
+
+    hud.fury_progress += multiplier * (log_value - 5) * (log_value - 5);
+
+    if (hud.fury_progress > 262144) {
+        hud.fury_progress = 263000;
+    }
+}
+
 // Invoked when an enemy dies
 export function onEnemyDeath(
     x: number, 
@@ -245,6 +284,10 @@ export function onEnemyDeath(
         hud.combo_timer = COMBO_DELAY;
         hud.combo++;
     }    
+
+    if (opts.UseFury) {
+        furyProgress(log_value);
+    }
 }
 
 // t in 0..31
@@ -316,6 +359,29 @@ export function render() {
                 S.texcombo[(hud.fire_timer >> 2) % S.texcombo.length],
                 170, 4, alpha, alpha);
         }
+    }
+
+    // fury ==================================================================
+
+    if (opts.UseFury) {
+
+        // Display full bar and then cover unused part with black
+        if (hud.displayed_fury < 262114 && hud.using_fury) {
+            GL.drawSprite(S.furybar, 4, 306);
+        } else {
+            const tex = S.texfury[(hud.fire_timer >> 2) % S.texfury.length];
+            GL.drawSprite(tex, 8, 306);
+            GL.drawSprite(tex, 40, 306);
+            GL.drawSpriteAdditive(S.furybar, 4, 306, 8);
+        }
+
+        const furyWidth = 4 + ((44 * hud.displayed_fury) >> 18);
+        GL.drawRect(4 + furyWidth, 300, 64 - furyWidth, 20, 0, 0, 0, 1);
+        GL.drawSprite(S.furybox, 4, 306);
+
+        GL.drawSpriteAdditive(S.furylight, 54, 307, hud.frl1 >> 1);
+        GL.drawSpriteAdditive(S.furylight, 64, 307, hud.frl2 >> 1);
+        GL.drawSpriteAdditive(S.furylight, 74, 307, hud.frl3 >> 1);
     }
 
     // multiplier ============================================================

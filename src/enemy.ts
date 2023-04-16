@@ -33,6 +33,7 @@ export class Enemy {
         if (!opts.UseWeakerEnemies) ++this.basehealth;
         if (opts.UseStrongerEnemies) ++this.basehealth;
         this.health = 1 << this.basehealth;
+        console.log("BaseHealth: %d, self: %o", this.basehealth, this);
         this.alpha = 33;
     }
 

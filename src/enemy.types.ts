@@ -734,7 +734,10 @@ export class Suicide extends Enemy {
 
         const radius = this.mode == "n" ? 640 : 1280;
         if (this.y + radius > py) {
-            return new Suicide2(this.x, this.y, this.mode, this.health)
+            return new Suicide2(
+                this.x, this.y, this.mode, 
+                this.mode == "n" ? 5 :
+                this.mode == "d" ? 7 : 6)
         }
 
         return this;
