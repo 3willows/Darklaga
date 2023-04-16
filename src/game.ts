@@ -9,6 +9,7 @@ import * as Hud from "./hud"
 import * as Float from "./float"
 import * as Boss from "./boss"
 import * as GL from "./webgl"
+import * as Fury from "./fury"
 
 const gLEVEL1 = 0
 const gLEVEL2 = 1
@@ -242,6 +243,7 @@ function playStep() {
     Player.step();
     Pickup.step();
     Dan.step();
+    Fury.step();
     Float.step();
     
     if (!Background.animated())
@@ -250,7 +252,8 @@ function playStep() {
     if (Level.over() && 
         g.player_enter == 64 && 
         Enemy.count() == 0 && 
-        Boss.over()) 
+        Boss.over() && 
+        !Fury.isRunning()) 
     {
         endLevel();
     }
@@ -267,6 +270,7 @@ function endLevelStep() {
     Dan.step();
     Float.step();
     Boss.step();
+    Fury.step();
 
     nextLevel();
 }
@@ -288,6 +292,7 @@ function startingLevelStep() {
     Dan.step();
     Float.step();
     Boss.step();
+    Fury.step();
 
     if (Background.warping()) return;
 
@@ -317,6 +322,7 @@ startLevel();
 
 export function playRender() {
     Background.render();
+    Fury.renderStart();
     Enemy.render();
     Boss.render();
     Shot.render();
@@ -324,12 +330,14 @@ export function playRender() {
     Player.render();
     Dan.render();
     Boss.renderTop();
+    Fury.renderEnd();
     Hud.render();
     Float.render();
 }
 
 export function endLevelRender() {
     Background.render();
+    Fury.renderStart();
     Enemy.render();
     Boss.render();
     Shot.render();
@@ -337,6 +345,7 @@ export function endLevelRender() {
     Player.render();
     Dan.render();
     Boss.renderTop();
+    Fury.renderEnd();
     Hud.render();
     Float.render();
 }

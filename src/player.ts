@@ -4,6 +4,7 @@ import { key } from "./input"
 import { opts } from "./options"
 import * as Hud from "./hud"
 import * as Shot from "./shot"
+import * as Fury from "./fury"
 
 type Player = {
 
@@ -167,6 +168,8 @@ export function step() {
     const friction = opts.ModPlayerFriction * opts.ModPlayerFriction * 4;
     const speed = 5 + opts.ModPlayerSpeed;
     
+    const stuff = Hud.stuff();
+
     pl.timer++;
 
     // user input
@@ -193,6 +196,12 @@ export function step() {
 
         if (key.action) {
             pl.shooting = 5;
+        }
+
+        if (key.action2 && Hud.furyReady()) {
+            if (stuff.weapon == Hud.ITEM_WNONE) {
+                Fury.startBlaster();
+            }
         }
     }
 
@@ -240,14 +249,13 @@ export function step() {
     }
 
     Hud.setPlayer(pl.x + 88, pl.y + 88);
+    Fury.setPlayer(pl.x + 88, pl.y + 88);
 
     // Shots
 
     if (pl.cooldown) --pl.cooldown;
     if (pl.shooting) --pl.shooting;
     if (pl.muzzle_flash) --pl.muzzle_flash;
-
-    const stuff = Hud.stuff();
 
     if (pl.controllable && !pl.cooldown && (opts.ModAutoFire || pl.shooting))
         shoot(stuff)

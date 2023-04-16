@@ -1,5 +1,5 @@
 import { opts } from "options";
-import { blade, bladestar, bladet, blast, lasbme, lasbml, lasbmm, lasbse, lasbsl, lasbsm, lasoml, lasomm, lasosl, lasosm, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
+import { blade, bladestar, bladet, blast, bullet3v, lasbme, lasbml, lasbmm, lasbse, lasbsl, lasbsm, lasoml, lasomm, lasosl, lasosm, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
 import * as GL from "./webgl"
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -80,6 +80,14 @@ function shotStep(ref: number): boolean {
     } else if (type == SHOT_BLASTER) {
 
         if ((shots[off + TOP] -= 96) < -96)
+            shots[off + TYPE] = SHOT_DEAD;
+
+    } else if (type == SHOT_FBLASTER) {
+        
+        const y = (shots[off + TOP] += shots[off + PARAM1]);
+        const x = (shots[off + LEFT] += shots[off + PARAM0]);
+
+        if (x < -120 || x > 1920 || y < -120 || y > 2560)
             shots[off + TYPE] = SHOT_DEAD;
 
     } else if (type == SHOT_ROCKET_SPAWN ||
@@ -403,6 +411,8 @@ function shotRender(ref: number): number {
         renderOLaser(off);
     } else if (type == SHOT_BLASTER) {
         GL.drawSprite(blast, x, y)
+    } else if (type == SHOT_FBLASTER) {
+        GL.drawSprite(bullet3v[0], x, y);
     } else if (type == SHOT_ROCKET_MOVE || type == SHOT_OROCKET_MOVE) {
         GL.drawSprite(rocket, x, y);
     } else if (type == SHOT_ROCKET) {

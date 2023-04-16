@@ -1,6 +1,7 @@
 import * as GL from "./webgl"
 import * as S from "./sprites"
 import * as Float from "./float"
+import * as Fury from "./fury"
 import { opts } from "options"
 import { hasTarget } from "shot"
 
@@ -23,7 +24,6 @@ const GRAZE_DELAY = 170
 type Hud = {
     score: number
     real_score: number
-    using_fury: boolean
     timer: number
     frl1: number
     frl2: number
@@ -63,7 +63,6 @@ function empty() : Hud {
     return {
         score: 0,
         real_score: 0,
-        using_fury: false,
         timer: 0,
         frl1: 0,
         frl2: 0,
@@ -71,7 +70,7 @@ function empty() : Hud {
         graze: 0,
         graze_anim: 0,
         graze_timer: 0,
-        fury_progress: 0,
+        fury_progress: 262114,
         displayed_fury: 0,
         combo: 1,
         combo_timer: COMBO_DELAY,
@@ -201,6 +200,11 @@ export function step() {
 		if( hud.frl3 > 64 ) { hud.frl3 = 64; }
 		if( hud.frl3 < 0 ) { hud.frl3 = 0; }
 
+        if (Fury.isRunning()) {
+            hud.fury_progress = Math.max(0, hud.fury_progress - 512);
+            Fury.setFuel(Math.floor(hud.fury_progress / 512));
+        }
+
         if (hud.fury_progress > hud.displayed_fury) {
             const delta = hud.fury_progress - hud.displayed_fury;
             const add = Math.max(1, Math.floor(delta / 8));
@@ -208,6 +212,7 @@ export function step() {
         } else {
             hud.displayed_fury = hud.fury_progress;
         }
+
     }
 }
 
@@ -255,20 +260,22 @@ function addScore(
 
 function furyProgress(log_value: number) {
 
-    if (hud.using_fury) return;
+    if (Fury.isRunning()) return;
 
     let multiplier = 40;
     if (hud.fury_progress < 131072) multiplier = 180;
     if (hud.defense == ITEM_FURY) 
         multiplier *= hud.defense_overload ? 4 : 2.5;
 
-    console.log("Multiplier: %d, log_value: %d", multiplier, log_value);
-
     hud.fury_progress += multiplier * (log_value - 5) * (log_value - 5);
 
     if (hud.fury_progress > 262144) {
         hud.fury_progress = 263000;
     }
+}
+
+export function furyReady() {
+    return hud.fury_progress > 262144;
 }
 
 // Invoked when an enemy dies
@@ -366,7 +373,7 @@ export function render() {
     if (opts.UseFury) {
 
         // Display full bar and then cover unused part with black
-        if (hud.displayed_fury < 262114 && hud.using_fury) {
+        if (hud.displayed_fury <= 262114 && !Fury.isRunning()) {
             GL.drawSprite(S.furybar, 4, 306);
         } else {
             const tex = S.texfury[(hud.fire_timer >> 2) % S.texfury.length];
