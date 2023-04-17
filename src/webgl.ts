@@ -4,7 +4,7 @@ import { Sprite, texwhite } from "./sprites"
 const gl : WebGLRenderingContext = (function() {
     
     const canvas = document.getElementById("gl") as HTMLCanvasElement; 
-    const gl = canvas.getContext("webgl");
+    const gl = canvas.getContext("webgl", {preserveDrawingBuffer: true});
 
     if (gl == null) {
         alert("WebGL is not supported by your browser, or could not be initialized");
@@ -676,6 +676,9 @@ export function drawText(
 
 export function startRender() {
     statFrameStart = +new Date();
+}
+
+export function clear() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 }

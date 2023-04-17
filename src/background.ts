@@ -1,4 +1,5 @@
 import { back, cityb, cityl, cityr, colu, metalla, metallb, metalra, metalrb, olla, ollb, olra, olrb, orgab, orgal, orgar, planet, Sprite } from "./sprites";
+import * as Fury from "./fury"
 import * as GL from "./webgl"
 
 function randomizeStars() : Int32Array {
@@ -170,6 +171,11 @@ function renderMetalBack(bringin: boolean) {
 
 
 export function render() {
+
+    if (!Fury.showBackground()) return;
+
+    GL.clear();
+
     switch (bg.current) {
     case LEVEL0:
     {

@@ -201,6 +201,8 @@ export function step() {
         if (key.action2 && Hud.furyReady()) {
             if (stuff.weapon == Hud.ITEM_WNONE) {
                 Fury.startBlaster();
+            } else if (stuff.weapon == Hud.ITEM_ROCKETS) {
+                Fury.startRocket();
             }
         }
     }

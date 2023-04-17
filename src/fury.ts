@@ -23,6 +23,9 @@ class Fury {
 
     step(): void { /* */ }
 
+    // Should we draw a background ? 
+    background(): boolean { return true; }
+
     renderStart() {
         if (this.darken < 64) {
             GL.drawRect(0, 0, 240, 320, 0, 0, 0, this.darken/64)
@@ -64,6 +67,10 @@ export function renderEnd() {
     if (current) current.renderEnd();
 }
 
+export function showBackground() {
+    return !current || current.background();
+}
+
 class BlasterFury extends Fury {
     step() {
         if (++this.timer % 2 == 0) {
@@ -99,14 +106,71 @@ class RocketFury extends Fury {
     ) {
         super()
     }
+
+    background() { return this.darken < 64; }
+
+    renderStart() {
+        if (this.background())
+            super.renderStart()
+        else            
+            GL.drawRect(0, 0, 240, 320, 0, 0, 0, 0.05);
+    }
     
     step() {
         switch (this.mode) {
-        case 0: 
+        case 0:
+        {
+            if (this.timer % 4 == 0) {
+                const a = this.timer << 2;
+                for (let i = 0; i < 512; i += 128)
+                    Shot.add(
+                        Shot.SHOT_OROCKET_FURY,
+                        px - 120, py - 120, 64, 64,
+                        a + i);
+            }
+            break;
+        } 
+        case 1:
+        {
+            if (this.timer % 4 == 0) {
+                const a = this.timer;
+                Shot.add(
+                    Shot.SHOT_OROCKET_FURY,
+                    px - 120, py - 120, 64, 64,
+                    128 -64 - a*6);
+                Shot.add(
+                    Shot.SHOT_OROCKET_FURY,
+                    px - 120, py - 120, 64, 64,
+                    128-64 + a*6); 
+                Shot.add(
+                    Shot.SHOT_OROCKET_FURY,
+                    px - 120, py - 120, 64, 64,
+                    128+64 - a*6);
+                Shot.add(
+                    Shot.SHOT_OROCKET_FURY,
+                    px - 120, py - 120, 64, 64,
+                    128+64 + a*6);
+            }
+            break;
+        } 
+        case 2:
+        {
+            Shot.add(
+                Shot.SHOT_OROCKET_FURY,
+                px - 120, py - 120, 64, 64,
+                this.timer << 3); 
+            break;
+        }
+        case 3:
         {
             if (this.timer % 32 == 0) {
-                
-            }    
+                for (let a = 0; a < 512; a += 32)
+                    Shot.add(
+                        Shot.SHOT_OROCKET_FURY,
+                        px - 120, py - 120, 64, 64,
+                        a); 
+            }
+            break;    
         }
         }
     }
