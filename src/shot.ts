@@ -134,7 +134,7 @@ function shotStep(ref: number): boolean {
 
         shots[off + TIMER]++;
 
-    } else if (type == SHOT_OROCKET) {
+    } else if (type == SHOT_OROCKET || type == SHOT_OROCKET_FURY) {
 
         const t = shots[off + TIMER]++;
         const a = shots[off + PARAM0] / 256 * Math.PI;
@@ -143,21 +143,15 @@ function shotStep(ref: number): boolean {
         if (p < 64)
             shots[off + PARAM1] = p + 1;
 
-        const x = shots[off + LEFT] += Math.floor(p * Math.cos(a));
-        const y = shots[off + TOP] += Math.floor(p * Math.sin(a));
+        const vx = Math.floor(p * Math.cos(a));
+        const vy = Math.floor(p * Math.sin(a));
+        const x = shots[off + LEFT] += vx;
+        const y = shots[off + TOP] += vy;
 
-        if (t > 16 && tx != 0 && ty != 0) {
-            // Track the current target
-            const cx = x + shots[off + WIDTH]/2;
-            const cy = y + shots[off + HEIGHT]/2;
-            const aim = Math.atan2(ty - cy, tx - cx);
-
-            const adjaim = 
-                Math.abs(aim - a) < Math.PI ? aim :
-                Math.abs(aim - a + 2 * Math.PI) < Math.PI ? aim + 2 * Math.PI : 
-                                                            aim - 2 * Math.PI; 
+        if (t > 16 && targets.length) {
             
-            shots[off + PARAM0] += a > adjaim ? -3 : 3;
+            const adj = aimAtNearest(x, y, vx, vy);
+            shots[off + PARAM0] += adj * 3;
         }
 
         if (t > 64)
@@ -289,10 +283,6 @@ export function step() {
         if (shotStep(ref)) ref = next;
     }
 
-    // Reset the target enemy ; it will be provided again on 
-    // the next step if there are enemies.
-    tx = 0; ty = 0;
-
 }
 
 // RENDERING =================================================================
@@ -422,10 +412,10 @@ function shotRender(ref: number): number {
 			GL.drawSpriteAlpha(rocketf[(1+(t>>2))&1], x+1, y+15, 8 );
         }
         GL.drawSprite(rocket, x, y);
-    } else if (type == SHOT_OROCKET) {
+    } else if (type == SHOT_OROCKET || type == SHOT_OROCKET_FURY) {
         const a = shots[off + PARAM0] / 256 * Math.PI + Math.PI/2;
         GL.drawSpriteAngle(orocket, x, y, a);
-    } else if (type == SHOT_OROCKET_DIE) {
+    } else if (type == SHOT_OROCKET_DIE || type == SHOT_OROCKET_FURY_D) {
         const w = smaball.w;
         GL.drawSpriteAdditive(smaball, x-1-w/2, y+1-w/2, shots[off + PARAM0]);
     } else if (type == SHOT_BLADE_SPAWN || type == SHOT_OBLADE_SPAWN ||
@@ -553,6 +543,17 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
         return 3;
     }
 
+    if (type == SHOT_OROCKET_FURY) {
+        shots[off + HIT] = 1;
+        shots[off + TYPE] = SHOT_OROCKET_DIE;
+        shots[off + PARAM0] = 32;
+        return 600;
+    }
+
+    if (type == SHOT_OROCKET_FURY_D) {
+        return 70;
+    }
+
     if (type == SHOT_BLADE) {
 
         const tcx = tx + tw/2;
@@ -641,18 +642,60 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
     return 0;
 }
 
-// Center of an enemy target, if any. Otherwise (0, 0)
-let tx = 0, ty = 0;
+// A list of all valid enemy targets 
+let targets : readonly { 
+    readonly x: number, 
+    readonly y: number,
+    readonly alive: boolean 
+}[] = []
 
-// Specify a target for homing shots.
-export function setTarget(x: number, y: number) {
-    tx = x;
-    ty = y;
+// Specify targets for homing shots.
+export function setTargets(t: readonly {
+    readonly x: number, 
+    readonly y: number,
+    readonly alive: boolean
+}[]) {
+    targets = t;
 }
 
 // True if there is currently a valid target on the field.
 export function hasTarget() {
-    return tx != 0 || ty != 0;
+    return !!targets.length;
+}
+
+// Find the nearest target (in terms of angle) and return < 0 if the
+// aim must turn left, > 0 if it must turn right. 0 if aim is good or 
+// there are no targets.
+function aimAtNearest(x: number, y: number, vx: number, vy: number): number {
+
+    // Orthogonal vector pointing to the left. 
+    const ox = vy;
+    const oy = -vx;
+
+    let bestAhead = 1000000;
+    let bestBehind = 0;
+
+    for (const {x: ex, y: ey, alive} of targets) {
+
+        if (!alive) continue;
+
+        const dx = ex - x;
+        const dy = ey - y;
+
+        const ahead = (dx * vx + dy * vy) > 0;
+        const dist = (dx * ox + dy * oy);
+
+        if (ahead) {
+            if (bestAhead > Math.abs(dist)) bestAhead = dist;
+        } else {
+            if (bestBehind < Math.abs(dist)) bestBehind = dist;
+        }
+    }
+
+    if (bestAhead < 1000000)
+        return bestAhead < 0 ? 1 : -1;
+
+    return bestBehind < 0 ? 1 : bestBehind > 0 ? -1 : 0;
 }
 
 // Return the damage amount if at least one shot intersects the rectangle, or

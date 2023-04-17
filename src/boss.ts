@@ -20,7 +20,11 @@ class BossBase {
     public warningTimer : number = 0
     public timer : number = 0
     public lives : number = 2
+    // The boss is in its dying phase
     public dead : boolean = false
+    // The boss can be targeted by homing missiles
+    public alive: boolean = true
+    public self: BossBase[] = []
 
     constructor(
         public baseHealth : number,
@@ -42,9 +46,10 @@ class BossBase {
 
         ++this.timer;
 
-        if (this.shootable()) {
+        if (this.alive = this.shootable()) {
 
-            Shot.setTarget(this.x, this.y);
+            Shot.setTargets(this.self);
+            if (this.self.length == 0) this.self.push(this);
 
             if (Shot.collideEnemy(
                 this.x + this.cdx, 
@@ -56,6 +61,8 @@ class BossBase {
                     this.hit = true;
                 }
             }
+        } else {
+            this.self.length = 0;
         }
 
         if (++this.hitTimer >= 25) {
@@ -64,7 +71,7 @@ class BossBase {
             this.hitTimer = 0;
         }
 
-        if (this.hitPrev && !this.suffering && this.shootable()) {
+        if (this.hitPrev && !this.suffering && this.alive) {
 
             this.health -= 16;
             if (Hud.stuff().offense_overload > 0) 

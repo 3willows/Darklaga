@@ -117,7 +117,7 @@ function shoot(stuff: Hud.Stuff) {
         const x = pl.x + 64, y = pl.y + 8, 
               w = S.rocket.w << 3, h = S.rocket.h;
         const s = stuff.weapon_overload ? Shot.SHOT_OROCKET_SPAWN   
-                                        : Shot.SHOT_ROCKET_SPAWN;
+                                        : Shot.SHOT_OROCKET_SPAWN;
         
         Shot.add(s, x, y, w, h,  1);
         Shot.add(s, x, y, w, h, -1);

@@ -17,6 +17,7 @@ export class Enemy {
     public flash: number
     public health: number
     public alpha: number
+    public alive: boolean = true
     constructor(
         public x: number, 
         public y: number,
@@ -100,6 +101,7 @@ export class Dying extends Enemy {
         super(x, y, 0, mode, [sprite], sprite)
         this.explo = explosions[mode];
         this.angle = Math.random()
+        this.alive = false;
     }
 
     public shootable(): boolean { return false; }
@@ -189,9 +191,7 @@ export function step() {
     }
 
     if (enemies.length > 0)
-        // Always use enemy zero as the target, as it is the one 
-        // that never moves in the array (unless it dies).
-        Shot.setTarget(enemies[0].cx(), enemies[0].cy());
+        Shot.setTargets(enemies);
 }
 
 export function render() {
