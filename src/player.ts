@@ -203,6 +203,8 @@ export function step() {
                 Fury.startBlaster();
             } else if (stuff.weapon == Hud.ITEM_ROCKETS) {
                 Fury.startRocket();
+            } else if (stuff.weapon == Hud.ITEM_BLADES) {
+                Fury.startBlades();
             }
         }
     }

@@ -99,6 +99,93 @@ export function startBlaster() {
     }
 }
 
+function actionLine(x: number, y: number, t: number) {
+    
+    t -= 20;
+
+    if (t <= 0) return;
+    if (t >= 128) t = 128;
+
+    t = t >> 2;
+
+    let xa : number, xb : number, ya : number, yb : number;
+    if (y <= 20 || y >= 300) {
+        xa = x - t;
+        xb = x + t;
+        ya = yb = y;
+    } else {
+        xa = xb = x;
+        ya = y - t;
+        yb = y + t;
+    }
+
+    GL.drawPoly([
+        xa, ya, 
+        xb, yb, 
+        120, 160
+    ], 0.5, 1, 1, 1, 1);
+}
+
+class BladeFury extends Fury {
+
+    step() {
+
+        if (this.timer == 1) {
+            for (let a = 0; a < 32; a++) {
+                const dx = Math.round(32 * Math.cos(a * Math.PI / 16));
+                const dy = Math.round(32 * Math.sin(a * Math.PI / 16));
+                Shot.add(
+                    Shot.SHOT_BLADE,
+                    872 + 4*dx, 1196 +4*dy, 176, 176,
+                    dx, dy); 
+            }
+            return;
+        }
+
+        if (this.timer < 40) return;
+        
+
+        if (this.timer % 4 == 0) {
+            const a = Math.random() * 2 * Math.PI;
+            const dx = Math.floor(24 * Math.cos(a));
+            const dy = Math.floor(24 * Math.sin(a));
+            Shot.add(
+                Shot.SHOT_BLADE,
+                872 + 4*dx, 1196 +4*dy, 176, 176,
+                dx, dy); 
+        }
+    }
+
+    renderEnd(): void {
+        if (this.timer == 0) {
+            const t = this.darken;
+            actionLine(0, 75, t);
+            actionLine(239, 240, t - 8);
+            actionLine(0, 130, t - 18);
+            actionLine(112, 0, t - 24);
+            actionLine(0, 200, t - 30);
+            actionLine(239, 300, t - 38);
+            actionLine(0, 130, t - 44);
+            actionLine(239, 10, t - 54);
+            actionLine(0, 200, t - 58);
+        } else if (this.timer < 40) {
+            const a = Math.min(32, 40 - this.timer);
+            GL.drawRect(0, 20, 240, 280, 1, 1, 1, a/32);
+        }
+
+        GL.drawSpriteAdditive(S.bigball, 48, 85, this.darken >> 1);        
+
+        super.renderEnd();
+    }
+}
+
+export function startBlades() {
+    if (!current) {
+        fuel = 128
+        current = new BladeFury();
+    }
+}
+
 class RocketFury extends Fury {
     
     constructor(
