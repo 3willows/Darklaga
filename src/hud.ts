@@ -77,7 +77,7 @@ function empty() : Hud {
         lives: 3,
         combo_fade: 0,
         combo_fade_value: 1,
-        weapon: ITEM_BLADES,
+        weapon: ITEM_LASER,
         weapon_overload: 0,
         offense: ITEM_ONONE,
         offense_overload: 0,

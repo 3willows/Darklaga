@@ -1,5 +1,5 @@
 import { opts } from "options";
-import { blade, bladestar, bladet, blast, bullet3v, lasbme, lasbml, lasbmm, lasbse, lasbsl, lasbsm, lasoml, lasomm, lasosl, lasosm, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
+import { blade, bladestar, bladet, blast, bullet3v, furybolt, lasbme, lasbml, lasbmm, lasbse, lasbsl, lasbsm, lasoml, lasomm, lasosl, lasosm, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
 import * as GL from "./webgl"
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -257,6 +257,10 @@ function shotStep(ref: number): boolean {
             if (o >= 0) shots[o + HIT] = 1;
             dec -= 18*p1;
         }
+    } else if (type == SHOT_FLASER) {
+        if (++shots[off + TIMER] + shots[off + PARAM0]>= 16) {
+            shots[off + TYPE] = SHOT_DEAD;
+        }
     } else {
         throw "Unknown shot type"
     }
@@ -446,6 +450,10 @@ function shotRender(ref: number): number {
         } else if (opts.LodWeaponDetail) {
             GL.drawSpriteAdditive(blade, x, y, 32 - timer)
         }
+    } else if (type == SHOT_FLASER) {
+        const timer = shots[off + TIMER];
+        const p0 = shots[off + PARAM0];
+        GL.drawSpriteAdditive(furybolt[((p0 + timer) >> 2) % 2], 0, y, 32 - timer)
     } else {
         throw "Unknown shot type"
     }
@@ -637,6 +645,11 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
     if (type == SHOT_INVISIBLE) {
         shots[off + HIT] = 1;
         return shots[off + PARAM0];
+    }
+
+    if (type == SHOT_FLASER) {
+        shots[off + HIT] = 1;
+        return 40;
     }
 
     return 0;

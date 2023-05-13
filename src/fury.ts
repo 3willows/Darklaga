@@ -71,6 +71,23 @@ export function showBackground() {
     return !current || current.background();
 }
 
+class LaserFury extends Fury {
+    step() {
+        if ((this.timer % 8) == 0) {
+            const y = Math.floor(Math.random() * 1024);
+            Shot.add(Shot.SHOT_FLASER, 0, y, 1920, 1040, 
+                Math.round(8 * Math.random()));
+        }
+    }
+}
+
+export function startLaser() {
+    if (!current) {
+        fuel = 128
+        current = new LaserFury();
+    }
+}
+
 class BlasterFury extends Fury {
     step() {
         if (++this.timer % 2 == 0) {
