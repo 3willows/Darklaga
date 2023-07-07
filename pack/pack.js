@@ -201,6 +201,61 @@ async function emitImages() {
 
 emitImages();
 
+// Sound =====================================================================
+
+function loadSounds() {
+
+    const sounds = {};
+    const dir = fs.opendirSync("snd")
+    while (true) {
+
+        const next = dir.readSync();
+        if (!next) break;
+
+        if (!next.isFile()) continue;
+        if (!/mp3$/.test(next.name)) continue;
+
+        const path = "snd/" + next.name;
+        const buf = fs.readFileSync(path);
+
+        const id = next.name.replace(".mp3", "");
+        sounds[id] = buf;
+    }
+
+    return sounds;
+}
+
+async function emitSounds() {
+
+    const sounds = loadSounds();
+
+    let accum = "window.sounds = {";
+
+    for (let k of Object.keys(sounds)) {
+        const sound = sounds[k];
+        accum += "'" + k + "': new Uint8Array([";
+        accum += new Uint8Array(sound).map(b => b.toString()).join(",");
+        accum += "]),";
+    }
+
+    accum += "};"
+
+    fs.writeFileSync("dist/sounds.js", accum);
+
+    let loaded = "";
+    
+    for (let k of Object.keys(sounds)) {
+        loaded += "export const " + k + " = new Audio(" + 
+            "URL.createObjectURL(new Blob([" +
+            "(window as unknown as {" + k + ": Uint8Array})." + k +  
+            "], {type: 'audio/mpeg'})))\n";
+    }
+
+    fs.writeFileSync("src/sounds.ts", loaded);
+}
+
+emitSounds();
+
 // Levels ====================================================================
 
 function loadLevels() {
