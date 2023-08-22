@@ -30,5 +30,4 @@ export function run() {
     }
     
     requestAnimationFrame(frame);
-
 }

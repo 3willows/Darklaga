@@ -3,6 +3,7 @@
     <head><title>Darklaga - Cannonball Symphony</title>
 </head>
 <body style="background-color:black">
+    <button id="button" onclick="start()">Start</button>
     <canvas id="gl" width="480" height="640" style="margin:10px auto;display:block"></canvas>
     <pre id="log" style="color:green;margin:10px auto;width:480px"></pre>
     <script type="text/javascript">
@@ -34,7 +35,10 @@
             return modl.exports;
         }
 
-        require("index").run();
+        window.start = function() {
+            document.getElementById("button").remove();
+            require("index").run();
+        }
     </script>
 </body>
 </html>

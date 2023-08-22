@@ -242,13 +242,12 @@ async function emitSounds() {
 
     fs.writeFileSync("dist/sounds.js", accum);
 
-    let loaded = "";
+    let loaded = "export const ac = new AudioContext();";
     
     for (let k of Object.keys(sounds)) {
-        loaded += "export const " + k + " = new Audio(" + 
-            "URL.createObjectURL(new Blob([" +
-            "(window as unknown as {" + k + ": Uint8Array})." + k +  
-            "], {type: 'audio/mpeg'})))\n";
+        loaded += "export const " + k + " = ac.decodeAudioData(" + 
+            "(window as unknown as {sounds: {" + k + ": Uint8Array}}).sounds." + k + 
+            ".buffer)\n";
     }
 
     fs.writeFileSync("src/sounds.ts", loaded);

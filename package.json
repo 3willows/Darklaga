@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc src/index.ts --outFile dist/darklaga.js --module amd",
+    "build": "tsc src/index.ts --outFile dist/darklaga.js --module amd --target ES6",
     "pack": "node pack/pack.js"
   },
   "author": "",
