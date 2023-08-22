@@ -5,6 +5,7 @@ import { opts } from "./options"
 import * as Hud from "./hud"
 import * as Shot from "./shot"
 import * as Fury from "./fury"
+import * as Snd from "./sound"
 
 type Player = {
 
@@ -76,6 +77,8 @@ function shoot(stuff: Hud.Stuff) {
                       stuff.offense_overload ? 1 : 3;
         const w = S.blast.w << 3, h = S.blast.h << 3;
         
+        Snd.blasterFire.play();
+
         Shot.add(Shot.SHOT_BLASTER, pl.x + 80, pl.y + 8, w, h);
         if (stuff.offense == Hud.ITEM_MULTI) {
             Shot.add(Shot.SHOT_BLASTER, pl.x +  48, pl.y + 32, w, h);
@@ -96,6 +99,8 @@ function shoot(stuff: Hud.Stuff) {
               w = S.blade.w << 3, h = S.blade.h;
         const s = stuff.weapon_overload ? Shot.SHOT_OBLADE_SPAWN   
                                         : Shot.SHOT_BLADE_SPAWN;
+
+        Snd.bladeFire.play();
 
         Shot.add(s, x, y, w, h, 0);
         if (stuff.offense == Hud.ITEM_MULTI) {
@@ -119,6 +124,8 @@ function shoot(stuff: Hud.Stuff) {
         const s = stuff.weapon_overload ? Shot.SHOT_OROCKET_SPAWN   
                                         : Shot.SHOT_ROCKET_SPAWN;
         
+        Snd.rocketFire.play();
+
         Shot.add(s, x, y, w, h,  1);
         Shot.add(s, x, y, w, h, -1);
         if (stuff.offense == Hud.ITEM_MULTI) {

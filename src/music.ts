@@ -1,5 +1,9 @@
 import * as S from "./sounds"
 
+const music = S.ac.createGain();
+music.connect(S.ac.destination);
+music.gain.value = 0.5;
+
 export class Music {
     
     private buffer : AudioBuffer|undefined
@@ -46,7 +50,7 @@ export class Music {
         if (!this.buffer) return false;
         this.node = new AudioBufferSourceNode(S.ac);
         this.node.buffer = this.buffer;
-        this.node.connect(S.ac.destination);
+        this.node.connect(music);
         this.node.loopEnd = this.buffer.duration;
         this.node.loopStart = this.loopStart;
         this.node.loop = true;
