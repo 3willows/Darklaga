@@ -455,6 +455,7 @@ export function render() {
 export function pickup(pickup: number) {
     switch (pickup) {
         case ITEM_ROCKETS: 
+            Snd.pickupRockets.play();
             if (opts.UseTourist)
                 Float.addInfo(S.irocket, [
                     "Rockets equipment. Low damage, good fire rate,",
@@ -463,6 +464,7 @@ export function pickup(pickup: number) {
             hud.weapon = pickup;
             return;
         case ITEM_BLADES: 
+            Snd.pickupBlades.play();
             if (opts.UseTourist)
                 Float.addInfo(S.iblade, [
                     "Blade equipment. Wide spray, slow fire rate,",
@@ -471,6 +473,7 @@ export function pickup(pickup: number) {
             hud.weapon = pickup;
             return;
         case ITEM_LASER: 
+            Snd.pickupLaser.play();
             if (opts.UseTourist)
                 Float.addInfo(S.ilaser, [
                     "Laser equipment. High damage, narrow spray,",
@@ -479,6 +482,7 @@ export function pickup(pickup: number) {
             hud.weapon = pickup; 
             return;
         case ITEM_MULTI:
+            Snd.pickupMulti.play();
             if (opts.UseTourist)
                 Float.addInfo(S.imulti, [
                     "Multi-shot equipment. Widens weapon spray."
@@ -486,6 +490,7 @@ export function pickup(pickup: number) {
             hud.offense = pickup; 
             return;
         case ITEM_SPEED: 
+            Snd.pickupSpeed.play();
             if (opts.UseTourist)
                 Float.addInfo(S.ispeed, [
                     "Fire rate equipment. Increases weapon fire rate."
@@ -493,6 +498,7 @@ export function pickup(pickup: number) {
             hud.offense = pickup; 
             return;
         case ITEM_OFFP: 
+            Snd.pickup.play();
             if (opts.UseTourist)
                 Float.addInfo(S.ioplus, [
                     "Bonus equipment. Increases score multiplier."
@@ -500,6 +506,7 @@ export function pickup(pickup: number) {
             hud.offense = pickup; 
             return;
         case ITEM_SHIELD:
+            Snd.pickupShield.play();
             if (opts.UseTourist)
                 Float.addInfo(S.ishield, [
                     "Shield equipment. Protects from enemy ships,",
@@ -508,6 +515,7 @@ export function pickup(pickup: number) {
             hud.defense = pickup;
             return;
         case ITEM_FURY:
+            Snd.pickupFury.play();
             if (opts.UseTourist)
                 Float.addInfo(S.ifury, [
                     "Fury equipment. Fury bar fills faster."
@@ -515,6 +523,7 @@ export function pickup(pickup: number) {
             hud.defense = pickup;
             return;
         case ITEM_DEFP:
+            Snd.pickup.play();
             if (opts.UseTourist)
                 Float.addInfo(S.idplus, [
                     "Bonus equipment. Increases score,",
@@ -523,22 +532,28 @@ export function pickup(pickup: number) {
             hud.defense = pickup;
             return;
         case ITEM_WNONE: 
-        if (opts.UseTourist)
-            Float.addInfo(S.iwover, ["Overload! Temporary equipment enhancer."])
+            Snd.pickup.play();
+            if (opts.UseTourist)
+                Float.addInfo(S.iwover, ["Overload! Temporary equipment enhancer."])
             hud.weapon_overload += 100;
             return;
-        case ITEM_ONONE: 
-            Float.addInfo(S.ioover, ["Overload! Temporary equipment enhancer."])
+        case ITEM_ONONE:
+            Snd.pickup.play(); 
+            if (opts.UseTourist)
+                Float.addInfo(S.ioover, ["Overload! Temporary equipment enhancer."])
             hud.offense_overload += 100;
             return;
         case ITEM_DNONE:
-            Float.addInfo(S.idover, ["Overload! Temporary equipment enhancer."])
+            Snd.pickup.play();
+            if (opts.UseTourist)
+                Float.addInfo(S.idover, ["Overload! Temporary equipment enhancer."])
             hud.defense_overload += 100;
             return;
         default:            
-            Float.addInfo(
-                [S.iwover[0], S.idover[0], S.ioover[0]], 
-                ["Overload! Temporary equipment enhancer."])
+            if (opts.UseTourist)
+                Float.addInfo(
+                    [S.iwover[0], S.idover[0], S.ioover[0]], 
+                    ["Overload! Temporary equipment enhancer."])
             hud.weapon_overload += 100;
             hud.offense_overload += 100;
             hud.defense_overload += 100;
@@ -549,10 +564,15 @@ export function pickup(pickup: number) {
 export function playerHit() {}
 
 export function graze(x: number, y: number) {
+    
     const g = ++hud.graze;
-    Snd.graze.play();
+    
+    if (g != 20) Snd.graze.play();
+    else Snd.pickup.play();
+
     hud.graze_timer = Math.max(1, GRAZE_DELAY - (3 * g));
     hud.graze_anim = GRAZE_DELAY;
+
     Float.addGraze(
         x - (S.grazeb[0].w << 2), y - (S.grazeb[0].h << 2), 
         g > 20 ? S.grazer : S.grazeb);
