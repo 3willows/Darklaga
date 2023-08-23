@@ -2,8 +2,9 @@ import * as GL from "./webgl"
 import * as S from "./sprites"
 import * as Float from "./float"
 import * as Fury from "./fury"
-import { opts } from "options"
-import { hasTarget } from "shot"
+import { opts } from "./options"
+import { hasTarget } from "./shot"
+import * as Snd from "./sound"
 
 export const ITEM_LASER = 0
 export const ITEM_ROCKETS = 1
@@ -549,6 +550,7 @@ export function playerHit() {}
 
 export function graze(x: number, y: number) {
     const g = ++hud.graze;
+    Snd.graze.play();
     hud.graze_timer = Math.max(1, GRAZE_DELAY - (3 * g));
     hud.graze_anim = GRAZE_DELAY;
     Float.addGraze(

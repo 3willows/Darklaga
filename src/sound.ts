@@ -51,3 +51,4 @@ export const laserFire = new Sound(S.l_fire, 1);
 export const bladeFire = new Sound(S.b_fire, 4);
 export const rocketFire = new Sound(S.r_fire, 4);
 export const boom = new Sound(S.boom, 4);
+export const graze = new Sound(S.graze, 4);
