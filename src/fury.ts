@@ -1,11 +1,16 @@
 import * as GL from "./webgl"
 import * as S from "./sprites"
 import * as Shot from "./shot"
+import * as Snd from "./sound"
 
 class Fury {
 
     protected darken : number = 0
     protected timer : number = 0
+
+    constructor() {
+        Snd.furyBegin.play();
+    }
 
     onStep(): void { 
         
@@ -106,6 +111,9 @@ class BlasterFury extends Fury {
             fire(3*Math.PI/2 - t, 80, -128, 0);
             fire(3*Math.PI/2 + t, 40, -128, 0);
         }
+
+        if (this.timer % 8 == 0)
+            Snd.blasterFire.play();
     }
 }
 
@@ -148,6 +156,7 @@ class BladeFury extends Fury {
     step() {
 
         if (this.timer == 1) {
+            Snd.bladeFire.play();
             for (let a = 0; a < 32; a++) {
                 const dx = Math.round(32 * Math.cos(a * Math.PI / 16));
                 const dy = Math.round(32 * Math.sin(a * Math.PI / 16));
@@ -170,6 +179,9 @@ class BladeFury extends Fury {
                 Shot.SHOT_BLADE,
                 872 + 4*dx, 1196 +4*dy, 176, 176,
                 dx, dy); 
+
+            if (this.timer % 8 == 0) 
+                Snd.bladeFire.play();
         }
     }
 
@@ -225,6 +237,7 @@ class RocketFury extends Fury {
         case 0:
         {
             if (this.timer % 4 == 0) {
+                Snd.rocketFire.play();
                 const a = this.timer << 2;
                 for (let i = 0; i < 512; i += 128)
                     Shot.add(
@@ -237,6 +250,7 @@ class RocketFury extends Fury {
         case 1:
         {
             if (this.timer % 4 == 0) {
+                Snd.rocketFire.play();
                 const a = this.timer;
                 Shot.add(
                     Shot.SHOT_OROCKET_FURY,
@@ -259,6 +273,7 @@ class RocketFury extends Fury {
         } 
         case 2:
         {
+            Snd.rocketFire.play();
             Shot.add(
                 Shot.SHOT_OROCKET_FURY,
                 px - 120, py - 120, 64, 64,
@@ -268,6 +283,7 @@ class RocketFury extends Fury {
         case 3:
         {
             if (this.timer % 32 == 0) {
+                Snd.rocketFire.play();
                 for (let a = 0; a < 512; a += 32)
                     Shot.add(
                         Shot.SHOT_OROCKET_FURY,

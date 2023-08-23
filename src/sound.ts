@@ -54,3 +54,4 @@ export const boom = new Sound(S.boom, 4);
 export const graze = new Sound(S.graze, 4);
 export const bossboom1 = new Sound(S.bossboom1, 1);
 export const bossboom2 = new Sound(S.bossboom2, 1);
+export const furyBegin = new Sound(S.furybegin, 1);
