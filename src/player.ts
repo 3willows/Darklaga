@@ -26,6 +26,7 @@ type Player = {
     muzzle_flash: number
     timer: number
     laser_timer: number
+    laser_fired: boolean
     mousedown: number
     anim: number
     modules1: number
@@ -49,6 +50,7 @@ function initial() : Player {
         muzzle_flash: 0,
         timer: 0,
         laser_timer: 0,
+        laser_fired: false,
         mousedown: 0,
         anim: 0,
         modules1: 0,
@@ -142,6 +144,7 @@ function shoot(stuff: Hud.Stuff) {
     }
     case Hud.ITEM_LASER: 
     {
+        pl.laser_fired = true;
         pl.cooldown = 1;
         const x = pl.x, y = 0,
               w = 60, h = pl.y + 16;
@@ -270,8 +273,14 @@ export function step() {
     if (pl.shooting) --pl.shooting;
     if (pl.muzzle_flash) --pl.muzzle_flash;
 
+    pl.laser_fired = false;
     if (pl.controllable && !pl.cooldown && (opts.ModAutoFire || pl.shooting))
         shoot(stuff)
+
+    if (pl.laser_fired)
+        Snd.laserFire.loop();
+    else
+        Snd.laserFire.stop();
 
     // Laser
 

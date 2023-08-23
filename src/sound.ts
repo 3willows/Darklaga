@@ -17,8 +17,6 @@ export class Sound {
     play() {
         if (!this.buffer) return;
 
-        const now = +new Date();
-
         while (this.playing.length > this.maxCount) 
             this.playing.shift()!.stop();
 
@@ -26,11 +24,25 @@ export class Sound {
         node.buffer = this.buffer;
         node.connect(S.ac.destination);
         node.start();
+        this.playing.push(node);
     }
 
     stop() {
         while (this.playing.length)
             this.playing.shift()!.stop()
+    }
+
+    loop() {
+        if (!this.buffer) return;
+
+        if (this.playing.length == 0) {
+            const node = new AudioBufferSourceNode(S.ac);
+            node.buffer = this.buffer;
+            node.connect(S.ac.destination);
+            node.loop = true;
+            node.start();
+            this.playing.push(node);
+        }
     }
 }
 
