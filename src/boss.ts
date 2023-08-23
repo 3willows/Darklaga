@@ -6,6 +6,7 @@ import * as Dan from "./dan"
 import * as Shot from "shot"
 import * as Hud from "./hud"
 import * as Float from "./float"
+import * as Snd from "./sound"
 
 class BossBase {
 
@@ -45,7 +46,7 @@ class BossBase {
     public step() {
 
         ++this.timer;
-
+        
         if (this.alive = this.shootable()) {
 
             Shot.setTargets(this.self);
@@ -201,6 +202,7 @@ class HalfBoss1 extends BossBase {
                 this.srtimer2 = 0;
             this.timer = 76; // because of phase 3 animation
         } else {
+            Snd.bossboom1.play();
             super.die();
         }
     }
@@ -456,6 +458,7 @@ class HalfBoss2 extends BossBase
             this.baseHealth = 14 + (opts.UseStrongerEnemies ? 1 : 0);
             this.health = 1 << this.baseHealth;
         } else {
+            Snd.bossboom2.play();
             super.die();
         }
     }
@@ -668,6 +671,7 @@ class Boss1 extends BossBase
             this.baseHealth = 14 + (opts.UseStrongerEnemies ? 1 : 0);
             this.health = 1 << this.baseHealth;
         } else {
+            Snd.bossboom1.play();
             super.die();
         }
     }

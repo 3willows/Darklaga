@@ -10,7 +10,7 @@ export class Music {
     private node : AudioBufferSourceNode|undefined
     private loopStart : number = 0
 
-    constructor(audio: Promise<AudioBuffer>[]) {
+    constructor(audio: Promise<AudioBuffer>[], initial = 1) {
 
         const self = this;
         async function prepare() {
@@ -37,9 +37,12 @@ export class Music {
                     buffer.copyToChannel(track.getChannelData(channel), channel, offset);
                 offset += track.length;
             }
-
+            
+            self.loopStart = 0;
+            for (let i = 0; i < initial; ++i)
+                self.loopStart += buffers[i].duration;
+            
             // Assign the buffer to mark the music as available.
-            self.loopStart = buffers[0].duration;
             self.buffer = buffer;
         }
 
@@ -92,7 +95,12 @@ export const music3 = new Music([
     S.m3b5, 
 ]);
 
-export const musicBoss = new Music([ S.m4i, S.m4b ])
+export const musicBoss = new Music([ 
+    S.warning,
+    S.warning,
+    S.warning,
+    S.m4i, 
+    S.m4b ], 4);
 
 let current : Music|undefined = undefined
 
