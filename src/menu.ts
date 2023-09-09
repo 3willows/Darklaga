@@ -1,6 +1,7 @@
 import * as GL from "./webgl"
 import * as S from "./sprites"
 import * as Snd from "./sound";
+import * as Lvl from "./level";
 import { key } from "input";
 
 type Message = "up" | "down" | "action" | { x: number, y: number };
@@ -119,12 +120,74 @@ class MainMenu extends MenuWindow {
     }
 
     activate(mi: MenuItem) {
+        
+        if (mi === this.btnNew) {
+            Snd.furyBegin.play();
+            wnd = new GameMenu();
+        }
+
         if (mi === this.btnQuit) {
             Snd.pickup.play();
             document.getElementsByTagName("canvas")[0].remove();
         }
     }
 }
+
+class GameMenu extends MenuWindow {
+
+    private readonly btnTourist : MenuItem
+    private readonly btnNormal : MenuItem
+    private readonly btnHard : MenuItem
+    private readonly btnExtreme : MenuItem
+    private readonly btnSecret : MenuItem
+    private readonly btnBossMode : MenuItem
+    private readonly btnBack : MenuItem
+
+    constructor() {
+        super((240-S.btn_l.w)/2, 140);
+        this.add(this.btnTourist = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "TOURIST"));
+        this.add(this.btnNormal = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "NORMAL"));
+        this.add(this.btnHard = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "HARD"));
+        this.add(this.btnExtreme = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "EXTREME"));
+        this.add(this.btnBossMode = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "BOSS MODE"));
+        this.add(this.btnSecret = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "SECRET LEVEL"));
+        this.add(this.btnBack = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "BACK"));
+    }
+
+    activate(mi: MenuItem) {
+        Snd.furyBegin.play();
+
+        if (mi === this.btnTourist) {
+            callbacks.startLevel(Lvl.gTOURIST1);
+        }
+
+        if (mi === this.btnNormal) {
+            callbacks.startLevel(Lvl.gLEVEL1);
+        }
+
+        if (mi === this.btnHard) {
+            callbacks.startLevel(Lvl.gLEVEL1);
+        }
+
+        if (mi === this.btnExtreme) {
+            callbacks.startLevel(Lvl.gLEVEL1);    
+        }
+
+        if (mi === this.btnBossMode) {
+            callbacks.startLevel(Lvl.gBOSSMODE1);    
+        }
+
+        if (mi === this.btnBack) {
+            wnd = new MainMenu();
+        }
+    }
+}
+
+// Because of mutual recursive modules, Game.ts uses Menu.ts so we cannot
+// access Game.ts from Menu.ts...
+export const callbacks = {
+    startLevel: (lvl: number) => {}
+};
 
 let wnd : MenuWindow|undefined = new MainMenu();
 
