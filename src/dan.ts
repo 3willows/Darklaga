@@ -171,12 +171,18 @@ dan[2 + (maxDanAmount - 1) * danSize + NEXT] = -1;
 // Logic step for the shot referenced by the cell at position
 // 'ref'. Returns true if the shot survives the step, false
 // if it needs to be removed. 
-function danStep(ref: number, px: number, py: number) {
+function danStep(ref: number, px: number, py: number, clear: boolean) {
     const off = dan[ref];
 
     const dying = dan[off + DIE] < 64;
-    if (dying && --dan[off + DIE] <= 0)
-        return false;
+    if (dying) 
+    {
+        if (--dan[off + DIE] <= 0) return false;
+    }
+    else if (clear)
+    {
+        --dan[off + DIE];
+    }
 
     const type = dan[off + TYPE];
     if (type == DAN_DEAD) 
@@ -428,13 +434,14 @@ function danStep(ref: number, px: number, py: number) {
 
 export function step() {
 
+    const clear = Hud.invulnerable() > 0;
     const pp = Player.pos();
     const px = pp.x + 88;
     const py = pp.y + 88;
     // Traverse all live shots while updating them.
     let ref = 0;
     while (dan[ref] > 0) {
-        if (danStep(ref, px, py)) {
+        if (danStep(ref, px, py, clear)) {
             ref = dan[ref] + NEXT
         } else {
             // Remove shot

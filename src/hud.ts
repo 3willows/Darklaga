@@ -139,9 +139,18 @@ export function hasItem(item: number) {
 export function step() {
     hud.timer++;
     hud.fire_timer++;
+
+    let shouldClearDan = false;
+
     if (hud.weapon_overload) hud.weapon_overload--;
     if (hud.offense_overload) hud.offense_overload--;
-    if (hud.defense_overload) hud.defense_overload--;
+    
+    if (hud.defense_overload) {
+        hud.defense_overload--;
+        shouldClearDan = (hud.defense == ITEM_SHIELD);
+    }
+
+    if (hud.invulnerable) hud.invulnerable--;
     
     if (opts.UseScore) {
         
@@ -204,6 +213,7 @@ export function step() {
         if (Fury.isRunning()) {
             hud.fury_progress = Math.max(0, hud.fury_progress - 512);
             Fury.setFuel(Math.floor(hud.fury_progress / 512));
+            shouldClearDan = true;
         }
 
         if (hud.fury_progress > hud.displayed_fury) {
@@ -213,8 +223,10 @@ export function step() {
         } else {
             hud.displayed_fury = hud.fury_progress;
         }
-
     }
+
+    if (shouldClearDan)
+        hud.invulnerable++;
 }
 
 // Compute the current score multiplier
@@ -576,4 +588,8 @@ export function graze(x: number, y: number) {
     Float.addGraze(
         x - (S.grazeb[0].w << 2), y - (S.grazeb[0].h << 2), 
         g > 20 ? S.grazer : S.grazeb);
+}
+
+export function invulnerable() {
+    return hud.invulnerable;
 }
