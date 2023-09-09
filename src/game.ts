@@ -67,10 +67,10 @@ type Game = {
 }
 
 const g : Game = {
-    state: GS_STARTING_LEVEL,
+    state: GS_MAIN_MENU,
     level: gLEVEL1,
     prerender: 0,
-    player_enter: 64,
+    player_enter: 0,
     specialscreen: 0
 }
 
@@ -278,6 +278,10 @@ function playStep() {
     }
 }
 
+function menuStep() {
+    Background.step();
+}
+
 function endLevelStep() {
 
     Background.step();
@@ -324,6 +328,9 @@ export function step() {
         case GS_PLAY: 
             playStep();
             return;
+        case GS_MAIN_MENU:
+            menuStep();
+            return;
         case GS_STARTING_LEVEL: 
             startingLevelStep();
             return;
@@ -335,7 +342,7 @@ export function step() {
     }
 }
 
-startLevel();
+//startLevel();
 
 // rendering =================================================================
 
@@ -352,6 +359,29 @@ export function playRender() {
     Fury.renderEnd();
     Hud.render();
     Float.render();
+}
+
+export function menuRender() {
+    Background.render();
+    Fury.renderStart();
+    Enemy.render();
+    Boss.render();
+    Shot.render();
+    Pickup.render();
+
+    if (g.prerender < 64) 
+        Player.prerender(g.prerender);
+    else
+        Player.render();
+
+    Dan.render();
+    Boss.renderTop();
+    Fury.renderEnd();
+
+    if (g.prerender < 64)
+        Hud.prerender(g.prerender >> 1);    
+    else
+        Hud.render();
 }
 
 export function endLevelRender() {
@@ -385,6 +415,9 @@ export function render() {
     switch (g.state) {
         case GS_PLAY: 
             playRender();
+            break;
+        case GS_MAIN_MENU:
+            menuRender();
             break;
         case GS_STARTING_LEVEL: 
             startingLevelRender();
