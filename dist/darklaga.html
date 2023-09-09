@@ -3,9 +3,10 @@
     <head><title>Darklaga - Cannonball Symphony</title>
 </head>
 <body style="background-color:black">
-    <div style="width:480px;height:640px;margin:10px auto">
-        <button style="display:none;margin:80px auto;background:#DDD;border:none;font-size:24px;padding:8px 20px;color:#222;font-family:sans-serif;" id=b onclick="start()">PLAY</button>
+    <div style="width:480px;height:640px;margin:10px auto;position:relative">
         <canvas id="gl" width="480" height="640" style="display:block"></canvas>
+        <div style="position:absolute;inset:0;width:480px;cursor:pointer;background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGYAAAAaBAMAAAC3ETTrAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAMUExURQAAAP///3BwcISEhAISk7MAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABSSURBVDjLY6AbEBQEkUqCgoJKYNIYKAIhwQyIoCC19IBV4EPDSg/2sB66eqgfboJ00kNT/xCD6KcHG5MEPZCsa4zIzwyCKGwGSA6nWA89AAMDAJonKIMMp4tSAAAAAElFTkSuQmCC') center center no-repeat" id=l></div>
+        <button style="display:none;position:absolute;inset:0;width:480px;cursor:pointer;background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGoAAAAyBAMAAABG0lM+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAqUExURQAAAFpaWgBB/wCk/wD//4ODg7S0tN7e3v///4SEhP//AP/CeVofB75wHxjlqxMAAAAJcEhZcwAADsEAAA7BAbiRa+0AAAFHSURBVEjHtdZhjcQgEAXgsTAWsIAFLDwLYwELWKgFLNTCWaiXe1O23WZzP9rZgxBSEr4NeQzdyrtpSiqPW0hpyvk5i6mUS8lptoIPmgpQxhYxWQFWqwFzVeWiytxbrY3ZV6o6TTEBUJVaGb3yN3SqMpZuBjIL2C5qaWzC/npe5JzGlSqStWYJqhc11oxl5/MXqmJfp2fn7Ih+ijIvp959tLlKRbke6woq9WhmKeXNgJr97J0VhTP6dpzs/ymD+RFzexw5uajr2L5VaEwD9iKevM8b/lCjt+8UM/BaWte9ojyRT/VxBGFlvk5L8YoqRX1mc5QzFpBvrXffKEvsQPK+++2SxhJWPFKGzfrdet+8dvnqvvHnF1NkQ63rULdQUPEFQDaUb1BkpuIbmxdz23gl9T4KKjbdlF0etphiDoh8s4WUaATdViK/5kmGiFNiD/8AAAAASUVORK5CYII=') center center no-repeat;border:none" id=b onclick="start()"></button>
         <pre id="log" style="color:green;margin:10px auto;width:480px"></pre>
     </div>
     <script type="text/javascript">
@@ -37,6 +38,7 @@
             return modl.exports;
         }
 
+        document.getElementById("l").remove();
         document.getElementById("b").style.display = "block"
 
         window.start = function() {
