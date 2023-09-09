@@ -38,11 +38,11 @@
             return modl.exports;
         }
 
-        document.getElementById("l").remove();
-        document.getElementById("b").style.display = "block"
+        l.remove();
+        b.style.display = "block"
 
         window.start = function() {
-            document.getElementById("b").remove();
+            b.remove();
             require("index").run();
         }
     </script>
