@@ -187,7 +187,6 @@ export function step() {
     pl.r_x_speed = 0;
     pl.r_y_speed = 0;
     
-
     if (pl.controllable) {
 
         if (key.up) {
@@ -294,6 +293,13 @@ export function step() {
             pl.modules2 = Math.min(128, 16 + pl.modules2);
         }
     }
+
+    // Shield sounds
+
+    if (stuff.defense == Hud.ITEM_SHIELD)
+        Snd.shield.loop();
+    else
+        Snd.shield.stop();
 }
 
 // Prepare back-and-forth animation for shield

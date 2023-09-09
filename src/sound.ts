@@ -8,10 +8,22 @@ export class Sound {
     // last played instance, if any
     private playing : AudioBufferSourceNode[] = []
 
+    // Play into this node (either the audio context's
+    // final destination, or a gain node)
+    private readonly destination : AudioNode
+
     constructor(
         audio: Promise<AudioBuffer>,
-        private readonly maxCount : number) {
+        private readonly maxCount : number,
+        volume : number = 1) {
         audio.then(buffer => this.buffer = buffer);
+        
+        this.destination = volume == 1 ? S.ac.destination : 
+            (function() {
+                const gain = S.ac.createGain();
+                gain.connect(S.ac.destination);
+                gain.gain.value = volume;
+                return gain; }());
     }
 
     play() {
@@ -22,7 +34,7 @@ export class Sound {
 
         const node = new AudioBufferSourceNode(S.ac);
         node.buffer = this.buffer;
-        node.connect(S.ac.destination);
+        node.connect(this.destination);
         node.start();
         this.playing.push(node);
     }
@@ -38,7 +50,7 @@ export class Sound {
         if (this.playing.length == 0) {
             const node = new AudioBufferSourceNode(S.ac);
             node.buffer = this.buffer;
-            node.connect(S.ac.destination);
+            node.connect(this.destination);
             node.loop = true;
             node.start();
             this.playing.push(node);
@@ -63,3 +75,4 @@ export const pickupMulti = new Sound(S.vpeacemaker, 1);
 export const pickupSpeed = new Sound(S.vfirerate, 1);
 export const pickupShield = new Sound(S.vshield, 1);
 export const pickupFury = new Sound(S.vfury, 1);
+export const shield = new Sound(S.shield, 1, 0.5);
