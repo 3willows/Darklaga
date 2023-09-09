@@ -672,6 +672,24 @@ export function drawText(
     }
 }
 
+// Measure the width of a piece of text, in pixels
+export function measureText(text: string, font: Sprite[]) {
+    
+    let x = 0;
+    for (let i = 0; i < text.length; ++i) {
+        
+        let s = fontmap[text.charCodeAt(i)];
+        
+        // For unknown characters (including whitespace), 
+        // use width of '-' character 
+        if (typeof s !== "number") s = 45;
+        
+        x += font[s].w - 1;
+    }
+
+    return x;
+}
+
 // GENERAL ===================================================================
 
 export function startRender() {

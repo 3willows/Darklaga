@@ -11,6 +11,7 @@ import * as Boss from "./boss"
 import * as GL from "./webgl"
 import * as Fury from "./fury"
 import * as Music from "./music"
+import * as Menu from "./menu"
 
 const gLEVEL1 = 0
 const gLEVEL2 = 1
@@ -280,6 +281,7 @@ function playStep() {
 
 function menuStep() {
     Background.step();
+    Menu.step();
 }
 
 function endLevelStep() {
@@ -382,6 +384,8 @@ export function menuRender() {
         Hud.prerender(g.prerender >> 1);    
     else
         Hud.render();
+
+    Menu.render();
 }
 
 export function endLevelRender() {
