@@ -90,6 +90,8 @@ class MenuWindow {
         }
     }
 
+    active() { return this.items[this.selected] }
+
     message(msg: Message) {
 
         if (msg == "up" && this.selected > 0) {
@@ -199,6 +201,69 @@ class GameMenu extends MenuWindow {
 
         if (mi === this.btnBack) {
             wnd = new MainMenu();
+        }
+    }
+
+    render() {
+        super.render();
+
+        const text : string[] = [];
+        const sel = this.active(); 
+
+        if (sel === this.btnTourist) {
+            text.push(
+                "Tourist mode",
+                "For beginners",
+                "50% enemy health",
+                "Less game complexity",
+                "Three levels only"
+            );
+        }
+
+        if (sel === this.btnNormal) {
+            text.push(
+                "Normal game"
+            );
+        }
+
+        if (sel === this.btnHard) {
+            text.push(
+                "Hard game",
+                "200% enemy health"
+            );
+        }
+
+        if (sel === this.btnExtreme) {
+            text.push(
+                "Extreme game!",
+                "200% enemy health",
+                "Enemies are more aggressive",
+                "Earn more score from enemies"
+            );
+        }
+
+        if (sel == this.btnSecret) {
+            text.push(
+                "Secret level",
+                "Geo-Destruction effects",
+                "200% enemy health",
+                "Enemies are more aggressive",
+                "Start with upgrades"
+            );
+        }
+
+        if (sel == this.btnBossMode) {
+            text.push(
+                "Boss Mode game",
+                "Play against bosses only",
+                "Receive upgrades before each boss"
+            );
+        }
+
+        let y = 16;
+        for (let line of text) {
+            GL.drawText(line, S.mini, y == 16 ? S.texwhite : S.texgreen, 40, y, 1, 0);
+            y += (y == 16 ? 16 : 12);
         }
     }
 }
