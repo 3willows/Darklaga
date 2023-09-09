@@ -2,7 +2,9 @@ import * as GL from "./webgl"
 import * as S from "./sprites"
 import * as Snd from "./sound";
 import * as Lvl from "./level";
+import * as Float from "./float";
 import { key } from "input";
+import { opts } from "options";
 
 type Message = "up" | "down" | "action" | { x: number, y: number };
 
@@ -159,6 +161,24 @@ class GameMenu extends MenuWindow {
 
         if (mi === this.btnTourist) {
             callbacks.startLevel(Lvl.gTOURIST1);
+            opts.UseTourist = true;
+            opts.UseScore = true;
+            opts.UseGraze = false;
+            opts.UseNewSchool = true;
+            opts.UseVertical = true;
+            opts.UseWeapon = true;
+            opts.UseFury = true;
+            opts.UseFuryShield = true;
+            opts.UseCombo = true;
+            opts.UseWeakerEnemies = true;
+            opts.UseStrongerEnemies = false;
+            opts.UseAggressiveEnemies = false;
+            setTimeout(() => 
+                Float.addInfo(
+                    [S.player[2]], 
+                    ["Your ship. Move it with the arrow keys or",
+                     "drag it with your mouse, stylus or finger."]),
+                5500);
         }
 
         if (mi === this.btnNormal) {

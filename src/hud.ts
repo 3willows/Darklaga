@@ -577,6 +577,8 @@ export function playerHit() {}
 
 export function graze(x: number, y: number) {
     
+    if (!opts.UseGraze) return;
+
     const g = ++hud.graze;
     
     if (g != 20) Snd.graze.play();
