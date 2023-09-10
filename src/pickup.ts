@@ -151,9 +151,9 @@ function add(x: number, y: number, type: number) {
 }
 
 export function generateChoices() {
-    add(400, 240, BONUS_ROCKETS);
-    add(880, 240, BONUS_MULTI);
-    add(1360, 240, BONUS_SHIELD);
+    add(400, -240, BONUS_ROCKETS);
+    add(880, -240, BONUS_MULTI);
+    add(1360, -240, BONUS_SHIELD);
     pickups.did_weapon = pickups.did_offense = pickups.did_defense = true;
 }
 

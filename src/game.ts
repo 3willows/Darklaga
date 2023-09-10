@@ -21,7 +21,6 @@ const GS_END_LEVEL = 3
 type Game = {
     state: number
     level: number
-    player_enter: number
     specialscreen: number
     prerender: number
 }
@@ -30,7 +29,6 @@ const g : Game = {
     state: GS_MAIN_MENU,
     level: Level.gLEVEL1,
     prerender: 0,
-    player_enter: 0,
     specialscreen: 0
 }
 
@@ -83,6 +81,12 @@ function startLevel(lvl: number) {
             break;
         case Level.gBOSSMODE1:
             Pickup.generateChoices();
+            Level.spawn(0);
+            Boss.start(0);
+            Background.warp(Background.BOSS1);
+            g.prerender = 0;
+            Music.playMusic(Music.musicBoss);
+            break;
         case Level.gBOSS1:
             Level.spawn(0);
             Boss.start(0);
@@ -127,6 +131,12 @@ function startLevel(lvl: number) {
             break;
         case Level.gBOSSMODE2:
             Pickup.generateChoices();
+            Level.spawn(0);
+            Boss.start(1);
+            Background.warp(Background.BOSS2);
+            g.prerender = 64;
+            Music.playMusic(Music.musicBoss);
+            break;
         case Level.gBOSS2:
             Level.spawn(0);
             Boss.start(1);
@@ -171,6 +181,12 @@ function startLevel(lvl: number) {
             break;
         case Level.gBOSSMODE3:
             Pickup.generateChoices();
+            Level.spawn(0);
+            Boss.start(2);
+            Background.warp(Background.BOSS3);
+            g.prerender = 64;
+            Music.playMusic(Music.musicBoss);
+            break;
         case Level.gBOSS3:
             Level.spawn(0);
             Boss.start(2);
@@ -210,13 +226,6 @@ function nextLevel() {
 
 function playStep() {
  
-    if (g.player_enter < 64) {
-        if (++g.player_enter == 64) {
-            Player.reset();
-            Player.setControllable(true);
-        }
-    }
-
     Background.step();
     Enemy.step();
     Boss.step();
@@ -232,7 +241,6 @@ function playStep() {
         Level.step();
 
     if (Level.over() && 
-        g.player_enter == 64 && 
         Enemy.count() == 0 && 
         Boss.over() && 
         !Fury.isRunning()) 
@@ -264,9 +272,11 @@ function endLevelStep() {
 
 function startingLevelStep() {
 
+    // During this step the player+hud come into view
     if (g.prerender < 64) {
         Background.step(false);
-        g.prerender++;
+        if (++g.prerender == 64)
+            Player.reset();
         return;
     }
 
@@ -278,9 +288,11 @@ function startingLevelStep() {
     Pickup.step();
     Dan.step();
     Float.step();
-    Boss.step();
     Fury.step();
 
+    // Wait for the background to finish warping
+    // before starting play. Boss & level do not operate
+    // while in this mode. 
     if (Background.warping()) return;
 
     g.state = GS_PLAY;
@@ -372,6 +384,7 @@ export function startingLevelRender() {
         Hud.prerender(g.prerender >> 1);    
     } else {
         Player.render();
+        Pickup.render();
         Hud.render();
     }
 }

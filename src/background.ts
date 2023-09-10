@@ -296,6 +296,7 @@ function stepWarp()
                 bg.lfactor += 3;
             } else {
                 bg.warpstate = 2;
+                bg.timer = -64;
                 bg.current = bg.next;
             }
             break;
@@ -304,7 +305,6 @@ function stepWarp()
                 bg.lfactor -= 3;
             } else {
                 bg.warpstate = 0;
-                bg.timer = 0;
             }
             break;
         default: 
