@@ -185,18 +185,82 @@ class GameMenu extends MenuWindow {
 
         if (mi === this.btnNormal) {
             callbacks.startLevel(Lvl.gLEVEL1);
+            opts.UseTourist = false;
+            opts.UseScore = true;
+            opts.UseGraze = true;
+            opts.UseNewSchool = true;
+            opts.UseVertical = true;
+            opts.UseWeapon = true;
+            opts.UseFury = true;
+            opts.UseFuryShield = true;
+            opts.UseCombo = true;
+            opts.UseWeakerEnemies = false;
+            opts.UseStrongerEnemies = false;
+            opts.UseAggressiveEnemies = false;
         }
 
         if (mi === this.btnHard) {
             callbacks.startLevel(Lvl.gLEVEL1);
+            opts.UseTourist = false;
+            opts.UseScore = true;
+            opts.UseGraze = true;
+            opts.UseNewSchool = true;
+            opts.UseVertical = true;
+            opts.UseWeapon = true;
+            opts.UseFury = true;
+            opts.UseFuryShield = true;
+            opts.UseCombo = true;
+            opts.UseWeakerEnemies = false;
+            opts.UseStrongerEnemies = true;
+            opts.UseAggressiveEnemies = false;
         }
 
         if (mi === this.btnExtreme) {
-            callbacks.startLevel(Lvl.gLEVEL1);    
+            callbacks.startLevel(Lvl.gLEVEL1);
+            opts.UseTourist = false;
+            opts.UseScore = true;
+            opts.UseGraze = true;
+            opts.UseNewSchool = true;
+            opts.UseVertical = true;
+            opts.UseWeapon = true;
+            opts.UseFury = true;
+            opts.UseFuryShield = true;
+            opts.UseCombo = true;
+            opts.UseWeakerEnemies = false;
+            opts.UseStrongerEnemies = true;
+            opts.UseAggressiveEnemies = true;
         }
 
         if (mi === this.btnBossMode) {
-            callbacks.startLevel(Lvl.gBOSSMODE1);    
+            callbacks.startLevel(Lvl.gBOSSMODE1);
+            opts.UseTourist = false;
+            opts.UseScore = true;
+            opts.UseGraze = true;
+            opts.UseNewSchool = true;
+            opts.UseVertical = true;
+            opts.UseWeapon = true;
+            opts.UseFury = true;
+            opts.UseFuryShield = true;
+            opts.UseCombo = true;
+            opts.UseWeakerEnemies = false;
+            opts.UseStrongerEnemies = true;
+            opts.UseAggressiveEnemies = false;
+        }
+
+        if (mi == this.btnSecret) {
+            callbacks.startLevel(Lvl.gSECRET);
+            opts.UseTourist = false;
+            opts.UseScore = true;
+            opts.UseGraze = true;
+            opts.UseNewSchool = true;
+            opts.UseVertical = true;
+            opts.UseWeapon = true;
+            opts.UseFury = true;
+            opts.UseFuryShield = true;
+            opts.UseCombo = true;
+            opts.UseWeakerEnemies = false;
+            opts.UseStrongerEnemies = true;
+            opts.UseAggressiveEnemies = true;
         }
 
         if (mi === this.btnBack) {

@@ -178,6 +178,10 @@ function startLevel(lvl: number) {
             g.prerender = 64;
             Music.playMusic(Music.musicBoss);
             break;
+        case Level.gSECRET: 
+            Level.spawn(16);
+            Pickup.generateChoices();
+            break;
     }
 }
 
