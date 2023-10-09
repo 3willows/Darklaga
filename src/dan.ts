@@ -196,7 +196,7 @@ function danStep(ref: number, px: number, py: number, clear: boolean) {
             // We are touching the player sprite! 
             if (Math.abs(ix - px) <= 16 && Math.abs(iy - py) <= 16) {
                 // Touch the player center: it's a hit !
-                Hud.playerHit()
+                Hud.playerHit(/* isDan */ true)
                 return false;
             }
             if (dan[off + GRAZE] == 0) { 
@@ -435,9 +435,7 @@ function danStep(ref: number, px: number, py: number, clear: boolean) {
 export function step() {
 
     const clear = Hud.invulnerable();
-    const pp = Player.pos();
-    const px = pp.x + 88;
-    const py = pp.y + 88;
+    const {x:px, y: py} = Player.pos();
     // Traverse all live shots while updating them.
     let ref = 0;
     while (dan[ref] > 0) {

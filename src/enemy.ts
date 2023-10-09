@@ -5,6 +5,7 @@ import * as Pickups from "./pickup"
 import { opts } from "./options";
 import * as Hud from "./hud";
 import * as Snd from "./sound";
+import * as Player from "./player"
 
 export type Mode = "n"|"v"|"d"
 
@@ -49,7 +50,7 @@ export class Enemy {
     // enemy (usually it's the same instance, but it may change
     // when an enemy changes to a different type), or null if the 
     // enemy is dead and should be removed. 
-    public step() : Enemy|null {
+    public step(px: number, py: number) : Enemy|null {
         
         this.timer++;
         if (this.flash) this.flash--;
@@ -66,6 +67,22 @@ export class Enemy {
                     Hud.onEnemyDeath(this.x, this.y, 1, this.basehealth);
                     return new Dying(this.x, this.y, this.hit, this.mode);
                 }
+            }
+        }
+
+        
+        // Are we in about the same area as player ? 
+        if (Math.abs(this.x - px) <= 400 && 
+            Math.abs(this.y - py) <= 400) 
+        {   
+            const cx = this.cx();
+            const cy = this.cy();
+
+            if (Math.abs(cx - px) <= 128 &&
+                Math.abs(cy - py) <= 128) 
+            {
+                // We are touching the player sprite! 
+                Hud.playerHit(/* isDan */ false);
             }
         }
 
@@ -108,8 +125,8 @@ export class Dying extends Enemy {
 
     public shootable(): boolean { return false; }
 
-    public step() {
-        super.step();
+    public step(px: number, py: number) {
+        super.step(px, py);
         if (this.timer >= 40) return null;
         return this;
     }
@@ -180,8 +197,9 @@ export class Dying extends Enemy {
 const enemies : Enemy[] = [];
 
 export function step() {
+    const {x, y} = Player.pos();
     for (let i = 0; i < enemies.length; ++i) {
-        const next = enemies[i].step();
+        const next = enemies[i].step(x, y);
         if (!next) {
             // Enemy died: remove it
             enemies[i] = enemies[enemies.length - 1]

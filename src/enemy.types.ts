@@ -49,9 +49,9 @@ export class Static extends Enemy {
         this.stimer = 75;
     }
 
-    public step(): Enemy|null {
+    public step(px: number, py: number): Enemy|null {
         
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         switch (this.variant) {
@@ -113,9 +113,9 @@ export class Sniper extends Enemy {
         this.dx = x < 0 ? 1 : -1;
     }
 
-    public step(): Enemy|null {
+    public step(px: number, py: number): Enemy|null {
         
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         const freq = this.mode == "v" ? 50 : 100; 
@@ -243,8 +243,8 @@ export class Flyby extends Enemy {
         this.fr = isVar1 ? 20/m : (mode == "v" ? 50 : 20); 
     }
 
-    public step() : Enemy|null {
-        const self = super.step();
+    public step(px: number, py: number) : Enemy|null {
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.timer <= this.t1) {        
@@ -312,8 +312,8 @@ export class Tank extends Enemy {
         this.tregen = mode == "n" ? 0 : this.regen;
     }
 
-    public step() : Enemy|null {
-        const self = super.step();
+    public step(px: number, py: number) : Enemy|null {
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.timer * this.m <= 200)
@@ -382,9 +382,9 @@ export class Group extends Enemy {
                   mode == "n" ? 29 : 74;
     }
 
-    public step(): Enemy|null {
+    public step(px: number, py: number): Enemy|null {
         
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.timer * this.speed < 100) {
@@ -470,9 +470,9 @@ export class Spiral extends Enemy {
                   mode == "d" ? 2000 : 65;
     }
  
-    public step(): Enemy|null {
+    public step(px: number, py: number): Enemy|null {
         
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.timer < this.t1) {
@@ -533,9 +533,9 @@ export class Carrier extends Enemy {
         if (this.variant == 2) this.alpha = 0;
     }
 
-    public step(): Enemy|null {
+    public step(px: number, py: number): Enemy|null {
         
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         let ready = false;
@@ -589,9 +589,9 @@ export class Bounce extends Enemy {
         this.vy = speed;
     }
     
-    public step(): Enemy|null {
+    public step(px: number, py: number): Enemy|null {
         
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.y > 0) this.x += this.vx;
@@ -671,9 +671,9 @@ class Suicide2 extends Enemy {
         this.angle = -Math.PI * (0.156 + Math.random() * 0.5);
     }
 
-    public step(): Enemy|null {
+    public step(px: number, py: number): Enemy|null {
     
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
         
         this.angle += Math.PI / 64;
@@ -711,11 +711,9 @@ export class Suicide extends Enemy {
                    x < 0 ? 8 : -8;
     }
 
-    public step() : Enemy|null {
-        const self = super.step();
+    public step(px: number, py: number) : Enemy|null {
+        const self = super.step(px, py);
         if (self !== this) return self;
-
-        const {x:px, y:py} = Player.pos();
 
         const mv = opts.UseVertical 
             ? this.mode == "v" ? 16 : 8 
@@ -769,9 +767,9 @@ export class Warp extends Enemy {
     public present() {}
     public end() : Enemy|null { return null }
 
-    public step() : Enemy|null {
+    public step(px: number, py: number) : Enemy|null {
 
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.timer * this.speed <= 32) {
@@ -931,9 +929,9 @@ export class Sweep extends Enemy {
         this.stimer = 300 + Math.floor(300 * Math.random());
     }
 
-    public step() : Enemy|null {
+    public step(px: number, py: number) : Enemy|null {
 
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.wait > 0) {
@@ -979,9 +977,9 @@ export class Sweep3 extends Enemy {
         this.stimer = 0;
     }
 
-    public step() : Enemy|null {
+    public step(px: number, py: number) : Enemy|null {
 
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.x <= 10) this.vx = 8;
@@ -1041,9 +1039,9 @@ export class Sweep4 extends Enemy {
         this.angle = 0;
     }
 
-    public step() : Enemy|null {
+    public step(px: number, py: number) : Enemy|null {
 
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.mode == "v") {
@@ -1113,9 +1111,9 @@ export class Hunter1 extends Hunter {
         this.spd = mode == "v" ? 16 : 8;
     }
 
-    step() : Enemy|null {
+    step(px: number, py: number) : Enemy|null {
         
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         this.stimer--;
@@ -1174,9 +1172,9 @@ export class Hunter2 extends Hunter {
         this.spd = mode == "v" ? 16 : 8;
     }
 
-    step() : Enemy|null {
+    step(px: number, py: number) : Enemy|null {
         
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.arrived) 
@@ -1227,9 +1225,9 @@ export class Hunter3 extends Hunter {
         this.mrad = mode == "v" ? 48 : 64;
     }
 
-    step() : Enemy|null {
+    step(px: number, py: number) : Enemy|null {
         
-        const self = super.step();
+        const self = super.step(px, py);
         if (self !== this) return self;
 
         if (this.radius > this.mrad) this.radius--;

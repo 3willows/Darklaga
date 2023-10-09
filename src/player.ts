@@ -170,7 +170,7 @@ function shoot(stuff: Hud.Stuff) {
 }
 
 export function pos() {
-    return {x: pl.x, y: pl.y};
+    return {x: pl.x + 88, y: pl.y + 88};
 }
 
 export function step() {

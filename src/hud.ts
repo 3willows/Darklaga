@@ -594,9 +594,10 @@ export function pickup(pickup: number) {
     }
 }
 
-export function playerHit() {
+export function playerHit(isDan: boolean) {
 
     if (invulnerable()) return;
+    if (!isDan && hud.defense == ITEM_SHIELD) return;
 
     if (opts.UseGraze && hud.graze > 0) {
         hud.graze = -1;
@@ -616,7 +617,6 @@ export function playerHit() {
         hud.danger = 63;
         hud.lives--;
     }
-
 }
 
 export function graze(x: number, y: number) {
