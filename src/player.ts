@@ -273,7 +273,7 @@ export function step() {
     if (pl.muzzle_flash) --pl.muzzle_flash;
 
     pl.laser_fired = false;
-    if (pl.controllable && !pl.cooldown && (opts.ModAutoFire || pl.shooting))
+    if (pl.controllable && !pl.cooldown && (opts.ModAutoFire || pl.shooting) && !Fury.isRunning())
         shoot(stuff)
 
     if (pl.laser_fired)
