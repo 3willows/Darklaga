@@ -71,7 +71,7 @@ function empty() : Hud {
         graze: 0,
         graze_anim: 0,
         graze_timer: 0,
-        fury_progress: 262114,
+        fury_progress: 0,
         displayed_fury: 0,
         combo: 0,
         combo_timer: COMBO_DELAY,
@@ -378,6 +378,18 @@ export function render() {
             GL.drawText(comboscore, S.font, 
                 S.texcombo[(hud.fire_timer >> 2) % S.texcombo.length],
                 170, 4, alpha, alpha);
+        }
+    }
+
+    // lives =================================================================
+
+    if (hud.lives > 4) {
+        GL.drawSprite(S.life, 170, 302);
+        const lifetext = "x " + hud.lives.toFixed();
+        GL.drawText(lifetext, S.font, S.texwhite, 200, 304, 1, 1);
+    } else {
+        for (let i = 0; i < hud.lives; ++i) {
+            GL.drawSprite(S.life, 170 + i * 16, 302);
         }
     }
 
