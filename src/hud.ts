@@ -53,6 +53,7 @@ type Hud = {
     lastlife: number
     invulnerable: number
     danger: number
+    death_alpha: number
     fire_timer: number
     tatk_lost_lives: number
 
@@ -87,6 +88,7 @@ function empty() : Hud {
         lastlife: 0,
         invulnerable: 0,
         danger: 0,
+        death_alpha: 0,
         fire_timer: 0,
         tatk_lost_lives: 0,
         player_x: 0,
@@ -151,6 +153,8 @@ export function step() {
     }
 
     if (hud.invulnerable) hud.invulnerable--;
+    if (hud.death_alpha) hud.death_alpha--;
+    if (hud.danger) hud.danger--;
     
     if (opts.UseScore) {
         
@@ -326,8 +330,13 @@ export function prerender(t: number) {
 }
 
 export function render() {
-    GL.drawRect(0, 0, 240, 20, (hud.danger << 2) / 256, 0, 0, 1);
-    GL.drawRect(0, 300, 240, 20, (hud.danger << 2) / 256, 0, 0, 1);
+
+    const dangerRed = (hud.danger << 2) / 256;
+    GL.drawRect(0, 0, 240, 20, dangerRed, 0, 0, 1);
+    GL.drawRect(0, 300, 240, 20, dangerRed, 0, 0, 1);
+
+    if (hud.death_alpha > 0) 
+        GL.drawRect(0, 20, 240, 280, 1, 1, 1, hud.death_alpha/64);
 
     // score =================================================================
 
@@ -408,7 +417,7 @@ export function render() {
         }
 
         const furyWidth = 4 + ((44 * hud.displayed_fury) >> 18);
-        GL.drawRect(4 + furyWidth, 300, 64 - furyWidth, 20, 0, 0, 0, 1);
+        GL.drawRect(4 + furyWidth, 300, 64 - furyWidth, 20, dangerRed, 0, 0, 1);
         GL.drawSprite(S.furybox, 4, 306);
 
         GL.drawSpriteAdditive(S.furylight, 54, 307, hud.frl1 >> 1);
@@ -585,7 +594,30 @@ export function pickup(pickup: number) {
     }
 }
 
-export function playerHit() {}
+export function playerHit() {
+
+    if (invulnerable()) return;
+
+    if (opts.UseGraze && hud.graze > 0) {
+        hud.graze = -1;
+        hud.graze_timer = 128;
+        hud.graze_anim = 0;
+    }
+
+    Snd.disrupt.play();
+
+    if (opts.UseFury && opts.UseFuryShield && hud.fury_progress > 87381) {
+        hud.fury_progress -= 87381;
+        hud.invulnerable = 100;
+        hud.danger = 31;
+    } else if (hud.lives > 0) {
+        hud.death_alpha = 48;
+        hud.invulnerable = 100;
+        hud.danger = 63;
+        hud.lives--;
+    }
+
+}
 
 export function graze(x: number, y: number) {
     
@@ -605,5 +637,5 @@ export function graze(x: number, y: number) {
 }
 
 export function invulnerable() {
-    return hud.invulnerable;
+    return !!hud.invulnerable;
 }

@@ -434,7 +434,7 @@ function danStep(ref: number, px: number, py: number, clear: boolean) {
 
 export function step() {
 
-    const clear = Hud.invulnerable() > 0;
+    const clear = Hud.invulnerable();
     const pp = Player.pos();
     const px = pp.x + 88;
     const py = pp.y + 88;
