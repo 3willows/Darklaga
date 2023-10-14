@@ -77,6 +77,15 @@ function renderInfo(this: Float) {
     }
 }
 
+function renderSprite(this: Float) {
+    if (!this.sprite) return;    
+    const x = this.x >> 3;
+    const y = this.y >> 3;
+    const a = (128 - this.timer)/128;
+    const s = this.sprite[(this.timer >> 4) % this.sprite.length];
+    GL.drawSpriteAlpha(s, x, y, a*32);
+}
+
 function renderGraze(this: Float) {
     const a = (32 - this.timer)/2;
     if (this.sprite) {
@@ -107,6 +116,18 @@ export function render() {
 }
 
 // Creation ==================================================================
+
+export function addSprite(sprite: S.Sprite[], x: number, y: number) {
+    fl.push({
+        x, y, 
+        value: 0, 
+        timer: 0,
+        text: [],
+        sprite,
+        render: renderSprite,
+        step: stepStandard
+    })
+}
 
 export function add(x: number, y: number, value: number) {
     fl.push({

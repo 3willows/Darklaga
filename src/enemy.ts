@@ -82,7 +82,7 @@ export class Enemy {
                 Math.abs(cy - py) <= 128) 
             {
                 // We are touching the player sprite! 
-                Hud.playerHit(/* isDan */ false);
+                Hud.playerHit(px, py, /* isDan */ false);
             }
         }
 

@@ -196,7 +196,7 @@ function danStep(ref: number, px: number, py: number, clear: boolean) {
             // We are touching the player sprite! 
             if (Math.abs(ix - px) <= 16 && Math.abs(iy - py) <= 16) {
                 // Touch the player center: it's a hit !
-                Hud.playerHit(/* isDan */ true)
+                Hud.playerHit(px, py, /* isDan */ true)
                 return false;
             }
             if (dan[off + GRAZE] == 0) { 

@@ -98,9 +98,19 @@ function empty() : Hud {
 
 let hud : Hud = empty();
 
+// The score at which the next life is awarded
+function nextlife() {
+
+    if (opts.UseNewSchool)
+        return Math.pow(hud.lastlife + 1, 3) * 10000;
+
+    return (hud.lastlife + 1) * 12500;
+}
+
 function twoSide(s: S.Sprite[]) {
     return [s[1], s[2], s[1], s[0]];
 }
+
 const items = [
     twoSide(S.ilaser),
     twoSide(S.irocket),
@@ -162,6 +172,23 @@ export function step() {
             const delta = hud.real_score - hud.score;
             const add = Math.max(1, Math.floor(delta / 8));
             hud.score += add;
+        }
+
+        if (opts.UseClaque) {
+            while (hud.score > nextlife()) {
+                ++hud.lastlife;
+                if (opts.UseWeapon && hud.defense == ITEM_DEFP) {
+                    Float.addSprite([S.nolife], 170 << 3, 302 << 3);
+                } else {
+                    ++hud.lives;
+                    if (opts.UseTourist) 
+                        Float.addInfo(
+                            [S.life],
+                            ["You have gathered enough score to earn a life."])
+                    else
+                        Float.addSprite([S.life], 170 << 3, 302 << 3);
+                }
+            }
         }
     }
 
@@ -594,7 +621,7 @@ export function pickup(pickup: number) {
     }
 }
 
-export function playerHit(isDan: boolean) {
+export function playerHit(px: number, py: number, isDan: boolean) {
 
     if (invulnerable()) return;
     if (!isDan && hud.defense == ITEM_SHIELD) return;
@@ -616,6 +643,7 @@ export function playerHit(isDan: boolean) {
         hud.invulnerable = 100;
         hud.danger = 63;
         hud.lives--;
+        Float.addSprite([hud.lives ? S.life : S.nolife ], px, py);
     }
 }
 
