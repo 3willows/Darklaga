@@ -3,6 +3,7 @@ import * as S from "./sprites"
 import * as Player from "./player"
 import * as Dan from "./dan"
 import { opts } from "options"
+import * as Stats from "./stats"
 
 // Given a ship sprite-set 01234, oscillates 23432101 ;
 // given 012, oscillates 1210

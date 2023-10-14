@@ -1,4 +1,5 @@
 import * as Level from "./level"
+import * as L from "./levels"
 import * as Background from "./background"
 import * as Pickup from "./pickup"
 import * as Player from "./player"
@@ -12,6 +13,7 @@ import * as GL from "./webgl"
 import * as Fury from "./fury"
 import * as Music from "./music"
 import * as Menu from "./menu"
+import * as Stats from "./stats"
 
 const GS_MAIN_MENU = 0
 const GS_STARTING_LEVEL = 1
@@ -27,7 +29,7 @@ type Game = {
 
 const g : Game = {
     state: GS_MAIN_MENU,
-    level: Level.gLEVEL1,
+    level: L.gLEVEL1,
     prerender: 0,
     specialscreen: 0
 }
@@ -37,49 +39,50 @@ const g : Game = {
 function startLevel(lvl: number) {
     
 	g.state = GS_STARTING_LEVEL;
+    Stats.begin(lvl);
 
     switch (g.level = lvl) {
-        case Level.gLEVEL1:
-        case Level.gOSLEVEL1:
+        case L.gLEVEL1:
+        case L.gOSLEVEL1:
             g.specialscreen = 200;
-        case Level.gTOURIST1:
+        case L.gTOURIST1:
             Level.spawn(1);
             Background.set(Background.LEVEL0);
             Background.warp(Background.LEVEL1);
             g.prerender = 0;
             Music.playMusic(Music.music1);
             break;
-        case Level.gLEVEL2:
-        case Level.gOSLEVEL2:
-        case Level.gTOURIST2:
+        case L.gLEVEL2:
+        case L.gOSLEVEL2:
+        case L.gTOURIST2:
             Level.spawn(2);
             Background.set(Background.LEVEL1);
             g.prerender = 64;
             Music.playMusic(Music.music1);
             break;
-        case Level.gLEVEL3:
-        case Level.gOSLEVEL3:
-        case Level.gTOURIST3:
+        case L.gLEVEL3:
+        case L.gOSLEVEL3:
+        case L.gTOURIST3:
             Level.spawn(3);
             Background.set(Background.LEVEL2);
             g.prerender = 64;
             Music.playMusic(Music.music1);
             break;
-        case Level.gLEVEL4:
-        case Level.gOSLEVEL4:
+        case L.gLEVEL4:
+        case L.gOSLEVEL4:
             Level.spawn(4);
             Background.set(Background.LEVEL3)
             g.prerender = 64;
             Music.playMusic(Music.music1);
             break;
-        case Level.gLEVEL5:
-        case Level.gOSLEVEL5:
+        case L.gLEVEL5:
+        case L.gOSLEVEL5:
             Level.spawn(5);
             Background.set(Background.LEVEL3);
             g.prerender = 64;
             Music.playMusic(Music.music1);
             break;
-        case Level.gBOSSMODE1:
+        case L.gBOSSMODE1:
             Pickup.generateChoices();
             Level.spawn(0);
             Boss.start(0);
@@ -87,49 +90,49 @@ function startLevel(lvl: number) {
             g.prerender = 0;
             Music.playMusic(Music.musicBoss);
             break;
-        case Level.gBOSS1:
+        case L.gBOSS1:
             Level.spawn(0);
             Boss.start(0);
             Background.set(Background.BOSS1);
             g.prerender = 64;
             Music.playMusic(Music.musicBoss);
             break;
-        case Level.gLEVEL6:
-        case Level.gOSLEVEL6:
+        case L.gLEVEL6:
+        case L.gOSLEVEL6:
             Level.spawn(6);
             Background.warp(Background.LEVEL4);
             g.prerender = 64;
             Music.playMusic(Music.music2);
             break;
-        case Level.gLEVEL7:
-        case Level.gOSLEVEL7:
+        case L.gLEVEL7:
+        case L.gOSLEVEL7:
             Level.spawn(7);
             Background.set(Background.LEVEL5);
             g.prerender = 64;
             Music.playMusic(Music.music2);
             break;
-        case Level.gLEVEL8:
-        case Level.gOSLEVEL8:
+        case L.gLEVEL8:
+        case L.gOSLEVEL8:
             Level.spawn(8);
             Background.set(Background.LEVEL6);
             g.prerender = 64;
             Music.playMusic(Music.music2);
             break;
-        case Level.gLEVEL9:
-        case Level.gOSLEVEL9:
+        case L.gLEVEL9:
+        case L.gOSLEVEL9:
             Level.spawn(9);
             Background.set(Background.LEVEL6);
             g.prerender = 64;
             Music.playMusic(Music.music2);
             break;
-        case Level.gLEVEL10:
-        case Level.gOSLEVEL10:
+        case L.gLEVEL10:
+        case L.gOSLEVEL10:
             Level.spawn(10);
             Background.set(Background.LEVEL6);
             g.prerender = 64; 
             Music.playMusic(Music.music2);
             break;
-        case Level.gBOSSMODE2:
+        case L.gBOSSMODE2:
             Pickup.generateChoices();
             Level.spawn(0);
             Boss.start(1);
@@ -137,49 +140,49 @@ function startLevel(lvl: number) {
             g.prerender = 64;
             Music.playMusic(Music.musicBoss);
             break;
-        case Level.gBOSS2:
+        case L.gBOSS2:
             Level.spawn(0);
             Boss.start(1);
             Background.set(Background.BOSS2);
             g.prerender = 64;
             Music.playMusic(Music.musicBoss);
             break;
-        case Level.gLEVEL11:
-        case Level.gOSLEVEL11:
+        case L.gLEVEL11:
+        case L.gOSLEVEL11:
             Level.spawn(11);
             Background.warp(Background.LEVEL7);
             g.prerender = 64;
             Music.playMusic(Music.music3);
             break;
-        case Level.gLEVEL12:
-        case Level.gOSLEVEL12:
+        case L.gLEVEL12:
+        case L.gOSLEVEL12:
             Level.spawn(12);
             Background.set(Background.LEVEL7);
             g.prerender = 64;
             Music.playMusic(Music.music3);
             break;
-        case Level.gLEVEL13:
-        case Level.gOSLEVEL13:
+        case L.gLEVEL13:
+        case L.gOSLEVEL13:
             Level.spawn(13);
             Background.set(Background.LEVEL8);
             g.prerender = 64;
             Music.playMusic(Music.music3);
             break;
-        case Level.gLEVEL14:
-        case Level.gOSLEVEL14:
+        case L.gLEVEL14:
+        case L.gOSLEVEL14:
             Level.spawn(14);
             Background.set(Background.LEVEL9);
             g.prerender = 64;
             Music.playMusic(Music.music3);
             break;
-        case Level.gLEVEL15:
-        case Level.gOSLEVEL15:
+        case L.gLEVEL15:
+        case L.gOSLEVEL15:
             Level.spawn(15);
             Background.set(Background.LEVEL9);
             g.prerender = 64; 
             Music.playMusic(Music.music3);
             break;
-        case Level.gBOSSMODE3:
+        case L.gBOSSMODE3:
             Pickup.generateChoices();
             Level.spawn(0);
             Boss.start(2);
@@ -187,14 +190,14 @@ function startLevel(lvl: number) {
             g.prerender = 64;
             Music.playMusic(Music.musicBoss);
             break;
-        case Level.gBOSS3:
+        case L.gBOSS3:
             Level.spawn(0);
             Boss.start(2);
             Background.set(Background.BOSS3);
             g.prerender = 64;
             Music.playMusic(Music.musicBoss);
             break;
-        case Level.gSECRET: 
+        case L.gSECRET: 
             Level.spawn(16);
             Pickup.generateChoices();
             break;
@@ -203,18 +206,21 @@ function startLevel(lvl: number) {
 
 function endLevel() {
     g.state = GS_END_LEVEL;
+    Music.setVolume(0.25);
+    Stats.end(0);
     Player.setControllable(false);
 }
 
 function gameFinish() {}
 
 function nextLevel() {
+    Music.setVolume(1);
     switch (g.level) {
-        case Level.gBOSS3:
-        case Level.gBOSSMODE3:
-        case Level.gTOURIST3:
-        case Level.gSECRET:
-        case Level.gOSLEVEL15:
+        case L.gBOSS3:
+        case L.gBOSSMODE3:
+        case L.gTOURIST3:
+        case L.gSECRET:
+        case L.gOSLEVEL15:
             gameFinish();
             break;
         default:
@@ -267,7 +273,10 @@ function endLevelStep() {
     Boss.step();
     Fury.step();
 
-    nextLevel();
+    Hud.addScoreRaw(Stats.step());
+
+    if (Stats.isDone())
+        nextLevel();
 }
 
 function startingLevelStep() {
@@ -317,8 +326,6 @@ export function step() {
             throw "Unknown state";
     }
 }
-
-//startLevel();
 
 // rendering =================================================================
 
@@ -374,6 +381,7 @@ export function endLevelRender() {
     Boss.renderTop();
     Fury.renderEnd();
     Hud.render();
+    Stats.render();
     Float.render();
 }
 

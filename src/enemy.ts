@@ -6,6 +6,7 @@ import { opts } from "./options";
 import * as Hud from "./hud";
 import * as Snd from "./sound";
 import * as Player from "./player"
+import * as Stats from "./stats"
 
 export type Mode = "n"|"v"|"d"
 
@@ -199,11 +200,13 @@ const enemies : Enemy[] = [];
 export function step() {
     const {x, y} = Player.pos();
     for (let i = 0; i < enemies.length; ++i) {
-        const next = enemies[i].step(x, y);
+        const enemy = enemies[i];
+        const next = enemy.step(x, y);
         if (!next) {
             // Enemy died: remove it
             enemies[i] = enemies[enemies.length - 1]
             enemies.pop();
+            if (enemy.alive) Stats.enemyFled();
             --i;
         } else {
             enemies[i] = next;
@@ -222,6 +225,7 @@ export function add(e: Enemy) {
 
     if (enemies.length < 40) {
         enemies.push(e);
+        Stats.enemy();
         return true;
     }
 

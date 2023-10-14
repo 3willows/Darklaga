@@ -115,3 +115,7 @@ export function playMusic(music: Music) {
     else
         setTimeout(() => playMusic(music), 10);
 }
+
+export function setVolume(fraction: number) {
+    music.gain.linearRampToValueAtTime(fraction * 0.5, music.context.currentTime + 0.5);
+}

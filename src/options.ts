@@ -12,6 +12,7 @@ export const opts = {
     UseFury: true,
     UseWeapon: true,
     UseFuryShield: true,
+    UseTimeAttack: false,
 
     UseWeakerEnemies: false,
     UseStrongerEnemies: false,

@@ -1,7 +1,7 @@
 import * as GL from "./webgl"
 import * as S from "./sprites"
 import * as Snd from "./sound";
-import * as Lvl from "./level";
+import * as L from "./levels";
 import * as Float from "./float";
 import { key } from "input";
 import { opts } from "options";
@@ -162,7 +162,7 @@ class GameMenu extends MenuWindow {
         Snd.furyBegin.play();
 
         if (mi === this.btnTourist) {
-            callbacks.startLevel(Lvl.gTOURIST1);
+            callbacks.startLevel(L.gTOURIST1);
             opts.UseTourist = true;
             opts.UseScore = true;
             opts.UseGraze = false;
@@ -184,7 +184,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi === this.btnNormal) {
-            callbacks.startLevel(Lvl.gLEVEL1);
+            callbacks.startLevel(L.gLEVEL1);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;
@@ -200,7 +200,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi === this.btnHard) {
-            callbacks.startLevel(Lvl.gLEVEL1);
+            callbacks.startLevel(L.gLEVEL1);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;
@@ -216,7 +216,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi === this.btnExtreme) {
-            callbacks.startLevel(Lvl.gLEVEL1);
+            callbacks.startLevel(L.gLEVEL1);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;
@@ -232,7 +232,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi === this.btnBossMode) {
-            callbacks.startLevel(Lvl.gBOSSMODE1);
+            callbacks.startLevel(L.gBOSSMODE1);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;
@@ -248,7 +248,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi == this.btnSecret) {
-            callbacks.startLevel(Lvl.gSECRET);
+            callbacks.startLevel(L.gSECRET);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;

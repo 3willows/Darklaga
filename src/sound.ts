@@ -77,3 +77,4 @@ export const pickupShield = new Sound(S.vshield, 1);
 export const pickupFury = new Sound(S.vfury, 1);
 export const shield = new Sound(S.shield, 1, 0.5);
 export const disrupt = new Sound(S.disrupt, 1);
+export const statsPop = new Sound(S.statspop, 1);

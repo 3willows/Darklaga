@@ -5,6 +5,7 @@ import * as Fury from "./fury"
 import { opts } from "./options"
 import { hasTarget } from "./shot"
 import * as Snd from "./sound"
+import * as Stats from "./stats"
 
 export const ITEM_LASER = 0
 export const ITEM_ROCKETS = 1
@@ -275,6 +276,12 @@ function multiplier() {
     return multiplier;
 }
 
+export function addScoreRaw(value: number) {
+    if (opts.UseScore) {
+        hud.real_score += value;
+    }
+}
+
 function addScoreBonus(
     x: number, 
     y: number, 
@@ -333,11 +340,12 @@ export function onEnemyDeath(
 
     if (opts.UseCombo) {
         hud.combo_timer = COMBO_DELAY;
-        hud.combo++;
+        Stats.combo(++hud.combo)
     }    
 
     if (opts.UseFury) {
         furyProgress(log_value);
+        if (Fury.isRunning()) Stats.fury();
     }
 }
 
@@ -652,6 +660,7 @@ export function graze(x: number, y: number) {
     if (!opts.UseGraze) return;
 
     const g = ++hud.graze;
+    Stats.graze();
     
     if (g != 20) Snd.graze.play();
     else Snd.pickup.play();

@@ -1,5 +1,6 @@
-import { opts } from "options";
+import { opts } from "./options";
 import { blade, bladestar, bladet, blast, bullet3v, furybolt, lasbme, lasbml, lasbmm, lasbse, lasbsl, lasbsm, lasoml, lasomm, lasosl, lasosm, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
+import * as Stats from "./stats"
 import * as GL from "./webgl"
 
 // Shot data is encoded as consecutive Int32 values, 
@@ -268,6 +269,7 @@ function shotStep(ref: number): boolean {
     if (shots[off + TYPE] == SHOT_DEAD) {
         // Shot has died during this step, so remove it from
         // the live shot list and append it to the free shot list.
+        if (shots[off + HIT] > 0) Stats.shotHit();
         shots[ref] = shots[off + NEXT];
         shots[off + NEXT] = shots[1];
         shots[1] = off;
@@ -496,6 +498,8 @@ function addRaw(
     p1?: number,
     p2?: number
 ) {
+
+    Stats.shot();
 
     const off = shots[1];
     if (off < 0) return -1;
