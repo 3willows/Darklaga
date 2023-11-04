@@ -19,48 +19,38 @@
                 callback: callback 
             };
         }
-
-        fetch("darklaga.bin").then(r => r.arrayBuffer()).then(ab =>
-        {
-            const len = new Uint32Array(ab, 0, 1)[0];
-            const js  = new TextDecoder().decode(new Uint8Array(ab, 4, len));
-
-            let off = len + 4;
-            while (off % 4) ++off;
-
-            const kept = ab.slice(off);
-            const u8 = (s,l) => new Uint8Array(kept, s, l).slice();
-            const f32 = (s,l) => new Float32Array(kept, s, l);
-
-            eval(js);
-
-            function require(name) {
-                var modl = defined[name];
-                if (!modl.exports.__esModule) {
-                    var args = [
-                        function() { throw "Cannot Require" },
-                        modl.exports
-                    ];
-                    while (args.length < modl.deps.length) 
-                        args.push(require(modl.deps[args.length]));
-                    modl.callback.apply(null, args);
-                }
-                return modl.exports;
+    </script>
+    <script src="./sounds.js"></script>
+    <script src="./levels.js"></script>
+    <script src="./atlas.js"></script>
+    <script src="./darklaga.js"></script>
+    <script type="text/javascript">
+        function require(name) {
+            var modl = defined[name];
+            if (!modl.exports.__esModule) {
+                var args = [
+                    function() { throw "Cannot Require" },
+                    modl.exports
+                ];
+                while (args.length < modl.deps.length) 
+                    args.push(require(modl.deps[args.length]));
+                modl.callback.apply(null, args);
             }
+            return modl.exports;
+        }
 
-            l.remove();
-            document.getElementById('p').style.display = "block";
+        l.remove();
+        p.style.display = "block";
 
-            document.addEventListener("keydown", start);
-            document.addEventListener("click", start);
-            function start() {
-                document.getElementById('b').remove();
-                document.getElementById('p').remove();
-                document.removeEventListener("keydown", start);
-                document.removeEventListener("click", start);
-                require("index").run();
-            }
-        })
+        document.addEventListener("keydown", start);
+        document.addEventListener("click", start);
+        function start() {
+            b.remove();
+            p.remove();
+            document.removeEventListener("keydown", start);
+            document.removeEventListener("click", start);
+            require("index").run();
+        }
     </script>
 </body>
 </html>

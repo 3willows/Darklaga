@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc src/index.ts --outFile dist/darklaga.js --module amd --target ES6",
+    "buildsep": "tsc src/index.ts --outDir sep/ --target ES6",
+    "bin": "node pack/bin.js",
     "pack": "node pack/pack.js"
   },
   "author": "",
