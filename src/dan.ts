@@ -467,13 +467,13 @@ function danRender(ref: number) {
         if (anim < 8) {
             const sprite = sprites[dan[off + SPRITE]][anim];
             GL.drawSprite(sprite, 
-                (dan[off + LEFT] >> 3) - (sprite.w >> 1), 
-                (dan[off + TOP] >> 3) - (sprite.h >> 1));
+                (dan[off + LEFT] >> 3) - (sprite[S.w] >> 1), 
+                (dan[off + TOP] >> 3) - (sprite[S.h] >> 1));
         } else {
             const sprite = sprites[dan[off + SPRITE]][(anim+8)>>1];
             GL.drawSpriteAlpha(sprite, 
-                (dan[off + LEFT] >> 3) - (sprite.w >> 1), 
-                (dan[off + TOP] >> 3) - (sprite.h >> 1),
+                (dan[off + LEFT] >> 3) - (sprite[S.w] >> 1), 
+                (dan[off + TOP] >> 3) - (sprite[S.h] >> 1),
                 40 - anim);
         }
 
@@ -482,8 +482,8 @@ function danRender(ref: number) {
         const sprite = anim[(dan[off + ANIM] >> 3) % anim.length];
         const alpha = dan[off + DIE] >> 1;
         GL.drawSpriteAlpha(sprite, 
-            (dan[off + LEFT] >> 3) - (sprite.w >> 1), 
-            (dan[off + TOP] >> 3) - (sprite.h >> 1),
+            (dan[off + LEFT] >> 3) - (sprite[S.w] >> 1), 
+            (dan[off + TOP] >> 3) - (sprite[S.h] >> 1),
             alpha);
     }
 
@@ -530,8 +530,8 @@ function add(s: {
     dan[off + SPRITE] = sprite;
     dan[off + LEFT] = s.x;
     dan[off + TOP] = s.y;
-    dan[off + WIDTH] = sprites[sprite][0].w;
-    dan[off + HEIGHT] = sprites[sprite][0].h;
+    dan[off + WIDTH] = sprites[sprite][0][S.w];
+    dan[off + HEIGHT] = sprites[sprite][0][S.h];
     dan[off + TIMER] = 0;
     dan[off + ANIM] = 0;
     dan[off + DIE] = s.life;

@@ -31,8 +31,8 @@ export class Enemy {
 
         this.timer = 0
         this.flash = 0
-        this.w = sprites[0].w << 3;
-        this.h = sprites[0].h << 3;
+        this.w = sprites[0][S.w] << 3;
+        this.h = sprites[0][S.h] << 3;
         this.basehealth = health + 1;
         if (!opts.UseWeakerEnemies) ++this.basehealth;
         if (opts.UseStrongerEnemies) ++this.basehealth;
@@ -138,8 +138,8 @@ export class Dying extends Enemy {
         const ey = (this.y >> 3) - 4;
 
         // Center the flash
-        const bx = (this.x >> 3) - (S.boomlight.w - this.hit.w)/2;
-        const by = (this.y >> 3) - (S.boomlight.h - this.hit.h)/2;
+        const bx = (this.x >> 3) - (S.boomlight[S.w] - this.hit[S.w])/2;
+        const by = (this.y >> 3) - (S.boomlight[S.h] - this.hit[S.h])/2;
 
         let alpha;
 

@@ -1,4 +1,4 @@
-import { back, cityb, cityl, cityr, colu, metalla, metallb, metalra, metalrb, olla, ollb, olra, olrb, orgab, orgal, orgar, planet, Sprite } from "./sprites";
+import * as S from "./sprites";
 import * as Fury from "./fury"
 import * as GL from "./webgl"
 
@@ -40,7 +40,7 @@ const bg = {
 }
 
 const coluback: { 
-    readonly s: Sprite, 
+    readonly s: S.Sprite, 
     readonly x: number,
     readonly v: number,
     readonly h: number,
@@ -48,11 +48,11 @@ const coluback: {
 }[] = (function() {
     
     let nextx = 0;
-    return colu.map(function(s, i) {
+    return S.colu.map(function(s, i) {
         const x = nextx;
-        nextx += s.w;
+        nextx += s[S.w];
         return {
-            s, x, h: s.h, v: (1 + Math.abs(3 - i)) << 6, o: 0
+            s, x, h: s[S.h], v: (1 + Math.abs(3 - i)) << 6, o: 0
         }
     })
 })()
@@ -80,18 +80,18 @@ function renderCityBack(bringin: boolean, bringout: boolean) {
     let xoff = 0;
     if (bringin && bg.timer < 128) {
         const f = (128 - bg.timer) / 128;
-        xoff = Math.floor(f * f * cityl.w);
+        xoff = Math.floor(f * f * S.cityl[S.w]);
     }
     if (bringout && bg.timer >= 32) {
         const f = (bg.timer - 32) / 128;
-        xoff = Math.floor(f * f * cityl.w);
+        xoff = Math.floor(f * f * S.cityl[S.w]);
     }
 
-    const yoff = (2 * bg.timer) % cityl.h;
+    const yoff = (2 * bg.timer) % S.cityl[S.h];
 
     if (!(bringin && bg.timer < 128) && !(bringout && bg.timer >= 32)) 
-        for (let y = yoff/2 - cityb.h; y < 320; y += cityb.h)
-            GL.drawSprite(cityb, 120 - cityb.w/2, y);
+        for (let y = yoff/2 - S.cityb[S.h]; y < 320; y += S.cityb[S.h])
+            GL.drawSprite(S.cityb, 120 - S.cityb[S.w]/2, y);
 
     if (bringin && bg.timer < 256) 
         GL.drawRect(0, 20, 240, 280, 0, 0, 0, 1 - Math.abs(bg.timer - 128)/128);
@@ -99,9 +99,9 @@ function renderCityBack(bringin: boolean, bringout: boolean) {
     if (bringout && bg.timer < 32)
         GL.drawRect(0, 20, 240, 280, 0, 0, 0, bg.timer/32);
 
-    for (let y = yoff - cityl.h; y < 320; y += cityl.h) {
-        GL.drawSprite(cityl, -xoff, y);
-        GL.drawSprite(cityr, 240+xoff - cityr.w, y);
+    for (let y = yoff - S.cityl[S.h]; y < 320; y += S.cityl[S.h]) {
+        GL.drawSprite(S.cityl, -xoff, y);
+        GL.drawSprite(S.cityr, 240+xoff - S.cityr[S.w], y);
     }
 }
 
@@ -112,25 +112,25 @@ function renderOrga() {
     const a = bg.timer < 192 ? 0 : 
               bg.timer > 256 ? 32 : (bg.timer - 192) / 2
         
-    const sa = (1.5 * bg.timer) % orgal.h;
-    const sb = (0.75 * bg.timer) % orgab.h;
+    const sa = (1.5 * bg.timer) % S.orgal[S.h];
+    const sb = (0.75 * bg.timer) % S.orgab[S.h];
 
-    const x2 = orgal.w;
-    const x3 = 240 - orgar.w;
+    const x2 = S.orgal[S.w];
+    const x3 = 240 - S.orgar[S.w];
 
     if (a < 32)
         GL.drawRect(0, 20, 240, 280, 0, 0, 0, 1);
 
-    for (let y = sb - orgab.h; y < 320; y += orgab.h) 
-        GL.drawSpriteAlpha(orgab, x2, y, a);
+    for (let y = sb - S.orgab[S.h]; y < 320; y += S.orgab[S.h]) 
+        GL.drawSpriteAlpha(S.orgab, x2, y, a);
     
-    for (let y = sa - orgal.h; y < 320; y += orgal.h) {
-        GL.drawSpriteAlpha(orgal, 0, y, a);
-        GL.drawSpriteAlpha(orgar, x3, y, a);
-        GL.drawSpriteAdditive(olla, 20, y + 28, 32 - (bg.timer % 32));
-        GL.drawSpriteAdditive(ollb, 41, y + 30, 32 - ((bg.timer - 16) % 32));
-        GL.drawSpriteAdditive(olra, x3 + 23, y + 28, 32 - (bg.timer % 32));
-        GL.drawSpriteAdditive(olrb, x3 + 2, y + 30, 32 - ((bg.timer - 16) % 32));
+    for (let y = sa - S.orgal[S.h]; y < 320; y += S.orgal[S.h]) {
+        GL.drawSpriteAlpha(S.orgal, 0, y, a);
+        GL.drawSpriteAlpha(S.orgar, x3, y, a);
+        GL.drawSpriteAdditive(S.olla, 20, y + 28, 32 - (bg.timer % 32));
+        GL.drawSpriteAdditive(S.ollb, 41, y + 30, 32 - ((bg.timer - 16) % 32));
+        GL.drawSpriteAdditive(S.olra, x3 + 23, y + 28, 32 - (bg.timer % 32));
+        GL.drawSpriteAdditive(S.olrb, x3 + 2, y + 30, 32 - ((bg.timer - 16) % 32));
     }
 }
 
@@ -141,31 +141,31 @@ function renderMetalBack(bringin: boolean) {
     if (bringin && bg.timer < 128) {
         if (bg.timer < 64) {
             const f1 = (64 - bg.timer) / 64;
-            xoff1 = Math.floor(f1 * f1 * metalla.w);
-            xoff2 = metallb.w;
+            xoff1 = Math.floor(f1 * f1 * S.metalla[S.w]);
+            xoff2 = S.metallb[S.w];
         } else {
             const f2 = (128 - bg.timer) / 64;
-            xoff2 = Math.floor(f2 * f2 * metallb.w);
+            xoff2 = Math.floor(f2 * f2 * S.metallb[S.w]);
         }
     }
 
-    const yoff1 = (2 * bg.timer) % metalla.h;
-    const yoff2 = (bg.timer) % metallb.h;
+    const yoff1 = (2 * bg.timer) % S.metalla[S.h];
+    const yoff2 = (bg.timer) % S.metallb[S.h];
 
-    const rl = metalla.w + metallb.w - xoff1 - xoff2;
+    const rl = S.metalla[S.w] + S.metallb[S.w] - xoff1 - xoff2;
 
     GL.drawRect(rl, 20, 240 - rl, 280, 0, 0, 0, Math.min(1, bg.timer/128));
 
     if (!bringin || bg.timer > 64) {
-        for (let y = yoff2 - metallb.h; y < 320; y += metallb.h) {
-            GL.drawSprite(metallb, metalla.w - xoff2, y);
-            GL.drawSprite(metalrb, 240+xoff2 - metalrb.w - metalra.w, y);
+        for (let y = yoff2 - S.metallb[S.h]; y < 320; y += S.metallb[S.h]) {
+            GL.drawSprite(S.metallb, S.metalla[S.w] - xoff2, y);
+            GL.drawSprite(S.metalrb, 240+xoff2 - S.metalrb[S.w] - S.metalra[S.w], y);
         }
     }
 
-    for (let y = yoff1 - metalla.h; y < 320; y += metalla.h) {
-        GL.drawSprite(metalla,- xoff1, y);
-        GL.drawSprite(metalra, 240+xoff1 - metalra.w, y);
+    for (let y = yoff1 - S.metalla[S.h]; y < 320; y += S.metalla[S.h]) {
+        GL.drawSprite(S.metalla,- xoff1, y);
+        GL.drawSprite(S.metalra, 240+xoff1 - S.metalra[S.w], y);
     }
 }
 
@@ -179,22 +179,22 @@ export function render() {
     switch (bg.current) {
     case LEVEL0:
     {
-        GL.drawSprite(planet[0], 120, 80);
+        GL.drawSprite(S.planet[0], 120, 80);
         renderStars();
         break;
     }
     case LEVEL1: 
     {
-        GL.drawSprite(back, 0, 0);
-        GL.drawSprite(planet[1], 0, 0);
+        GL.drawSprite(S.back, 0, 0);
+        GL.drawSprite(S.planet[1], 0, 0);
         renderStars();
         break;
     }
     case LEVEL2:
     {
         if (bg.timer < 128) {
-            GL.drawSprite(back, 0, 0);
-            GL.drawSprite(planet[1], 0, 0);
+            GL.drawSprite(S.back, 0, 0);
+            GL.drawSprite(S.planet[1], 0, 0);
             renderStars();
             GL.drawRect(0, 20, 240, 280, 0, 0, 0, bg.timer/128);
         } else {
@@ -212,16 +212,16 @@ export function render() {
     } 
     case LEVEL4: 
     {
-        GL.drawSprite(back, 0, 0);
-        GL.drawSprite(planet[2], 0, 0);
+        GL.drawSprite(S.back, 0, 0);
+        GL.drawSprite(S.planet[2], 0, 0);
         renderStars();
         break;
     }
     case LEVEL5: 
     {
         if (bg.timer < 128) {
-            GL.drawSprite(back, 0, 0);
-            GL.drawSprite(planet[2], 0, 0);
+            GL.drawSprite(S.back, 0, 0);
+            GL.drawSprite(S.planet[2], 0, 0);
             renderStars();
         } 
         renderCityBack(true, false);
@@ -241,16 +241,16 @@ export function render() {
     } 
     case LEVEL7: 
     {
-        GL.drawSprite(back, 0, 0);
-        GL.drawSprite(planet[3], 0, 0);
+        GL.drawSprite(S.back, 0, 0);
+        GL.drawSprite(S.planet[3], 0, 0);
         renderStars();
         break;
     }
     case LEVEL8: 
     {
         if (bg.timer < 128) {
-            GL.drawSprite(back, 0, 0);
-            GL.drawSprite(planet[3], 0, 0);
+            GL.drawSprite(S.back, 0, 0);
+            GL.drawSprite(S.planet[3], 0, 0);
             renderStars();
         } 
         renderMetalBack(true);

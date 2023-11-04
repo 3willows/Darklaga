@@ -25,8 +25,8 @@ class MenuItem {
         public readonly font: S.Sprite[],
         private text: string)
     {
-        this.height = draw.h;
-        this.width = draw.w;
+        this.height = draw[S.h];
+        this.width = draw[S.w];
         this.alpha = 8;
         this.textWidth = GL.measureText(text, font);
     }
@@ -117,7 +117,7 @@ class MainMenu extends MenuWindow {
     private readonly btnQuit : MenuItem
 
     constructor() {
-        super((240-S.btn_l.w)/2, 195);
+        super((240-S.btn_l[S.w])/2, 195);
         this.add(this.btnNew = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "NEW GAME"));
         this.add(this.btnOptions = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "OPTIONS"));
         this.add(this.btnQuit = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "QUIT"));
@@ -148,7 +148,7 @@ class GameMenu extends MenuWindow {
     private readonly btnBack : MenuItem
 
     constructor() {
-        super((240-S.btn_l.w)/2, 140);
+        super((240-S.btn_l[S.w])/2, 140);
         this.add(this.btnTourist = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "TOURIST"));
         this.add(this.btnNormal = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "NORMAL"));
         this.add(this.btnHard = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "HARD"));

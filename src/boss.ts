@@ -104,13 +104,13 @@ class BossBase {
             
             if (this.lives > 0) {
                 const back = S.bossbartex[this.lives - 1];
-                for (let x = 0; x < 198; x += back.w)
+                for (let x = 0; x < 198; x += back[S.w])
                     GL.drawSprite(back, healthx + 1 + x, healthy + 3);
             }
 
             const front = S.bossbartex[this.lives];
             const maxx = (this.health * 198) >> this.baseHealth;
-            for (let x = 0; x < maxx; x += front.w) 
+            for (let x = 0; x < maxx; x += front[S.w]) 
                 GL.drawSprite(front, healthx + 1 + x, healthy + 3);
             
             GL.drawSprite(S.bossbar, healthx, healthy);
@@ -123,11 +123,11 @@ class BossBase {
             const dy = this.warningTimer >> 1;
             GL.drawSpriteAdditive(S.warningback, 0, 300 - dy, 32);
             const alpha = ((this.timer >> 1)&15)+17;
-            const bigx = 240 - (this.timer % S.warningbig.w);
-            GL.drawSpriteAdditive(S.warningbig, bigx - S.warningbig.w, 310 - dy, alpha);
+            const bigx = 240 - (this.timer % S.warningbig[S.w]);
+            GL.drawSpriteAdditive(S.warningbig, bigx - S.warningbig[S.w], 310 - dy, alpha);
             GL.drawSpriteAdditive(S.warningbig, bigx, 310 - dy, alpha);
-            const smax = 240 - ((this.timer << 1) % S.warningsma.w);
-            GL.drawSpriteAdditive(S.warningsma, smax - S.warningsma.w, 350 - dy, alpha);
+            const smax = 240 - ((this.timer << 1) % S.warningsma[S.w]);
+            GL.drawSpriteAdditive(S.warningsma, smax - S.warningsma[S.w], 350 - dy, alpha);
             GL.drawSpriteAdditive(S.warningsma, smax, 350 - dy, alpha);
         } 
 
@@ -180,8 +180,8 @@ class HalfBoss1 extends BossBase {
             /* xy */ 960, -820, 
             /* collision offset */ -120, -120,
             /* collision box */ 
-                S.halfboss[0].w << 3, 
-                S.halfboss[0].h << 3,
+                S.halfboss[0][S.w] << 3, 
+                S.halfboss[0][S.h] << 3,
             /* timer */ 45)
     }
 
@@ -214,7 +214,7 @@ class HalfBoss1 extends BossBase {
         {
             if (this.y < 410) {
                 this.y += 4;
-                this.warningTimer = Math.min(1 + this.warningTimer, S.warningback.h);
+                this.warningTimer = Math.min(1 + this.warningTimer, S.warningback[S.h]);
             } else if (this.warningTimer > 0) {
                 --this.warningTimer;
             } else {
@@ -434,11 +434,11 @@ class HalfBoss2 extends BossBase
         super(/* Health */ 13 + (opts.UseStrongerEnemies ? 1 : 0),
             /* xy */ 240, -820, 
             /* collision offset */ 
-                3 * S.halfbossb.w, 
-                5 * S.halfbossb.h,
+                3 * S.halfbossb[S.w], 
+                5 * S.halfbossb[S.h],
             /* collision box */ 
-                2 * S.halfbossb.w, 
-                2 * S.halfbossb.h,
+                2 * S.halfbossb[S.w], 
+                2 * S.halfbossb[S.h],
             /* timer */ 45)
         this.lives = 3;
     }
@@ -467,7 +467,7 @@ class HalfBoss2 extends BossBase
         super.step();
         const a = this.angle();
 
-        this.x = (120 - S.halfbossb.w / 2)
+        this.x = (120 - S.halfbossb[S.w] / 2)
             + Math.floor(42 * Math.cos(a))
             + Math.floor(10 * Math.cos(a * 0.27)) << 3;
         this.y = this.yy + 
@@ -488,7 +488,7 @@ class HalfBoss2 extends BossBase
         {
             if (this.yy < 600) {
                 this.yy += 4;
-                this.warningTimer = Math.min(1 + this.warningTimer, S.warningback.h);
+                this.warningTimer = Math.min(1 + this.warningTimer, S.warningback[S.h]);
             } else if (this.warningTimer > 0) {
                 --this.warningTimer;
             } else {
@@ -619,7 +619,7 @@ class HalfBoss2 extends BossBase
         const a = this.angle();
         for (let i = 9; i >= 0; --i) {
             const aa = a + i * Math.PI / 8;
-            const x = 120 - S.halfbossb.w / 2 
+            const x = 120 - S.halfbossb[S.w] / 2 
                 + Math.floor((42 - 2 * i) * Math.cos(aa))
                 + Math.floor(10 * Math.cos(aa * 0.27))
                 + Math.floor(dying * Math.cos(aa * 0.73))
@@ -679,7 +679,7 @@ class Boss1 extends BossBase
     public step() {
         super.step();
 
-        const rx = 960 - (S.bosshead.w << 2);
+        const rx = 960 - (S.bosshead[S.w] << 2);
         this.x = rx + Math.floor(120 * Math.cos(this.angle()));
 
         switch (this.stage) {
@@ -687,7 +687,7 @@ class Boss1 extends BossBase
         {
             if (this.y < 410) {
                 this.y += 4;
-                this.warningTimer = Math.min(1 + this.warningTimer, S.warningback.h);
+                this.warningTimer = Math.min(1 + this.warningTimer, S.warningback[S.h]);
             } else if (this.warningTimer > 0) {
                 --this.warningTimer;
             } else {
@@ -808,7 +808,7 @@ class Boss1 extends BossBase
     public render() {
         super.render();
         
-        const rx = 960 - (S.bosshead.w << 2) + 32;
+        const rx = 960 - (S.bosshead[S.w] << 2) + 32;
         const w = 120;
         const a = this.angle();
         for (let i = 0; i < 6; ++i) {

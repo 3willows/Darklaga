@@ -1,4 +1,4 @@
-import { Sprite, texwhite } from "./sprites"
+import * as S from "./sprites"
 
 // Global rendering context used by all methods in this module
 const gl : WebGLRenderingContext = (function() {
@@ -393,16 +393,16 @@ const spriteAlphas    = new Float32Array(maxSpriteData);
 let spritesBatched    = 0;
 
 function drawSpriteRaw(
-    sprite: Sprite, 
-    mult: Sprite,
+    sprite: S.Sprite, 
+    mult: S.Sprite,
     x: number, y: number,
     srca: number, dsta: number, 
     angle: number) {
 
     if (coloredBatched) drawBatchedColored();
 
-    const {tt, tl, tr, tb, h, w} = sprite;
-    const {tt:mt, tl:ml, tr:mr, tb:mb} = mult;
+    const [w, h, tt, tl, tr, tb] = sprite;
+    const [ ,  , mt, ml, mr, mb] = mult;
 
     // A --- B
     // |     |
@@ -498,12 +498,12 @@ function drawSpriteRaw(
     spritesBatched += 12;
 }
 
-export function drawSprite(sprite: Sprite, x: number, y: number) {
-    drawSpriteRaw(sprite, texwhite, x, y, 1, 1, 0)
+export function drawSprite(sprite: S.Sprite, x: number, y: number) {
+    drawSpriteRaw(sprite, S.texwhite, x, y, 1, 1, 0)
 }
 
-export function drawSpriteAngle(sprite: Sprite, x: number, y: number, angle: number) {
-    drawSpriteRaw(sprite, texwhite, x, y, 1, 1, angle)
+export function drawSpriteAngle(sprite: S.Sprite, x: number, y: number, angle: number) {
+    drawSpriteRaw(sprite, S.texwhite, x, y, 1, 1, angle)
 }
 
 // Draw all sprites accumulated into the current batch 
@@ -610,13 +610,13 @@ function drawBatchedSprites() {
 }
 
 // mul is 0..32
-export function drawSpriteAdditive(sprite: Sprite, x: number, y: number, mul: number) {
-    drawSpriteRaw(sprite, texwhite, x, y, (mul / 32), 0, 0);
+export function drawSpriteAdditive(sprite: S.Sprite, x: number, y: number, mul: number) {
+    drawSpriteRaw(sprite, S.texwhite, x, y, (mul / 32), 0, 0);
 }
 
 // mul is 0..32
-export function drawSpriteAlpha(sprite: Sprite, x: number, y: number, mul: number) {
-    drawSpriteRaw(sprite, texwhite, x, y, (mul / 32), (mul / 32), 0);
+export function drawSpriteAlpha(sprite: S.Sprite, x: number, y: number, mul: number) {
+    drawSpriteRaw(sprite, S.texwhite, x, y, (mul / 32), (mul / 32), 0);
 }
 
 // Use 'fontmap[s.charCodeAt(i)]' to get the sprite for character i. 
@@ -630,25 +630,21 @@ const fontmap = (function(){
 
 export function drawText(
     text: string, 
-    font: Sprite[], 
-    texture: Sprite, 
+    font: S.Sprite[], 
+    texture: S.Sprite, 
     x: number, 
     y: number, 
     srca: number, 
     dsta: number)
 {
-    const tpw = (texture.tr-texture.tl)/texture.w;
-    const tph = (texture.tb-texture.tt)/texture.h;
+    const [h, w, tt, tl, tr, tb] = texture;
+    const tpw = (tr - tl)/w;
+    const tph = (tb - tt)/h;
 
     // Mutable texture used to pass in the actual values.
-    let tex = {
-        tl: texture.tl,
-        tr: 0,
-        tt: texture.tt,
-        tb: 0,
-        w: 0,
-        h: 0
-    }
+    let tex = new Float32Array([
+        0, 0, tt, tl, 0, 0
+    ]);
 
     for (let i = 0; i < text.length; ++i) {
         
@@ -657,23 +653,24 @@ export function drawText(
         if (typeof s !== "number") {
             // For unknown characters (including whitespace), 
             // skip ahead by width of '-' character 
-            x += font[45].w - 1; 
+            x += font[45][S.w] - 1; 
             continue;     
         }
 
         const letter = font[s];
+        const [lw, lh, ltt, ltl, ltr, ltb] = letter;
         
-        tex.tr = letter.w >= texture.w ? texture.tr : texture.tl + tpw * letter.w;
-        tex.tb = letter.h >= texture.h ? texture.tb : texture.tt + tph * letter.h;
+        tex[S.tr] = lw >= w ? tr : tl + tpw * lw;
+        tex[S.tb] = lh >= h ? tb : tt + tph * lh;
         
         drawSpriteRaw(letter, tex, x, y, srca, dsta, 0);
         
-        x += letter.w - 1;
+        x += letter[S.w] - 1;
     }
 }
 
 // Measure the width of a piece of text, in pixels
-export function measureText(text: string, font: Sprite[]) {
+export function measureText(text: string, font: S.Sprite[]) {
     
     let x = 0;
     for (let i = 0; i < text.length; ++i) {
@@ -684,7 +681,7 @@ export function measureText(text: string, font: Sprite[]) {
         // use width of '-' character 
         if (typeof s !== "number") s = 45;
         
-        x += font[s].w - 1;
+        x += font[s][S.w] - 1;
     }
 
     return x;

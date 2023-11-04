@@ -1,5 +1,5 @@
 import { opts } from "./options";
-import { blade, bladestar, bladet, blast, bullet3v, furybolt, lasbme, lasbml, lasbmm, lasbse, lasbsl, lasbsm, lasoml, lasomm, lasosl, lasosm, orocket, rocket, rocketf, smaball, vblast } from "./sprites"
+import * as S from "./sprites"
 import * as Stats from "./stats"
 import * as GL from "./webgl"
 
@@ -240,7 +240,7 @@ function shotStep(ref: number): boolean {
         let dec = 0;
         for (let j = y; j < y + h; j += 3) dec += p1;
         for (let i = y; i < y + h - 3; i += 36) {
-            let o = addRaw(SHOT_INVISIBLE, x - 32 + (dec>>2), i << 3, lasosl.w << 3, 36<<3, p0 << 3);
+            let o = addRaw(SHOT_INVISIBLE, x - 32 + (dec>>2), i << 3, S.lasosl[S.w] << 3, 36<<3, p0 << 3);
             if (o >= 0) shots[o + HIT] = 1;
             dec -= 12*p1;
         }
@@ -254,7 +254,7 @@ function shotStep(ref: number): boolean {
         let dec = 0;
         for (let j = y; j < y + h; j += 3) dec += p1;
         for (let i = y; i < y + h - 3; i += 54) {
-            let o = addRaw(SHOT_INVISIBLE, x - 32 + (dec>>2), i << 3, lasosm.w << 3, 54<<3, p0 << 2);
+            let o = addRaw(SHOT_INVISIBLE, x - 32 + (dec>>2), i << 3, S.lasosm[S.w] << 3, 54<<3, p0 << 2);
             if (o >= 0) shots[o + HIT] = 1;
             dec -= 18*p1;
         }
@@ -314,22 +314,22 @@ function renderOLaser(off: number) {
         for (let i = y - ((p2>>1)&3); i < max; i += 3) 
         {
             if (i+3 > y)
-                GL.drawSprite(lasosl, x-5+(dec>>5), i);
+                GL.drawSprite(S.lasosl, x-5+(dec>>5), i);
             dec -= p1;
         }
 
-        GL.drawSprite(lasosm, x-7, max-8);
+        GL.drawSprite(S.lasosm, x-7, max-8);
 
     } else {
 
         for (let i = y - ((p2>>1)&3); i < max; i += 3) 
         {
             if (i+3 > y)
-                GL.drawSprite(lasoml, x+(dec>>5), i);
+                GL.drawSprite(S.lasoml, x+(dec>>5), i);
             dec -= p1;
         }
 
-        GL.drawSprite(lasomm, x-2, max-8);
+        GL.drawSprite(S.lasomm, x-2, max-8);
 
     }
 }
@@ -357,13 +357,13 @@ function renderLaser(off: number) {
                 Math.min(8, (i - y)/4, (max-6-i)/4));
             
             if (i + 3 > y)
-                GL.drawSpriteAdditive(lasbsl, x-1+xoff, i, alpha);
+                GL.drawSpriteAdditive(S.lasbsl, x-1+xoff, i, alpha);
         }
 
         if (y != 0 && h > 0)
-            GL.drawSpriteAdditive(lasbse, x-6, y-8, alpha);
+            GL.drawSpriteAdditive(S.lasbse, x-6, y-8, alpha);
 
-        GL.drawSpriteAdditive(lasbsm, x-7, max-9, alpha);
+        GL.drawSpriteAdditive(S.lasbsm, x-7, max-9, alpha);
 
     } else {
         
@@ -375,13 +375,13 @@ function renderLaser(off: number) {
                 Math.min(6, (i - y)/4, (max-6-i)/4));
             
             if (i + 3 > y)
-                GL.drawSpriteAdditive(lasbml, x+2+xoff, i, alpha);
+                GL.drawSpriteAdditive(S.lasbml, x+2+xoff, i, alpha);
         }
 
         if (y != 0 && h > 0)
-            GL.drawSpriteAdditive(lasbme, x-2, y-8, alpha);
+            GL.drawSpriteAdditive(S.lasbme, x-2, y-8, alpha);
 
-        GL.drawSpriteAdditive(lasbmm, x-2, max-6, alpha);
+        GL.drawSpriteAdditive(S.lasbmm, x-2, max-6, alpha);
     }
 }
 
@@ -406,56 +406,56 @@ function shotRender(ref: number): number {
     } else if (type == SHOT_OLASER_DEAD || type == SHOT_OLASERM_DEAD) {
         renderOLaser(off);
     } else if (type == SHOT_BLASTER) {
-        GL.drawSprite(blast, x, y)
+        GL.drawSprite(S.blast, x, y)
     } else if (type == SHOT_FBLASTER) {
-        GL.drawSprite(bullet3v[0], x, y);
+        GL.drawSprite(S.bullet3v[0], x, y);
     } else if (type == SHOT_ROCKET_MOVE || type == SHOT_OROCKET_MOVE) {
-        GL.drawSprite(rocket, x, y);
+        GL.drawSprite(S.rocket, x, y);
     } else if (type == SHOT_ROCKET) {
         if (opts.LodWeaponDetail) {
             const t = shots[off + TIMER];            
-			GL.drawSpriteAlpha(rocketf[(t>>2)&1], x+1, y+15, 24 );
-			GL.drawSpriteAlpha(rocketf[(1+(t>>2))&1], x+1, y+15, 8 );
+			GL.drawSpriteAlpha(S.rocketf[(t>>2)&1], x+1, y+15, 24 );
+			GL.drawSpriteAlpha(S.rocketf[(1+(t>>2))&1], x+1, y+15, 8 );
         }
-        GL.drawSprite(rocket, x, y);
+        GL.drawSprite(S.rocket, x, y);
     } else if (type == SHOT_OROCKET || type == SHOT_OROCKET_FURY) {
         const a = shots[off + PARAM0] / 256 * Math.PI + Math.PI/2;
-        GL.drawSpriteAngle(orocket, x, y, a);
+        GL.drawSpriteAngle(S.orocket, x, y, a);
     } else if (type == SHOT_OROCKET_DIE || type == SHOT_OROCKET_FURY_D) {
-        const w = smaball.w;
-        GL.drawSpriteAdditive(smaball, x-1-w/2, y+1-w/2, shots[off + PARAM0]);
+        const w = S.smaball[S.w];
+        GL.drawSpriteAdditive(S.smaball, x-1-w/2, y+1-w/2, shots[off + PARAM0]);
     } else if (type == SHOT_BLADE_SPAWN || type == SHOT_OBLADE_SPAWN ||
                type == SHOT_ROCKET_SPAWN || type == SHOT_OROCKET_SPAWN) {
         // Nothing
     } else if (type == SHOT_BLADE || type == SHOT_OBLADE) {
 
         if (type == SHOT_OBLADE) {
-            GL.drawSpriteAlpha(bladet, 
+            GL.drawSpriteAlpha(S.bladet, 
                 (shots[off + LEFT] - 2*shots[off + PARAM1]) >> 3,
                 (shots[off + TOP]  - 2*shots[off + PARAM0]) >> 3,
                 opts.LodWeaponDetail ? 16 : 32);
-            GL.drawSpriteAlpha(bladet, 
+            GL.drawSpriteAlpha(S.bladet, 
                 (shots[off + LEFT] - 4*shots[off + PARAM1]) >> 3,
                 (shots[off + TOP]  - 4*shots[off + PARAM0]) >> 3,
                 opts.LodWeaponDetail ? 8 : 32);
         }
 
         if (opts.LodWeaponDetail)
-            GL.drawSpriteAdditive(blade, x, y, 32)
+            GL.drawSpriteAdditive(S.blade, x, y, 32)
         else
-            GL.drawSprite(blade, x, y)
+            GL.drawSprite(S.blade, x, y)
     } else if (type == SHOT_BLADE_STAR) {
         const timer = shots[off + TIMER];
         if (opts.LodExplosions) {
-            GL.drawSpriteAdditive(blade, x, y, 32 - timer)
-            GL.drawSpriteAdditive(bladestar[timer >> 1], x-26, y-32, 32 - timer);
+            GL.drawSpriteAdditive(S.blade, x, y, 32 - timer)
+            GL.drawSpriteAdditive(S.bladestar[timer >> 1], x-26, y-32, 32 - timer);
         } else if (opts.LodWeaponDetail) {
-            GL.drawSpriteAdditive(blade, x, y, 32 - timer)
+            GL.drawSpriteAdditive(S.blade, x, y, 32 - timer)
         }
     } else if (type == SHOT_FLASER) {
         const timer = shots[off + TIMER];
         const p0 = shots[off + PARAM0];
-        GL.drawSpriteAdditive(furybolt[((p0 + timer) >> 2) % 2], 0, y, 32 - timer)
+        GL.drawSpriteAdditive(S.furybolt[((p0 + timer) >> 2) % 2], 0, y, 32 - timer)
     } else {
         throw "Unknown shot type"
     }

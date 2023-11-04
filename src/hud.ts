@@ -395,16 +395,10 @@ export function render() {
 
         if (hud.combo > 2) {
 
-            const combow = Math.floor(S.combo.w * hud.combo_timer / COMBO_DELAY);
-            const combor = S.combo.tl + (S.combo.tr - S.combo.tl) / S.combo.w * combow;
-            const combo = {
-                tl: S.combo.tl,
-                tr: combor,
-                tt: S.combo.tt,
-                tb: S.combo.tb,
-                w: combow,
-                h: S.combo.h
-            };
+            const [w, h, tt, tl, tr, tb] = S.combo;
+            const combow = Math.floor(w * hud.combo_timer / COMBO_DELAY);
+            const combor = tl + (tr - tl) / w * combow;
+            const combo = new Float32Array([combow, h, tt, tl, combor, tb]);
 
             GL.drawSprite(combo, 165, 3);
 
@@ -669,7 +663,7 @@ export function graze(x: number, y: number) {
     hud.graze_anim = GRAZE_DELAY;
 
     Float.addGraze(
-        x - (S.grazeb[0].w << 2), y - (S.grazeb[0].h << 2), 
+        x - (S.grazeb[0][S.w] << 2), y - (S.grazeb[0][S.h] << 2), 
         g > 20 ? S.grazer : S.grazeb);
 }
 

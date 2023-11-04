@@ -180,23 +180,42 @@ async function emitImages() {
         + "])";
     fs.writeFileSync("dist/atlas.js", asData);
 
+    const spriteType = `export type Sprite = Float32Array
+export const w = 0;
+export const h = 1;
+export const tt = 2;
+export const tl = 3;
+export const tr = 4;
+export const tb = 5;
+`
+
     const bounds = mergeBindings(bindings, side);
-    const boundsStr = Object.keys(bounds).map(k => {
+    
+    function toArray(bb) {
+        return "new Float32Array([" + 
+            [bb.w, bb.h, bb.tt, bb.tl, bb.tr, bb.tb].join(",")
+            + "])";
+    }
+
+    const exportsStr = Object.keys(bounds).map(k => {
         const b = bounds[k];
-        return "export const " + k + " : Sprite" + 
+        let s = "export const " + k + " : Sprite" + 
             (b.hasOwnProperty("length") ? "[]" : "") + 
-            " = " + JSON.stringify(b, null, 4) + ";\n"
+            " = ";
+        if (b.hasOwnProperty("length")) {
+            let prev = "[";
+            for (let bb of b) {
+                s += prev + toArray(bb);;
+                prev = ",";
+            }
+            s += "];\n";
+        } else {
+            s +=toArray(b) + ";\n";
+        }
+        return s;
     }).join("");
 
-    const sprites = `export type Sprite = {
-    w: number, 
-    h: number, 
-    tt: number, 
-    tl: number, 
-    tr: number, 
-    tb: number 
-}`
-    fs.writeFileSync("src/sprites.ts", sprites + "\n" + boundsStr);
+    fs.writeFileSync("src/sprites.ts", spriteType + "\n" + exportsStr);
 }
 
 emitImages();

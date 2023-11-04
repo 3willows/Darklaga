@@ -77,7 +77,7 @@ function shoot(stuff: Hud.Stuff) {
         pl.muzzle_flash = 2;
         pl.cooldown = stuff.offense != Hud.ITEM_SPEED ? 6 : 
                       stuff.offense_overload ? 1 : 3;
-        const w = S.blast.w << 3, h = S.blast.h << 3;
+        const w = S.blast[S.w] << 3, h = S.blast[S.h] << 3;
         
         Snd.blasterFire.play();
 
@@ -98,7 +98,7 @@ function shoot(stuff: Hud.Stuff) {
         pl.cooldown = stuff.offense != Hud.ITEM_SPEED ? 20 : 
                       stuff.offense_overload ? 3 : 8;
         const x = pl.x + 24, y = pl.y + 64, 
-              w = S.blade.w << 3, h = S.blade.h;
+              w = S.blade[S.w] << 3, h = S.blade[S.h] << 3;
         const s = stuff.weapon_overload ? Shot.SHOT_OBLADE_SPAWN   
                                         : Shot.SHOT_BLADE_SPAWN;
 
@@ -122,7 +122,7 @@ function shoot(stuff: Hud.Stuff) {
         pl.cooldown = stuff.offense != Hud.ITEM_SPEED ? 9 : 
                       stuff.offense_overload ? 2 : 5;
         const x = pl.x + 64, y = pl.y + 8, 
-              w = S.rocket.w << 3, h = S.rocket.h;
+              w = S.rocket[S.w] << 3, h = S.rocket[S.h] << 3;
         const s = stuff.weapon_overload ? Shot.SHOT_OROCKET_SPAWN   
                                         : Shot.SHOT_ROCKET_SPAWN;
         

@@ -65,7 +65,7 @@ function renderInfo(this: Float) {
     if (this.sprite) {
         const s = this.sprite[(this.timer >> 4) % this.sprite.length];
         GL.drawSpriteAlpha(s, x, y, a*32);
-        x += s.w;
+        x += s[S.w];
     }
 
     x += 2;
