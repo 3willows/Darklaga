@@ -1,6 +1,6 @@
 import * as GL from "./webgl"
 import * as S from "./sprites"
-import { key } from "./input"
+import { key, mouse } from "./input"
 import { opts } from "./options"
 import * as Hud from "./hud"
 import * as Shot from "./shot"
@@ -34,6 +34,9 @@ type Player = {
     
     // X-axis rotation level, [-20, 20]
     distance: number
+
+    // Target opacity 
+    target: number
 }
 
 function initial() : Player {
@@ -55,7 +58,8 @@ function initial() : Player {
         anim: 0,
         modules1: 0,
         modules2: 0,
-        distance: 0
+        distance: 0,
+        target: 0
     }
 }
 
@@ -173,6 +177,13 @@ export function pos() {
     return {x: pl.x + 88, y: pl.y + 88};
 }
 
+const minX = 32;
+const maxX = 1696;
+const minY = 192;
+const maxY = 2176;
+const mouseDeltaX = 88;
+const mouseDeltaY = 160 + 88;
+
 export function step() {
 
     const friction = opts.ModPlayerFriction * opts.ModPlayerFriction * 4;
@@ -189,24 +200,51 @@ export function step() {
     
     if (pl.controllable) {
 
-        if (key.up) {
-            pl.r_y_speed = -3*speed;
-        } else if (key.down) {
-            pl.r_y_speed = 3*speed;
+        if (mouse.down) {
+            const tx = Math.max(minX, Math.min(maxX, (mouse.x << 3) - mouseDeltaX));
+            const ty = Math.max(minY, Math.min(maxY, (mouse.y << 3) - mouseDeltaY));
+
+            if (ty < pl.y) {
+                pl.r_y_speed = Math.max(-3 * speed, ty - pl.y);
+            } else {
+                pl.r_y_speed = Math.min(3 * speed, ty - pl.y);
+            }
+
+            if (tx < pl.x) {
+                pl.r_x_speed = Math.max(-3 * speed, tx - pl.x);
+                pl.distance = Math.max(-20, pl.distance - 3);
+            } else if (tx > pl.x) {
+                pl.r_x_speed = Math.min(3 * speed, tx - pl.x)
+                pl.distance = Math.min(20, pl.distance + 3);
+            }
+
+            if (pl.target < 4) pl.target = 24;
+            else if (pl.target > 4) pl.target--; 
         }
 
-        if (key.left) {
-            pl.r_x_speed = -3*speed;
-            pl.distance = Math.max(-20, pl.distance - 3);
-        } else if (key.right) {
-            pl.r_x_speed = 3*speed;
-            pl.distance = Math.min(20, pl.distance + 3);
+        else {
+
+            if (pl.target > 0) pl.target--;
+
+            if (key.up) {
+                pl.r_y_speed = -3*speed;
+            } else if (key.down) {
+                pl.r_y_speed = 3*speed;
+            }
+
+            if (key.left) {
+                pl.r_x_speed = -3*speed;
+                pl.distance = Math.max(-20, pl.distance - 3);
+            } else if (key.right) {
+                pl.r_x_speed = 3*speed;
+                pl.distance = Math.min(20, pl.distance + 3);
+            }
         }
 
-        if (key.action) {
+        if (key.action || mouse.down) {
             pl.shooting = 5;
         }
-
+    
         if (key.action2 && Hud.furyReady()) {
             if (stuff.weapon == Hud.ITEM_WNONE) {
                 Fury.startBlaster();
@@ -247,19 +285,19 @@ export function step() {
 
     const bounce = opts.ModWallsBounce ? -1 : 0;
 
-    if (pl.x < 32) {
-        pl.x = 32;
+    if (pl.x < minX) {
+        pl.x = minX;
         pl.x_speed *= bounce;
-    } else if (pl.x > 1696) {
-        pl.x = 1696;
+    } else if (pl.x > maxX) {
+        pl.x = maxX;
         pl.x_speed *= bounce;
     }
 
-    if (pl.y < 192) {
-        pl.y = 192;
+    if (pl.y < minY) {
+        pl.y = minY;
         pl.y_speed *= bounce;
-    } else if (pl.y > 2176) {
-        pl.y = 2176;
+    } else if (pl.y > maxY) {
+        pl.y = maxY;
         pl.y_speed *= bounce;
     }
 
@@ -344,6 +382,12 @@ export function render() {
     if (muzzle_flash && opts.UseNewSchool)
         GL.drawSpriteAdditive(S.muzzle, (x >> 3) + 2, (y >> 3) - 22, 32);
 
+    if (mouse.down && pl.controllable) {
+        const tx = Math.max(minX, Math.min(maxX, (mouse.x << 3) - mouseDeltaX));
+        const ty = Math.max(minY, Math.min(maxY, (mouse.y << 3) - mouseDeltaY));
+
+        GL.drawSpriteAlpha(S.player[2], tx >> 3, ty >> 3, pl.target);
+    }    
 }
 
 // t is 0..63

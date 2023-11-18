@@ -1,4 +1,4 @@
-export const key = {
+export const key = { 
     up: false,
     left: false,
     down: false,
@@ -7,7 +7,7 @@ export const key = {
     action2: false
 }
 
-function handler(setTo: boolean) {
+function onKey(setTo: boolean) {
     return function(e: KeyboardEvent) {
         switch (e.key) {
 
@@ -45,5 +45,23 @@ function handler(setTo: boolean) {
     }
 }
 
-document.addEventListener("keydown", handler(true))
-document.addEventListener("keyup", handler(false))
+export const mouse = {
+    x: 0,
+    y: 0,
+    down: false
+}
+
+const canvas = document.getElementById("gl")!;
+
+function onMouse(e: MouseEvent) {
+    const r = canvas.getBoundingClientRect();
+    mouse.x = Math.max(0, Math.min(r.width, e.clientX - r.left)) * (240 / r.width);
+    mouse.y = Math.max(0, Math.min(r.height, e.clientY - r.top)) * (320 / r.height);
+    e.preventDefault();
+}
+
+document.addEventListener("keydown", onKey(true))
+document.addEventListener("keyup", onKey(false))
+document.addEventListener("mousemove", onMouse)
+document.addEventListener("mousedown", e => { mouse.down = true ; e.preventDefault() });
+document.addEventListener("mouseup", e => { mouse.down = false ; e.preventDefault() });
