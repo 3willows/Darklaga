@@ -4,6 +4,9 @@ import * as S from "./sprites"
 const gl : WebGLRenderingContext = (function() {
     
     const canvas = document.getElementById("gl") as HTMLCanvasElement; 
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    console.log("%o %o", canvas.width, canvas.height);
     const gl = canvas.getContext("webgl", {preserveDrawingBuffer: true});
 
     if (gl == null) {
@@ -721,7 +724,8 @@ export function endRender() {
         statLastFrames + " FPS\n" +  
         statBatches.toFixed() + " batches\n" +
         statPolys.toFixed() + " triangles\n" + 
-        (statBytes / 1024).toFixed(1) + " KB"
+        (statBytes / 1024).toFixed(1) + " KB\n" + 
+        window.innerWidth.toFixed() + " x " + window.innerHeight.toFixed();
 
     statBatches = 0
     statPolys = 0
