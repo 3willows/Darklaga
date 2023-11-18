@@ -12,16 +12,12 @@ export class Music {
 
     constructor(audio: Promise<AudioBuffer>[], initial = 1) {
 
-        const self = this;
-        async function prepare() {
+        Promise.all(audio).then(buffers => {
             
-            // Wait for all buffers to be decoded
             let length = 0;
-            const buffers = [];
-            for (let promise of audio) {
-                const track = await promise;
+            
+            for (let track of buffers) {
                 length += track.length;
-                buffers.push(track);
             }
 
             // Create a buffer that will contain them all
@@ -38,15 +34,14 @@ export class Music {
                 offset += track.length;
             }
             
-            self.loopStart = 0;
+            this.loopStart = 0;
             for (let i = 0; i < initial; ++i)
-                self.loopStart += buffers[i].duration;
+                this.loopStart += buffers[i].duration;
             
             // Assign the buffer to mark the music as available.
-            self.buffer = buffer;
-        }
+            this.buffer = buffer;
+        });
 
-        prepare();
     }
 
     start() {
