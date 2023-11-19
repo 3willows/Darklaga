@@ -298,5 +298,6 @@ export function render() {
 export function isDone() {
     return stats.showing >= stats.show.length && (
         Input.key.action ||
-        Input.key.action2)
+        Input.key.action2 ||
+        Input.mouse.down)
 }
