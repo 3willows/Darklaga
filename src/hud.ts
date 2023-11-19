@@ -340,7 +340,7 @@ export function onEnemyDeath(
 
     if (opts.UseCombo) {
         hud.combo_timer = COMBO_DELAY;
-        Stats.combo(++hud.combo)
+        Stats.combo(hud.combo++)
     }    
 
     if (opts.UseFury) {
