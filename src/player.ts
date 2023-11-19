@@ -248,7 +248,9 @@ export function step() {
             pl.shooting = 5;
         }
     
-        if (key.action2 && Hud.furyReady()) {
+        if ((key.action2 || mouse.click && mouse.x < 92 && mouse.y > 300) && 
+            Hud.furyReady()) 
+        {
             if (stuff.weapon == Hud.ITEM_WNONE) {
                 Fury.startBlaster();
             } else if (stuff.weapon == Hud.ITEM_ROCKETS) {
