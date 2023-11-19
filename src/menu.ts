@@ -158,6 +158,15 @@ class MainMenu extends MenuWindow {
     }
 }
 
+function showShipTip() {
+    setTimeout(() => 
+        Float.addInfo(
+            [S.player[2]], 
+            ["Your ship. Move it with the arrow keys or",
+            "drag it with your mouse, stylus or finger."]),
+        5500);
+}
+
 class GameMenu extends MenuWindow {
 
     private readonly btnTourist : MenuItem
@@ -196,12 +205,7 @@ class GameMenu extends MenuWindow {
             opts.UseWeakerEnemies = true;
             opts.UseStrongerEnemies = false;
             opts.UseAggressiveEnemies = false;
-            setTimeout(() => 
-                Float.addInfo(
-                    [S.player[2]], 
-                    ["Your ship. Move it with the arrow keys or",
-                     "drag it with your mouse, stylus or finger."]),
-                5500);
+            showShipTip();            
         }
 
         if (mi === this.btnNormal) {
@@ -218,6 +222,7 @@ class GameMenu extends MenuWindow {
             opts.UseWeakerEnemies = false;
             opts.UseStrongerEnemies = false;
             opts.UseAggressiveEnemies = false;
+            if (opts.WaitForInput) showShipTip();
         }
 
         if (mi === this.btnHard) {
@@ -234,6 +239,7 @@ class GameMenu extends MenuWindow {
             opts.UseWeakerEnemies = false;
             opts.UseStrongerEnemies = true;
             opts.UseAggressiveEnemies = false;
+            if (opts.WaitForInput) showShipTip();
         }
 
         if (mi === this.btnExtreme) {
@@ -250,6 +256,7 @@ class GameMenu extends MenuWindow {
             opts.UseWeakerEnemies = false;
             opts.UseStrongerEnemies = true;
             opts.UseAggressiveEnemies = true;
+            if (opts.WaitForInput) showShipTip();
         }
 
         if (mi === this.btnBossMode) {

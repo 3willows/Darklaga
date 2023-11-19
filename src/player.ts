@@ -27,7 +27,6 @@ type Player = {
     timer: number
     laser_timer: number
     laser_fired: boolean
-    mousedown: number
     anim: number
     modules1: number
     modules2: number
@@ -54,7 +53,6 @@ function initial() : Player {
         timer: 0,
         laser_timer: 0,
         laser_fired: false,
-        mousedown: 0,
         anim: 0,
         modules1: 0,
         modules2: 0,
@@ -199,6 +197,11 @@ export function step() {
     pl.r_y_speed = 0;
     
     if (pl.controllable) {
+
+        if (opts.WaitForInput) 
+            opts.WaitForInput = 
+                !(mouse.down || key.action || key.action2 ||
+                key.up || key.left || key.right || key.down);
 
         if (mouse.down) {
             const tx = Math.max(minX, Math.min(maxX, (mouse.x << 3) - mouseDeltaX));

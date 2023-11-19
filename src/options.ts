@@ -3,6 +3,10 @@ export const opts = {
     // Display helper messages.
     UseTourist: true,
 
+    // Block enemy appearance and disappearance of 
+    // first info until first input from player.
+    WaitForInput: true,
+
     UseVertical: true,
     
     UseGraze: true,
@@ -40,6 +44,5 @@ export const opts = {
     ModPlayerSpeed: 2,
 
     // Player movement quadratic friction, 0..5
-    ModPlayerFriction: 1
-
+    ModPlayerFriction: 1    
 }

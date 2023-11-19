@@ -1,6 +1,6 @@
+import { opts } from "options";
 import * as Enemy from "./enemy";
 import * as E from "./enemy.types";
-import * as L from "./levels"
 
 type EnemySeed = {
     readonly before: number,
@@ -149,7 +149,7 @@ function enemyOfSeed(s: EnemySeed): Enemy.Enemy {
 let current = parseLevel(1);
 
 export function step() {
-    while (current.length > 0 && current[0].before <= (40 - Enemy.count())) {
+    while (!opts.WaitForInput && current.length > 0 && current[0].before <= (40 - Enemy.count())) {
         const enemy = enemyOfSeed(current.shift()!);
         Enemy.add(enemy);
     }

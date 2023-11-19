@@ -1,5 +1,6 @@
 import * as GL from "./webgl"
 import * as S from "./sprites"
+import { opts } from "./options"
 
 type Float = {
     render: (this: Float) => void
@@ -25,7 +26,8 @@ function stepStandard(this: Float) {
 function stepInfo(this: Float) {
     const t = ++this.timer;
     if (t <= 16) this.x = 4 + (16-t) * 15;
-    return t < 184; 
+    else if (opts.WaitForInput) this.timer = 16;
+    return  t < 184; 
 }
 
 function stepGraze(this: Float) {
