@@ -60,8 +60,19 @@ function onMouse(e: MouseEvent) {
     e.preventDefault();
 }
 
+function onTouch(e: TouchEvent) {
+    const r = canvas.getBoundingClientRect();
+    mouse.down = true;
+    mouse.x = Math.max(0, Math.min(r.width, e.touches[0].clientX - r.left)) * (240 / r.width);
+    mouse.y = Math.max(0, Math.min(r.height, e.touches[0].clientY - r.top)) * (320 / r.height);
+    e.preventDefault();
+}
+
 document.addEventListener("keydown", onKey(true))
 document.addEventListener("keyup", onKey(false))
 document.addEventListener("mousemove", onMouse)
 document.addEventListener("mousedown", e => { mouse.down = true ; e.preventDefault() });
 document.addEventListener("mouseup", e => { mouse.down = false ; e.preventDefault() });
+document.addEventListener("touchmove", onTouch);
+document.addEventListener("touchstart", onTouch);
+document.addEventListener("touchend", e => { mouse.down = false ; e.preventDefault() });

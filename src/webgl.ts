@@ -6,7 +6,6 @@ const gl : WebGLRenderingContext = (function() {
     const canvas = document.getElementById("gl") as HTMLCanvasElement; 
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
-    console.log("%o %o", canvas.width, canvas.height);
     const gl = canvas.getContext("webgl", {preserveDrawingBuffer: true});
 
     if (gl == null) {

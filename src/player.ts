@@ -182,7 +182,7 @@ const maxX = 1696;
 const minY = 192;
 const maxY = 2176;
 const mouseDeltaX = 88;
-const mouseDeltaY = 160 + 88;
+const mouseDeltaY = 320 + 88;
 
 export function step() {
 

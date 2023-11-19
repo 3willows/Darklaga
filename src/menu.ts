@@ -3,7 +3,7 @@ import * as S from "./sprites"
 import * as Snd from "./sound";
 import * as L from "./levels";
 import * as Float from "./float";
-import { key } from "input";
+import { key, mouse } from "input";
 import { opts } from "options";
 
 type Message = "up" | "down" | "action" | { x: number, y: number };
@@ -85,7 +85,7 @@ class MenuWindow {
         let y = this.y + margin;
         for (let i = 0; i < this.items.length; ++i) {
             const item = this.items[i];
-            item.render(this.x, y, this.selected === i);
+            item.render(this.x, y, this.selected === i || mouse.down);
             y += item.height + 2 * margin;
         }
     }
@@ -94,18 +94,39 @@ class MenuWindow {
 
     message(msg: Message) {
 
-        if (msg == "up" && this.selected > 0) {
-            --this.selected;
-            Snd.rocketFire.play();
+        if (msg == "up") {
+            if (this.selected > 0) {
+                --this.selected;
+                Snd.rocketFire.play();
+            }
+            return;
         }
 
-        if (msg == "down" && this.selected < this.items.length - 1) {
-            ++this.selected;
-            Snd.rocketFire.play();
+        if (msg == "down") {
+                if (this.selected < this.items.length - 1) {
+                ++this.selected;
+                Snd.rocketFire.play();
+            }
+            return;
         }
 
         if (msg == "action") {
             this.activate(this.items[this.selected]);
+            return;
+        }
+
+        const {x, y} = msg;
+        if (x < this.x) return;
+
+        let iy = this.y + margin;
+        for (let item of this.items) {
+            if (y < iy) return;
+            if (y < iy + item.height && x < this.x + item.width) {
+                this.activate(item);
+                return;
+            }
+
+            iy += item.height + 2 * margin;
         }
     }
 }
@@ -343,7 +364,8 @@ let wnd : MenuWindow|undefined = new MainMenu();
 const prevkey = {
     up: false,
     down: false,
-    action: false
+    action: false,
+    mouse: false
 }
 
 export function step() {
@@ -362,6 +384,11 @@ export function step() {
     if (key.action != prevkey.action) {
         prevkey.action = key.action;
         if (key.action) wnd.message("action");
+    }
+
+    if (mouse.down != prevkey.mouse) {
+        prevkey.mouse = mouse.down;
+        if (mouse.down) wnd.message(mouse)
     }
 
     wnd.step();
