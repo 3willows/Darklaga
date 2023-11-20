@@ -48,6 +48,7 @@ function onKey(setTo: boolean) {
 export const mouse = {
     x: 0,
     y: 0,
+    touch: false,
     click: false,
     down: false
 }
@@ -64,7 +65,7 @@ function onMouse(e: MouseEvent) {
 function onTouch(e: TouchEvent) {
     const r = canvas.getBoundingClientRect();
     mouse.click = !mouse.down;
-    mouse.down = true;
+    mouse.down = mouse.touch = true;
     mouse.x = Math.max(0, Math.min(r.width, e.touches[0].clientX - r.left)) * (240 / r.width);
     mouse.y = Math.max(0, Math.min(r.height, e.touches[0].clientY - r.top)) * (320 / r.height);
     e.preventDefault();

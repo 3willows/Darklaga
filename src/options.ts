@@ -35,7 +35,10 @@ export const opts = {
     ModWallsBounce: false,
 
     // Automatically shooting without pressing the button ?
-    ModAutoFire: false,
+    // 0 = never
+    // 1 = only if touch
+    // 2 = always
+    ModAutoFire: 1,
 
     // Frequency at which pickups change
     ModChangePickup: 1,
