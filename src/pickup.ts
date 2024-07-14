@@ -86,7 +86,7 @@ type Pickup = {
     change: number
 }
 
-function stepPickup(p: Pickup, pp: {x: number, y: number}) : boolean {
+function stepPickup(p: Pickup, pp: {x: number, y: number}, move: boolean) : boolean {
 
     if ((p.change += opts.ModChangePickup) >= 128) {
         p.change = 0;
@@ -95,6 +95,8 @@ function stepPickup(p: Pickup, pp: {x: number, y: number}) : boolean {
         p.anim = anim[p.kind];
     }
 
+    if (!move) return true;
+    
     if ((p.y += 4) >= 2560) return false;
     
     if (p.y < pp.y + 160 && p.y + 320 > pp.y + 160 && 
@@ -108,14 +110,14 @@ function stepPickup(p: Pickup, pp: {x: number, y: number}) : boolean {
     return true;
 }
 
-export function step() {
+export function step(move: boolean = true) {
     
     if (pickups.all.length == 0) return;
 
     pickups.timer++;
     const pp = Player.pos()
     for (let i = 0; i < pickups.all.length; ++i) {
-        if (!stepPickup(pickups.all[i], pp)) {
+        if (!stepPickup(pickups.all[i], pp, move)) {
             pickups.all[i] = pickups.all[pickups.all.length - 1];
             pickups.all.pop();
             i--;

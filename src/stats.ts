@@ -27,6 +27,7 @@ type Stats = {
     timer: number
     level: number
     start: number
+    countdown: number
 }
 
 function newStats(level: number) : Stats {
@@ -43,6 +44,7 @@ function newStats(level: number) : Stats {
         show: [],
         display: 0,
         timer: 0,
+        countdown: 0,
         start: +new Date()
     }
 }
@@ -56,26 +58,27 @@ export function enemy() { stats.enemy++; }
 export function enemyFled() { stats.enemy_fled++; }
 export function fury() { stats.fury++; }
 export function combo(count: number) { stats.combo = Math.max(stats.combo, count) }
+export function countdown(frames: number) { stats.countdown = frames };
 
 export function begin(level: number) {
     stats = newStats(level);
 }
 
-function printTime(time: number) {
+export function printTime(time: number) {
     const time_ms = time % 1000;
-    const time_s = Math.round(time / 1000) % 60;
-    const time_m = Math.round(time / 60000);
+    const time_s = Math.floor(time / 1000) % 60;
+    const time_m = Math.floor(time / 60000);
     return time_m.toFixed() + (time_s < 10 ? "'0" : "'") 
         + time_s.toFixed() 
         + (time_ms < 10 ? "\"00" : time_ms < 100 ? "\"0" : "\"")
         + time_ms.toFixed();
 }
 
-export function end(countdown: number) {
+export function end() {
 
     const time = +new Date() - stats.start;
     const time_str = printTime(time);
-    const cd_str = printTime(countdown);
+    const cd_str = printTime(stats.countdown * 1000 / 60);
 
     // ITEM 1: level/boss finished ==========================================
 
@@ -189,7 +192,7 @@ export function end(countdown: number) {
             texture: [S.texgreen]
         })
     } else {
-        const score = 100 * Math.round(countdown / 100);
+        const score = 4000 * Math.round(stats.countdown / 100);
         const prefix = "  " + cd_str;
         stats.show.push({
             label: "TIME BONUS",
@@ -253,8 +256,8 @@ export function end(countdown: number) {
     // item 6: total graze ===================================================
     
     if (stats.graze > 20) {
-        const score = stats.combo * 200;
-        const prefix = "  " + stats.combo.toFixed() + " graze"
+        const score = stats.graze * 200;
+        const prefix = "  " + stats.graze.toFixed() + " graze"
         stats.show.push({
             label: "DAREDEVIL",
             value: opts.UseScore 

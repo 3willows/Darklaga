@@ -207,7 +207,7 @@ function startLevel(lvl: number) {
 function endLevel() {
     g.state = GS_END_LEVEL;
     Music.setVolume(0.25);
-    Stats.end(0);
+    Stats.end();
     Player.setControllable(false);
 }
 
@@ -267,7 +267,7 @@ function endLevelStep() {
     Hud.step();
     Shot.step();
     Player.step();
-    Pickup.step();
+    Pickup.step(false);
     Dan.step();
     Float.step();
     Boss.step();

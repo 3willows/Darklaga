@@ -7,6 +7,7 @@ import * as Shot from "shot"
 import * as Hud from "./hud"
 import * as Float from "./float"
 import * as Snd from "./sound"
+import * as Stats from "./stats"
 
 class BossBase {
 
@@ -43,6 +44,11 @@ class BossBase {
         this.countdown = seconds * 60;
     }    
 
+    public addCountdown(seconds: number) {
+        if (this.countdown > 0)
+            this.countdown += seconds * 60;
+    }
+
     public step() {
 
         ++this.timer;
@@ -62,6 +68,11 @@ class BossBase {
                     this.hit = true;
                 }
             }
+
+            if (this.suffering == 0 && this.countdown > 0) {
+                --this.countdown;
+            }
+
         } else {
             this.self.length = 0;
         }
@@ -91,6 +102,7 @@ class BossBase {
     }
 
     public die() {
+        Stats.countdown(this.countdown);
         this.dead = true;
     }
 
@@ -129,7 +141,12 @@ class BossBase {
             const smax = 240 - ((this.timer << 1) % S.warningsma[S.w]);
             GL.drawSpriteAdditive(S.warningsma, smax - S.warningsma[S.w], 350 - dy, alpha);
             GL.drawSpriteAdditive(S.warningsma, smax, 350 - dy, alpha);
-        } 
+        } else {
+            if (this.countdown > 0) {
+                const t = Stats.printTime(this.countdown * 1000 / 60);
+                GL.drawText(t, S.font, S.texwhite, 20, 55, 1, 0);
+            }
+        }
 
         if (this.suffering > 150) {
             const a = (300 - this.suffering) / 256;
@@ -201,6 +218,7 @@ class HalfBoss1 extends BossBase {
                 this.ctimer = this.stimer = this.srtimer1 = 
                 this.srtimer2 = 0;
             this.timer = 76; // because of phase 3 animation
+            this.addCountdown(this.stage == 2 ? 30 : 45);
         } else {
             Snd.bossboom1.play();
             super.die();
@@ -439,7 +457,7 @@ class HalfBoss2 extends BossBase
             /* collision box */ 
                 2 * S.halfbossb[S.w], 
                 2 * S.halfbossb[S.h],
-            /* timer */ 45)
+            /* timer */ 30)
         this.lives = 3;
     }
 
@@ -457,6 +475,7 @@ class HalfBoss2 extends BossBase
             --this.lives;
             this.baseHealth = 14 + (opts.UseStrongerEnemies ? 1 : 0);
             this.health = 1 << this.baseHealth;
+            this.addCountdown(this.stage == 4 ? 60 : 30);
         } else {
             Snd.bossboom2.play();
             super.die();
@@ -670,6 +689,7 @@ class Boss1 extends BossBase
             --this.lives;
             this.baseHealth = 14 + (opts.UseStrongerEnemies ? 1 : 0);
             this.health = 1 << this.baseHealth;
+            this.addCountdown(45);
         } else {
             Snd.bossboom1.play();
             super.die();
