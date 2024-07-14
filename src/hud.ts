@@ -99,6 +99,10 @@ function empty() : Hud {
 
 let hud : Hud = empty();
 
+export function reset() {
+    hud = empty();
+}
+
 // The score at which the next life is awarded
 function nextlife() {
 
@@ -323,6 +327,10 @@ function furyProgress(log_value: number) {
     if (hud.fury_progress > 262144) {
         hud.fury_progress = 263000;
     }
+}
+
+export function score() {
+    return hud.score;
 }
 
 export function furyReady() {
@@ -646,7 +654,14 @@ export function playerHit(px: number, py: number, isDan: boolean) {
         hud.danger = 63;
         hud.lives--;
         Float.addSprite([hud.lives ? S.life : S.nolife ], px, py);
+    } else {
+        // Cause dead() to return true
+        hud.lives--;
     }
+}
+
+export function dead() {
+    return hud.lives < 0;
 }
 
 export function graze(x: number, y: number) {

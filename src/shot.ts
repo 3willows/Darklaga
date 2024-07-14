@@ -54,15 +54,18 @@ const maxShotAmount = 200;
 const shotSize = 11;
 
 const shots = new Int32Array(maxShotAmount * shotSize);
+reset();
 
-// The first two spots are: 
-//  - the start of the allocated list
-//  - the start of the free list
-shots[0] = -1
-shots[1] = 2
-for (let i = 0; i < maxShotAmount - 1; ++i) 
-    shots[2 + i * shotSize + NEXT] = 2 + (i+1) * shotSize;
-shots[2 + (maxShotAmount - 1) * shotSize + NEXT] = -1;
+export function reset() {
+    // The first two spots are: 
+    //  - the start of the allocated list
+    //  - the start of the free list
+    shots[0] = -1
+    shots[1] = 2
+    for (let i = 0; i < maxShotAmount - 1; ++i) 
+        shots[2 + i * shotSize + NEXT] = 2 + (i+1) * shotSize;
+    shots[2 + (maxShotAmount - 1) * shotSize + NEXT] = -1;
+}
 
 // STEPPING ==================================================================
 

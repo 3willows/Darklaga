@@ -232,4 +232,8 @@ export function add(e: Enemy) {
     return false;
 }
 
+export function reset() {
+    enemies.length = 0;
+}
+
 export function count() { return enemies.length }

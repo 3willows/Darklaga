@@ -1,6 +1,7 @@
 import { opts } from "options";
 import * as Enemy from "./enemy";
 import * as E from "./enemy.types";
+import * as Boss from "./boss"
 
 type EnemySeed = {
     readonly before: number,
@@ -157,6 +158,8 @@ export function step() {
 
 export function spawn(level: number) {
     current = level == 0 ? [] : parseLevel(level);
+    Enemy.reset();
+    Boss.reset();
 }
 
 export function over() {

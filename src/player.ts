@@ -64,7 +64,7 @@ function initial() : Player {
 let pl : Player = initial();
 
 export function reset() {
-    pl = initial();  
+    pl = initial(); 
 }
 
 export function setControllable(c: boolean) {

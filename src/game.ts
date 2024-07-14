@@ -14,11 +14,14 @@ import * as Fury from "./fury"
 import * as Music from "./music"
 import * as Menu from "./menu"
 import * as Stats from "./stats"
+import * as End from "./end"
+import * as Snd from "./sound"
 
 const GS_MAIN_MENU = 0
 const GS_STARTING_LEVEL = 1
 const GS_PLAY = 2
 const GS_END_LEVEL = 3
+const GS_END_GAME = 4
 
 type Game = {
     state: number
@@ -40,6 +43,7 @@ function startLevel(lvl: number) {
     
 	g.state = GS_STARTING_LEVEL;
     Stats.begin(lvl);
+    Dan.reset();
 
     switch (g.level = lvl) {
         case L.gLEVEL1:
@@ -206,12 +210,25 @@ function startLevel(lvl: number) {
 
 function endLevel() {
     g.state = GS_END_LEVEL;
+    Snd.shield.stop(); // annoying
     Music.setVolume(0.25);
     Stats.end();
     Player.setControllable(false);
 }
 
-function gameFinish() {}
+function gameFinish() {
+    g.state = GS_END_GAME;
+    Snd.shield.stop(); // annoying
+    Music.playMusic(Music.music1);
+    End.enable(true, Hud.score());    
+}
+
+function loseGame() {
+    g.state = GS_END_GAME;
+    End.enable(false, Hud.score());
+    Music.setVolume(0);
+    Player.setControllable(false);
+}
 
 function nextLevel() {
     Music.setVolume(1);
@@ -252,6 +269,10 @@ function playStep() {
         !Fury.isRunning()) 
     {
         endLevel();
+    }
+
+    if (Hud.dead()) {
+        loseGame();
     }
 }
 
@@ -308,6 +329,20 @@ function startingLevelStep() {
     Player.setControllable(true);
 }
 
+function endGameStep() {
+    
+    // Do not animate anything anymore.
+    End.step();
+
+    if (End.done()) {
+        g.state = GS_MAIN_MENU;
+        g.level = L.gLEVEL1,
+        g.prerender = 0;
+        g.specialscreen = 0;
+        Background.set(Background.LEVEL0);
+    }
+}
+
 export function step() {
     switch (g.state) {
         case GS_PLAY: 
@@ -321,6 +356,9 @@ export function step() {
             return;
         case GS_END_LEVEL: 
             endLevelStep();
+            return;
+        case GS_END_GAME:
+            endGameStep();
             return;
         default:
             throw "Unknown state";
@@ -346,26 +384,6 @@ export function playRender() {
 
 export function menuRender() {
     Background.render();
-    Fury.renderStart();
-    Enemy.render();
-    Boss.render();
-    Shot.render();
-    Pickup.render();
-
-    if (g.prerender < 64) 
-        Player.prerender(g.prerender);
-    else
-        Player.render();
-
-    Dan.render();
-    Boss.renderTop();
-    Fury.renderEnd();
-
-    if (g.prerender < 64)
-        Hud.prerender(g.prerender >> 1);    
-    else
-        Hud.render();
-
     Menu.render();
 }
 
@@ -397,6 +415,23 @@ export function startingLevelRender() {
     }
 }
 
+export function endGameRender() {
+    Background.render();
+    Fury.renderStart();
+    Enemy.render();
+    Boss.render();
+    Shot.render();
+    Pickup.render();
+    Player.render();
+    Dan.render();
+    Boss.renderTop();
+    Fury.renderEnd();
+    Hud.render();
+    Stats.render();
+    Float.render();
+    End.render();
+}
+
 export function render() {
     GL.startRender();
     switch (g.state) {
@@ -412,10 +447,18 @@ export function render() {
         case GS_END_LEVEL: 
             endLevelRender();
             break;
+        case GS_END_GAME:
+            endGameRender();
+            break;
         default:
             throw "Unknown state";
     }
     GL.endRender();
 }
 
-Menu.callbacks.startLevel = startLevel;
+Menu.callbacks.startOnLevel = (lvl) => {
+    Hud.reset();
+    Pickup.reset();
+    Shot.reset();
+    startLevel(lvl);
+}

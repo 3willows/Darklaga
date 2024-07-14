@@ -192,7 +192,7 @@ class GameMenu extends MenuWindow {
         Snd.furyBegin.play();
 
         if (mi === this.btnTourist) {
-            callbacks.startLevel(L.gTOURIST1);
+            callbacks.startOnLevel(L.gTOURIST1);
             opts.UseTourist = true;
             opts.UseScore = true;
             opts.UseGraze = false;
@@ -209,7 +209,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi === this.btnNormal) {
-            callbacks.startLevel(L.gLEVEL1);
+            callbacks.startOnLevel(L.gLEVEL1);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;
@@ -226,7 +226,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi === this.btnHard) {
-            callbacks.startLevel(L.gLEVEL1);
+            callbacks.startOnLevel(L.gLEVEL1);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;
@@ -243,7 +243,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi === this.btnExtreme) {
-            callbacks.startLevel(L.gLEVEL1);
+            callbacks.startOnLevel(L.gLEVEL1);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;
@@ -260,7 +260,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi === this.btnBossMode) {
-            callbacks.startLevel(L.gBOSSMODE1);
+            callbacks.startOnLevel(L.gBOSSMODE1);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;
@@ -276,7 +276,7 @@ class GameMenu extends MenuWindow {
         }
 
         if (mi == this.btnSecret) {
-            callbacks.startLevel(L.gSECRET);
+            callbacks.startOnLevel(L.gSECRET);
             opts.UseTourist = false;
             opts.UseScore = true;
             opts.UseGraze = true;
@@ -363,7 +363,7 @@ class GameMenu extends MenuWindow {
 // Because of mutual recursive modules, Game.ts uses Menu.ts so we cannot
 // access Game.ts from Menu.ts...
 export const callbacks = {
-    startLevel: (lvl: number) => {}
+    startOnLevel: (lvl: number) => {}
 };
 
 let wnd : MenuWindow|undefined = new MainMenu();

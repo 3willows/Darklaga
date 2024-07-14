@@ -865,3 +865,7 @@ export function start(n: number) {
 export function over() {
     return !active;
 }
+
+export function reset() {
+    active = undefined;
+} 

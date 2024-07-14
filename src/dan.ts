@@ -157,14 +157,7 @@ const danSize = 15;
 
 const dan = new Int32Array(maxDanAmount * danSize);
 
-// The first two spots are: 
-//  - the start of the allocated list
-//  - the start of the free list
-dan[0] = -1
-dan[1] = 2
-for (let i = 0; i < maxDanAmount - 1; ++i) 
-    dan[2 + i * danSize + NEXT] = 2 + (i+1) * danSize;
-dan[2 + (maxDanAmount - 1) * danSize + NEXT] = -1;
+reset();
 
 // STEP ======================================================================
 
@@ -499,6 +492,16 @@ export function render() {
         ref = danRender(ref);
 }
 
+export function reset() {
+    // The first two spots are: 
+    //  - the start of the allocated list
+    //  - the start of the free list
+    dan[0] = -1
+    dan[1] = 2
+    for (let i = 0; i < maxDanAmount - 1; ++i) 
+        dan[2 + i * danSize + NEXT] = 2 + (i+1) * danSize;
+    dan[2 + (maxDanAmount - 1) * danSize + NEXT] = -1;
+}
 
 // Add a shot, return true if the shot was added, false otherwise. 
 function add(s: {
