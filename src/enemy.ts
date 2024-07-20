@@ -7,6 +7,7 @@ import * as Hud from "./hud";
 import * as Snd from "./sound";
 import * as Player from "./player"
 import * as Stats from "./stats"
+import * as Wire from "./wireframe"
 
 export type Mode = "n"|"v"|"d"
 
@@ -64,6 +65,7 @@ export class Enemy {
                 if (this.flash <= 30) this.flash = 34; 
                 if ((this.health -= dmg) <= 0) {
                     Snd.boom.play();
+                    Wire.blast(this.cx(), this.cy(), 5, 3);
                     Pickups.onEnemyDeath(this.x, this.y);
                     Hud.onEnemyDeath(this.x, this.y, 1, this.basehealth);
                     return new Dying(this.x, this.y, this.hit, this.mode);

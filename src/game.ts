@@ -203,6 +203,7 @@ function startLevel(lvl: number) {
             break;
         case L.gSECRET: 
             Level.spawn(16);
+            Background.set(Background.WIRE);
             Pickup.generateChoices();
             break;
     }

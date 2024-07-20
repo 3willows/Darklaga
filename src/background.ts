@@ -1,6 +1,8 @@
 import * as S from "./sprites";
 import * as Fury from "./fury"
 import * as GL from "./webgl"
+import * as Wire from "./wireframe"
+import { opts } from "options";
 
 function randomizeStars() : Int32Array {
     const stars = new Int32Array(3 * 100);
@@ -25,6 +27,7 @@ export const LEVEL7 = 9
 export const LEVEL8 = 10
 export const LEVEL9 = 11
 export const BOSS3  = 12
+export const WIRE   = 13
 
 const bg = {
     current: LEVEL0,
@@ -262,6 +265,10 @@ export function render() {
         renderMetalBack(false);
         break;
     }
+    case WIRE:
+    {
+        Wire.render();    
+    }
     }
 
     if (bg.lfactor) {
@@ -277,11 +284,13 @@ function stepColuBack() {
 
 export function warp(planet: number) {
     bg.warpstate = 1;
-    bg.next = planet;
+    bg.next = opts.UseGeoDestruct ? WIRE : planet;
 } 
 
 export function set(planet: number) {
     bg.warpstate = 0;
+    if (opts.UseGeoDestruct) planet = WIRE;
+    if (bg.current == WIRE && planet != WIRE) Wire.stop();
     bg.current = planet;
     bg.timer = 0;
 }
@@ -297,6 +306,7 @@ function stepWarp()
             } else {
                 bg.warpstate = 2;
                 bg.timer = -64;
+                if (bg.current == WIRE && bg.next != WIRE) Wire.stop();
                 bg.current = bg.next;
             }
             break;
@@ -335,6 +345,9 @@ export function step(canWarp: boolean = true) {
     if (canWarp)
         stepWarp();
 
+    if (bg.current == WIRE)
+        Wire.step();
+    
     bg.timer++;
 
     for (let i = 0; i < 300; i += 3) {

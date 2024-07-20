@@ -25,6 +25,8 @@ export const opts = {
     // New-school graphics
     UseNewSchool: true,
 
+    UseGeoDestruct: false,
+
     // Higher level of detail for weapons
     LodWeaponDetail: true,
 

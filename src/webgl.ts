@@ -260,6 +260,119 @@ function drawBatchedColored() {
     coloredBatched = 0;
 }
 
+// LINES =====================================================================
+
+// Shader for drawing untextured, colored polygons. 
+const lineProgram = (function() {
+
+    // Vertex shader converts (X, Y) pixel positions, starting
+    // at (0,0) top left and ending at (240, 320), to OpenGL 
+    // positions starting at (-1, -1) bottom left and ending
+    // at (1, 1).
+    const vertexShader = compileShader(gl.VERTEX_SHADER, `
+attribute vec2 aVertexPosition;
+attribute vec3 aVertexColor;
+varying highp vec3 vColor;
+void main() {
+    gl_Position = vec4(
+        (aVertexPosition.x / 120.0) - 1.0, 
+        1.0 - (aVertexPosition.y / 160.0), 
+        1.0, 
+        1.0);
+    vColor = aVertexColor;
+}
+`);
+
+    const pixelShader = compileShader(gl.FRAGMENT_SHADER, `
+varying highp vec3 vColor;
+void main() {
+    gl_FragColor = vec4(vColor, 1);
+}
+`);
+
+    const program = gl.createProgram();
+    if (!program) throw "Could not create program";
+
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, pixelShader);
+    gl.linkProgram(program);
+
+    return {
+        program: program,
+        attribLocations: {
+            vertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
+            vertexColor: gl.getAttribLocation(program, "aVertexColor")
+        }
+    }
+
+}());
+export function drawLines(verticesXYZGB: Float32Array, indices: Uint16Array) {
+
+    if (coloredBatched) drawBatchedColored();
+    if (spritesBatched) drawBatchedSprites();
+
+    // Allocate and fill positions+colors buffer
+    const xyrgbBuf = gl.createBuffer();
+    if (!xyrgbBuf) throw "Could not allocate buffer";
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, xyrgbBuf);
+
+    gl.bufferData(
+        gl.ARRAY_BUFFER, 
+        verticesXYZGB, 
+        gl.STATIC_DRAW);
+
+    statBytes += verticesXYZGB.byteLength;
+
+    // Allocate and fill colors buffer
+    const indexBuf = gl.createBuffer();
+    if (!indexBuf) throw "Could not allocate buffer";
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
+
+    gl.bufferData(
+        gl.ELEMENT_ARRAY_BUFFER, 
+        indices, 
+        gl.STATIC_DRAW);
+
+    statBytes += indices.byteLength;
+    
+    // Render buffer
+    gl.useProgram(lineProgram.program);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, xyrgbBuf);
+    gl.vertexAttribPointer(
+        lineProgram.attribLocations.vertexPosition,
+        /* size */ 2,
+        /* type */ gl.FLOAT,
+        /* normalize */ false,
+        /* stride */ 5 * 4,
+        /* offset */ 0 * 4);
+
+    gl.enableVertexAttribArray(lineProgram.attribLocations.vertexPosition);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, xyrgbBuf);
+    gl.vertexAttribPointer(
+        lineProgram.attribLocations.vertexColor,
+        /* size */ 3,
+        /* type */ gl.FLOAT,
+        /* normalize */ false,
+        /* stride */ 5 * 4,
+        /* offset */ 2 * 4);
+
+    gl.enableVertexAttribArray(colorProgram.attribLocations.vertexColor);
+
+    gl.disable(gl.BLEND);
+
+    gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+    statPolys += indices.length/2;
+    statBatches += 1;
+
+    gl.deleteBuffer(xyrgbBuf);
+    gl.deleteBuffer(indexBuf);
+}
+
 // SPRITES ===================================================================
 
 // Shader for drawing sprites.
