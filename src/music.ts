@@ -101,6 +101,8 @@ let current : Music|undefined = undefined
 
 export function playMusic(music: Music) {
 
+    setVolume(1);
+
     if (current === music) return;
     
     if (current) current.stop();

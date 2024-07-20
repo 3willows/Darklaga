@@ -16,7 +16,7 @@ class MenuItem {
     public readonly height : number
     public readonly width : number
     private textWidth : number
-    private alpha : number
+    public alpha : number
 
     constructor(
         public readonly draw: S.Sprite,
@@ -30,6 +30,8 @@ class MenuItem {
         this.alpha = 8;
         this.textWidth = GL.measureText(text, font);
     }
+
+    activate() {}
 
     setText(text: string) {
         this.text = text;
@@ -48,7 +50,7 @@ class MenuItem {
     render(x: number, y: number, selected: boolean) {
         GL.drawSpriteAlpha(selected ? this.drawsel : this.draw, x, y, this.alpha);
         if (this.text) {
-            const tx = x + (this.center ? (this.width - this.textWidth) / 2 : 0);
+            const tx = x + (this.center ? (this.width - this.textWidth) / 2 : 4);
             const ty = y + 2;
             GL.drawText(this.text, this.font, S.texyellow, tx, ty, 1, 0);
         }
@@ -151,6 +153,11 @@ class MainMenu extends MenuWindow {
             wnd = new GameMenu();
         }
 
+        if (mi === this.btnOptions) {
+            Snd.furyBegin.play();
+            wnd = new OptionsMenu();
+        }
+
         if (mi === this.btnQuit) {
             Snd.pickup.play();
             document.getElementsByTagName("canvas")[0].remove();
@@ -165,6 +172,56 @@ function showShipTip() {
             ["Your ship. Move it with the arrow keys or",
             "drag it with your mouse, stylus or finger."]),
         5500);
+}
+
+class CheckboxItem extends MenuItem {
+
+    constructor(
+        label: string, 
+        public readonly read: () => boolean, 
+        public readonly toggle: () => void) {
+        super(S.btn_l, S.btn_lsel, false, S.font, label);
+    }
+
+    activate() { this.toggle(); }
+
+    render(x: number, y: number, selected: boolean) {
+        super.render(x, y, selected);
+        const cx = x + this.width - 2 - S.checkbox_l[S.w];
+        const cy = y + ((this.height - S.checkbox_l[S.h]) >> 1);
+
+        GL.drawSpriteAlpha(S.checkbox_l, cx, cy, this.alpha);
+        if (this.read())
+            GL.drawSpriteAlpha(S.check_l, cx, cy, this.alpha);
+    }
+
+}
+
+class OptionsMenu extends MenuWindow {
+
+    private readonly btnBack : MenuItem
+
+    constructor() {
+        super((240-S.btn_l[S.w])/2, 140);
+        this.add(new CheckboxItem("PLAYER FRICTION", () => !!opts.ModPlayerFriction, () => {}));
+        this.add(new CheckboxItem("PLAYER SPEED", () => !!opts.ModPlayerSpeed, () => {}));
+        this.add(new CheckboxItem("AUTO-FIRE", () => !!opts.ModAutoFire, () => {}));  
+        this.add(new CheckboxItem("GEO-DESTRUCTION", () => opts.UseGeoDestruct, () => opts.UseGeoDestruct = !opts.UseGeoDestruct));
+        this.add(new CheckboxItem("OLD SCHOOL MODE", () => !opts.UseNewSchool, () => opts.UseNewSchool = !opts.UseNewSchool));
+        this.add(new CheckboxItem("TIME ATTACK MODE", () => opts.UseTimeAttack, () => opts.UseTimeAttack = !opts.UseTimeAttack));
+        this.add(this.btnBack = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "BACK"));
+    }
+
+    activate(mi: MenuItem) {
+        
+        if (mi === this.btnBack) {
+            Snd.furyBegin.play();
+            wnd = new MainMenu();
+        } else {
+            Snd.blasterFire.play();
+            mi.activate();
+        }
+    }
 }
 
 class GameMenu extends MenuWindow {
