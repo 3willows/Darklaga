@@ -1,13 +1,15 @@
-import { pos } from "player"
+import { pos } from "./player"
 import { opts } from "./options"
 import * as S from "./sprites"
 import * as GL from "./webgl"
 import * as Dan from "./dan"
-import * as Shot from "shot"
+import * as Shot from "./shot"
 import * as Hud from "./hud"
 import * as Float from "./float"
 import * as Snd from "./sound"
 import * as Stats from "./stats"
+import * as Music from "./music"
+import * as Schlorp from "./schlorp"
 
 class BossBase {
 
@@ -652,6 +654,11 @@ class HalfBoss2 extends BossBase
 
 class Boss2 extends BossBase 
 {
+    private shine : number
+    private darken = 0
+    private beep = 0
+    private beepReset = 0
+
     constructor(cd: number) {
         super(/* Health */ 14 + (opts.UseStrongerEnemies ? 1 : 0),
             /* xy */ 860, 860, 
@@ -664,6 +671,7 @@ class Boss2 extends BossBase
             cd / 60 + 90);
         this.lives = 1;
         this.stage = 1;
+        this.shine = 128;
     }
 
     private angle() {
@@ -675,18 +683,20 @@ class Boss2 extends BossBase
     }
 
     public die() {
-        
-        if (this.stage == 2) {
-            Snd.disrupt.play();
-            Hud.disarm();
-        }
-
+        Hud.makeInvulnerable(64);
+        Music.setVolume(0);
+        Snd.bossboom2.play();
+        Schlorp.init();
         this.stage = 3; 
+        this.beep = this.beepReset = 30;
     }
 
     public step() {
 
         super.step();
+        if (this.shine > 0) --this.shine;
+
+        Schlorp.step();
 
         switch (this.stage) {
         case 1:
@@ -730,12 +740,29 @@ class Boss2 extends BossBase
         }
         case 3:
         {
+            this.timer += 3;
             const max = 1 << this.baseHealth;
             this.health += 64;
             if (this.health > max) {
                 this.health = max;
                 this.stage = 4;
+                this.darken = 0;
+                this.shine = 96;
+                Snd.statsPop.play();
+                Hud.disarm();
+                Music.setVolume(1);
+            } else {
+                this.darken = this.health / max;
             }
+
+
+            if (--this.beep < 0) {
+                this.beepReset = Math.max(3, this.beepReset - 2);
+                this.beep = this.beepReset;
+                Snd.furyBegin.stop();
+                Snd.furyBegin.play();
+            }
+
             break;
         }
         }
@@ -743,6 +770,13 @@ class Boss2 extends BossBase
 
     public render() {
         
+        if (this.darken > 0) {
+            GL.drawRect(0, 0, 240, 320, 0, 0, 0, this.darken);
+            Schlorp.render((this.x + 112) >> 3, ((this.y + 96)) >> 3);
+        }
+
+        super.render();
+
         const draw = (s: Float32Array, x: number, y: number) => {
             if (this.stage == 3) {
                 GL.drawSpriteAdditive(s, x, y, 32);
@@ -751,7 +785,7 @@ class Boss2 extends BossBase
                 GL.drawSprite(s, x, y);
             }
         }
-
+        
         draw(S.bossbody, (this.x >> 3), this.y >> 3);
 
         const w = 80;
@@ -764,15 +798,13 @@ class Boss2 extends BossBase
             draw(i == 11 ? S.bossrtene : S.bossrten, xr >> 3, y >> 3);
             draw(i == 11 ? S.bossltene : S.bosslten, xl >> 3, y >> 3);
         }
-
-        super.render();
     }
 
     public renderTop(): void {
         super.renderTop();
-        if (this.stage > 0) return;
+        if (this.shine <= 0) return;
 
-        const alpha = Math.max(0, 32 - (this.timer >> 2));
+        const alpha = Math.max(0, this.shine >> 2);
         GL.drawRectAdditive(0, 0, 240, 320, 1, 1, 1, alpha/32);
     }
 }

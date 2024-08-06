@@ -253,6 +253,10 @@ function drawBatchedColored() {
     statPolys += coloredBatched/3;
     statBatches += 1;
 
+    gl.disableVertexAttribArray(colorProgram.attribLocations.vertexColor);
+    gl.disableVertexAttribArray(colorProgram.attribLocations.vertexPosition);    
+    gl.disableVertexAttribArray(colorProgram.attribLocations.alphas);
+
     gl.deleteBuffer(positionsBuf);
     gl.deleteBuffer(colorsBuf);
     gl.deleteBuffer(alphasBuf);
@@ -360,7 +364,7 @@ export function drawLines(verticesXYZGB: Float32Array, indices: Uint16Array) {
         /* stride */ 5 * 4,
         /* offset */ 2 * 4);
 
-    gl.enableVertexAttribArray(colorProgram.attribLocations.vertexColor);
+    gl.enableVertexAttribArray(lineProgram.attribLocations.vertexColor);
 
     gl.disable(gl.BLEND);
 
@@ -368,6 +372,9 @@ export function drawLines(verticesXYZGB: Float32Array, indices: Uint16Array) {
 
     statPolys += indices.length/2;
     statBatches += 1;
+
+    gl.disableVertexAttribArray(lineProgram.attribLocations.vertexColor);
+    gl.disableVertexAttribArray(lineProgram.attribLocations.vertexPosition);
 
     gl.deleteBuffer(xyrgbBuf);
     gl.deleteBuffer(indexBuf);
@@ -717,6 +724,10 @@ function drawBatchedSprites() {
 
     statPolys += spritesBatched/6;
     statBatches += 1;
+
+    gl.disableVertexAttribArray(spriteProgram.attribLocations.vertexPosition);
+    gl.disableVertexAttribArray(spriteProgram.attribLocations.texCoord);
+    gl.disableVertexAttribArray(spriteProgram.attribLocations.alphas);
 
     gl.deleteBuffer(positionsBuf);
     gl.deleteBuffer(texturesBuf);
