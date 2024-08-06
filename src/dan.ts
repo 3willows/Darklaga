@@ -62,6 +62,8 @@ const DAN_ADN			= 0x0007
 // Homing missile
 //  Moves towards an angle, initially adjusts angle to aim at
 //  the player
+//  PARAMS0 = min aim timer
+//  PARAMS1 = max aim timer
 //  PARAMS2 = wait until starting to adjust
 //  PARAMS3 = angle 
 const DAN_MISL			= 0x0008
@@ -273,7 +275,7 @@ function danStep(ref: number, px: number, py: number, clear: boolean) {
             dan[off + PARAM3] += a > adjaim ? -3 : 3;
         }
 
-        if (timer >= 100)
+        if (timer >= dan[off + PARAM0] && timer <= dan[off + PARAM1])
             if (left <= -20-400 || left > 1920+400 || 
                     top <= -20-400 || top >= 2560+400) 
                 // Die if out-of-bounds
@@ -627,11 +629,31 @@ export function fireMissile(
         x,
         y,
         life: 64,
+        p0: 100,
+        p1: 10000,
         p2: wait,
         p3: Math.floor(a / Math.PI * 256)
     })
 }
 
+export function fireBossMissile(
+    x: number, 
+    y: number, 
+    a: number,
+    sprite: string) 
+{
+    add({
+        type: DAN_MISL,
+        sprite,
+        x,
+        y,
+        life: 64,
+        p0: 25,
+        p1: 100,
+        p2: 0,
+        p3: Math.floor(a / Math.PI * 256)
+    })
+}
 export function fireWorks(
     x: number, 
     y: number, 

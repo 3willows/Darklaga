@@ -153,6 +153,12 @@ export function hasItem(item: number) {
     return item == hud.weapon || item == hud.offense || item == hud.defense;
 }
 
+export function disarm() {
+    hud.weapon = ITEM_WNONE;
+    hud.offense = ITEM_ONONE;
+    hud.defense = ITEM_DNONE;
+}
+
 export function step() {
     hud.timer++;
     hud.fire_timer++;
@@ -311,6 +317,17 @@ function addScore(
     }
 
     Float.add(x, y, added);
+}
+
+export function increaseFury() {
+
+    if (Fury.isRunning()) return;
+
+    hud.fury_progress += 180;
+
+    if (hud.fury_progress > 262144) {
+        hud.fury_progress = 263000;
+    }
 }
 
 function furyProgress(log_value: number) {
@@ -658,6 +675,10 @@ export function playerHit(px: number, py: number, isDan: boolean) {
         // Cause dead() to return true
         hud.lives--;
     }
+}
+
+export function makeInvulnerable(duration: number) {
+    hud.invulnerable += duration;
 }
 
 export function dead() {

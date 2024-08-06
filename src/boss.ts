@@ -650,6 +650,133 @@ class HalfBoss2 extends BossBase
     }
 }
 
+class Boss2 extends BossBase 
+{
+    constructor(cd: number) {
+        super(/* Health */ 14 + (opts.UseStrongerEnemies ? 1 : 0),
+            /* xy */ 860, 860, 
+            /* collision offset */ 
+                64, 
+                64,
+            /* collision box */ 
+                144, 
+                256,
+            cd / 60 + 90);
+        this.lives = 1;
+        this.stage = 1;
+    }
+
+    private angle() {
+        return this.timer * Math.PI / 128;
+    }
+
+    public shootable(): boolean {
+        return this.stage == 2 || this.stage == 4;
+    }
+
+    public die() {
+        
+        if (this.stage == 2) {
+            Snd.disrupt.play();
+            Hud.disarm();
+        }
+
+        this.stage = 3; 
+    }
+
+    public step() {
+
+        super.step();
+
+        switch (this.stage) {
+        case 1:
+        {
+            if (this.timer > 96) { this.stage = 2; }
+            break;
+        }
+        case 2: 
+        case 4: 
+        {
+            const {x:px, y:py} = pos();
+            const tx = 1200 - (px >> 2) - 96;
+            const ty = 320 + ((2560 - py) >> 2);
+
+            if (tx - this.x > 4) {
+                this.x += 4;
+            } else if (this.x - tx > 4) {
+                this.x -= 4;
+            } else if (ty - this.y > 4) {
+                this.y += 4;
+            } else if (this.y - ty > 4) {
+                this.y -= 4;
+            }
+
+            if (this.stage == 4) {
+                Hud.increaseFury();
+                if (this.timer % 10 == 0) {
+                    const angle = Math.random() * 2 * Math.PI;
+                    Dan.fireBossMissile(this.x + 96, this.y + 96, angle, "bs3");
+                }
+            }
+
+            if (this.timer % 3 == 0) {
+                const angle = (this.timer >> 4) + (Math.random() * 0.25) * Math.PI;
+                const vx = Math.round(8 * Math.cos(angle));
+                const vy = Math.round(8 * Math.sin(angle));
+                Dan.fireSeek(this.x + 96, this.y + 96, vx, vy, 9, "bs1");
+            }
+
+            break;
+        }
+        case 3:
+        {
+            const max = 1 << this.baseHealth;
+            this.health += 64;
+            if (this.health > max) {
+                this.health = max;
+                this.stage = 4;
+            }
+            break;
+        }
+        }
+    }
+
+    public render() {
+        
+        const draw = (s: Float32Array, x: number, y: number) => {
+            if (this.stage == 3) {
+                GL.drawSpriteAdditive(s, x, y, 32);
+                GL.drawSpriteAdditive(s, x, y, 16);
+            } else {
+                GL.drawSprite(s, x, y);
+            }
+        }
+
+        draw(S.bossbody, (this.x >> 3), this.y >> 3);
+
+        const w = 80;
+        const a = this.angle();
+        for (let i = 0; i < 12; ++i) {
+            const d = 96 + Math.floor(w * ((i + 1) / 12) * Math.cos(a + i / 5));
+            const xr = this.x + 96 + d;
+            const xl = this.x + 96 - d;
+            const y = this.y + 140 + 32*i;
+            draw(i == 11 ? S.bossrtene : S.bossrten, xr >> 3, y >> 3);
+            draw(i == 11 ? S.bossltene : S.bosslten, xl >> 3, y >> 3);
+        }
+
+        super.render();
+    }
+
+    public renderTop(): void {
+        super.renderTop();
+        if (this.stage > 0) return;
+
+        const alpha = Math.max(0, 32 - (this.timer >> 2));
+        GL.drawRectAdditive(0, 0, 240, 320, 1, 1, 1, alpha/32);
+    }
+}
+
 class Boss1 extends BossBase
 {
     private s1accrue : number = 0
@@ -680,7 +807,7 @@ class Boss1 extends BossBase
     }
     
     public shootable(): boolean {
-        return this.stage > 0 && !this.dead;
+        return this.stage > 0 && this.stage < 5;
     }
 
     public die() {
@@ -692,7 +819,7 @@ class Boss1 extends BossBase
             this.addCountdown(45);
         } else {
             Snd.bossboom1.play();
-            super.die();
+            Hud.makeInvulnerable(10);
         }
     }
 
@@ -701,6 +828,11 @@ class Boss1 extends BossBase
 
         const rx = 960 - (S.bosshead[S.w] << 2);
         this.x = rx + Math.floor(120 * Math.cos(this.angle()));
+
+        if (this.suffering) {
+            this.timer++; 
+            return;
+        }
 
         switch (this.stage) {
         case 0: 
@@ -735,11 +867,6 @@ class Boss1 extends BossBase
         }
         case 2:
         {
-            if (this.suffering) {
-                this.timer++; 
-                break;
-            }
-
             if (++this.s2windup > 160) this.s2windup = 0;
             const early = this.s2windup < 128;
             if ((this.s2windup % (early ? 16 : 4) == 0)) {
@@ -758,11 +885,6 @@ class Boss1 extends BossBase
         }
         case 3: 
         {
-            if (this.suffering) {
-                this.timer++; 
-                break;
-            }
-
             if (this.y < 1000) this.y += 2;
 
             const cx = this.x + 96;
@@ -799,12 +921,7 @@ class Boss1 extends BossBase
             break;
         }
         case 4:
-        {                
-            if (this.suffering) {
-                this.timer++; 
-                break;
-            }
-
+        {
             ++this.s4tick;
 
             if (this.s4tick % 30 == 0)
@@ -822,12 +939,17 @@ class Boss1 extends BossBase
             }
             break;
         }
+        case 5: 
+        {
+            active = new Boss2(this.countdown);
+            break;
+        }
         }
     }
 
     public render() {
         super.render();
-        
+
         const rx = 960 - (S.bosshead[S.w] << 2) + 32;
         const w = 120;
         const a = this.angle();
@@ -840,6 +962,14 @@ class Boss1 extends BossBase
 
         const hx = rx + Math.floor(w * Math.cos(a));
         GL.drawSprite(S.bosshead, (hx >> 3) - 4, this.y >> 3); 
+    }
+
+    public renderTop(): void {
+        super.renderTop();
+        if (this.stage < 5) return;
+
+        const alpha = Math.min(32, (300 - this.suffering) >> 3);
+        GL.drawRectAdditive(0, 0, 240, 320, 1, 1, 1, alpha/32);
     }
 }
 
