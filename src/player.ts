@@ -152,16 +152,16 @@ function shoot(stuff: Hud.Stuff) {
               w = 60, h = pl.y + 16;
         const s = stuff.weapon_overload ? Shot.SHOT_OLASER : Shot.SHOT_LASER;
         const sm = stuff.weapon_overload ? Shot.SHOT_OLASERM : Shot.SHOT_LASERM;
-        const d = stuff.offense != Hud.ITEM_SPEED ? 33 : 
-                  stuff.offense_overload ? 33 * 5 : 33 * 3;
+        const d = stuff.offense != Hud.ITEM_SPEED ? 45 : 
+                  stuff.offense_overload ? 45 * 5 : 45 * 3;
         const sh = (pl.distance >> 1) << 1;
         Shot.add(s, x + 72, y, w, h, d, sh, pl.laser_timer);
         if (stuff.offense == Hud.ITEM_MULTI) {
-            Shot.add(sm, x + 56 - 96, y, w, h, d, sh, pl.laser_timer);
-            Shot.add(sm, x + 56 + 96, y, w, h, d, sh, pl.laser_timer);
+            Shot.add(sm, x + 56 - 128, y, w, h, d, sh, pl.laser_timer);
+            Shot.add(sm, x + 56 + 128, y, w, h, d, sh, pl.laser_timer);
             if (stuff.offense_overload) {  
-                Shot.add(sm, x + 56 - 64*3, y, w, h, d, sh, pl.laser_timer);
-                Shot.add(sm, x + 56 + 64*3, y, w, h, d, sh, pl.laser_timer);   
+                Shot.add(sm, x + 56 - 256, y, w, h, d, sh, pl.laser_timer);
+                Shot.add(sm, x + 56 + 256, y, w, h, d, sh, pl.laser_timer);   
             }
         }
 
@@ -251,14 +251,16 @@ export function step() {
         if ((key.action2 || mouse.click && mouse.x < 92 && mouse.y > 300) && 
             Hud.furyReady()) 
         {
-            if (stuff.weapon == Hud.ITEM_WNONE) {
-                Fury.startBlaster();
-            } else if (stuff.weapon == Hud.ITEM_ROCKETS) {
+            if (stuff.weapon == Hud.ITEM_ROCKETS) {
                 Fury.startRocket();
             } else if (stuff.weapon == Hud.ITEM_BLADES) {
                 Fury.startBlades();
-            } else {
+            } else if (stuff.weapon == Hud.ITEM_LASER) {
                 Fury.startLaser();
+            } else if (stuff.finalBoss) {
+                Fury.startUltimate();
+            } else {
+                Fury.startBlaster();
             }
         }
     }
@@ -363,13 +365,13 @@ export function render() {
     const {x, y, distance, muzzle_flash, modules1, modules2, timer} = pl;
 
     if (modules1) {
-        GL.drawSprite(S.lasmod, (x + 56 - ((modules1*6)>>3))>>3, (y >> 3) + 8 - (modules1>>4));
-        GL.drawSprite(S.lasmod, (x + 56 + ((modules1*6)>>3))>>3, (y >> 3) + 8 - (modules1>>4));
+        GL.drawSprite(S.lasmod, (x + 56 - modules1)>>3, (y >> 3) + 8 - (modules1>>4));
+        GL.drawSprite(S.lasmod, (x + 56 + modules1)>>3, (y >> 3) + 8 - (modules1>>4));
     }
         
     if (modules2) {
-        GL.drawSprite(S.lasmod, (x + 56 - ((modules2*12)>>3))>>3, (y >> 3) + 10 - (modules2>>4));
-        GL.drawSprite(S.lasmod, (x + 56 + ((modules2*12)>>3))>>3, (y >> 3) + 10 - (modules2>>4));
+        GL.drawSprite(S.lasmod, (x + 56 - modules2*2)>>3, (y >> 3) + 10 - (modules2>>4));
+        GL.drawSprite(S.lasmod, (x + 56 + modules2*2)>>3, (y >> 3) + 10 - (modules2>>4));
     }
 
     const stuff = Hud.stuff();

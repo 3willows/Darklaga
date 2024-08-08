@@ -18,6 +18,7 @@ class Fury {
             ++this.darken;
         } else if (fuel < this.darken) {
             this.darken = fuel;
+            ++this.timer;
         }
 
         if (this.darken == 64) {
@@ -46,7 +47,9 @@ class Fury {
 }
 
 let fuel = 0
-export function setFuel(f: number) { fuel = f; }
+export function setFuel(f: number) { 
+    fuel = f; 
+}
 
 let px = 0
 let py = 0
@@ -301,5 +304,109 @@ export function startRocket() {
         fuel = 128
         current = new RocketFury(Math.floor(Math.random() * 4));
     }
+}
 
+
+type UltimateBoom = {x: number, y: number, angle: number, t: number}
+
+function renderBoomAt(timer: number, p: UltimateBoom) {
+
+    const {x,y,angle} = p;
+    const t = timer - p.t;
+    if (t < 0 || t > 40) return;
+
+    const ex = x - S.explov[0][S.w] / 2;
+    const ey = y - S.explov[0][S.h] / 2;
+    const bx = x - S.boomlight[S.w] / 2;
+    const by = y - S.boomlight[S.h] / 2;
+    let alpha;
+
+    if (t < 8) {
+
+        // A two-layer explosion sprite
+        GL.drawSprite(S.explov[t >> 1], ex, ey);            
+        GL.drawSpriteAdditive(S.explov[t >> 1], ex, ey, 32);
+        
+        // An additive flash of light
+        GL.drawSpriteAdditive(S.boomlight, bx, by, t << 2);
+
+        alpha = t << 1;
+
+    } else {
+
+        const factor = 40 - t;
+
+        if (factor > 0) {
+            // Only the two-layer explosion sprite
+            GL.drawSpriteAlpha(S.explov[(t+8)>>2], ex, ey, factor);
+            GL.drawSpriteAdditive(S.explov[(t+8)>>2], ex, ey, factor);
+        }
+
+        if (t < 24)
+            GL.drawSpriteAdditive(S.boomlight, bx, by, (24 - t) << 1);
+
+        alpha = 24 - t;
+    }
+
+    // Three triangles centered on the explosion, additive
+    if (alpha > 0) {
+        for (let i = 0; i < 3; ++i) {
+            const cx = x;
+            const cy = y;
+            const ia = Math.PI * (angle + t / 255 + i * 0.66);
+            const ix = cx + 370 * Math.cos(ia);
+            const iy = cy + 370 * Math.sin(ia);
+            const ja = ia + Math.PI / 64;
+            const jx = cx + 370 * Math.cos(ja);
+            const jy = cy + 370 * Math.sin(ja);
+            GL.drawPolyAdditive(
+                [cx, cy, ix, iy, jx, jy],
+                1, 1, 1, alpha/32);
+        }
+    }
+}
+
+
+class UltimateFury extends Fury {
+
+    private readonly booms : UltimateBoom[]
+
+    constructor() {
+        super();
+        this.booms = []
+    }
+
+    step() {
+        
+        while (this.booms.length && this.timer - this.booms[0].t >= 40)
+            this.booms.shift();
+
+        if (this.timer % 12 == 0)
+            Snd.boom.play();
+
+        if (this.timer % 5 == 0) {  
+            this.booms.push({
+                t: this.timer,
+                angle: Math.random(),
+                x: Math.floor(Math.random() * 240),
+                y: Math.floor(Math.random() * 320)
+            })
+        }
+    }
+
+    renderEnd(): void {
+
+        for (const b of this.booms) {
+            renderBoomAt(this.timer, b);
+        }
+
+        super.renderEnd();
+    }
+}
+
+export function startUltimate() {
+    if (!current) {
+        fuel = 128;
+        current = new UltimateFury();
+    }
 }

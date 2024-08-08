@@ -51,6 +51,8 @@ type Hud = {
     defense: number
     defense_overload: number
 
+    finalBoss: boolean
+
     lastlife: number
     invulnerable: number
     danger: number
@@ -86,6 +88,7 @@ function empty() : Hud {
         offense_overload: 0,
         defense: ITEM_DNONE,
         defense_overload: 0,
+        finalBoss: false,
         lastlife: 0,
         invulnerable: 0,
         danger: 0,
@@ -138,6 +141,7 @@ export type Stuff = {
     readonly offense_overload: number
     readonly defense: number
     readonly defense_overload: number
+    readonly finalBoss: boolean
 }
 
 export function stuff() : Stuff {
@@ -153,10 +157,11 @@ export function hasItem(item: number) {
     return item == hud.weapon || item == hud.offense || item == hud.defense;
 }
 
-export function disarm() {
+export function finalBoss(begin: boolean) {
     hud.weapon = ITEM_WNONE;
     hud.offense = ITEM_ONONE;
     hud.defense = ITEM_DNONE;
+    hud.finalBoss = begin;
 }
 
 export function step() {
@@ -253,9 +258,14 @@ export function step() {
 		if( hud.frl3 < 0 ) { hud.frl3 = 0; }
 
         if (Fury.isRunning()) {
-            hud.fury_progress = Math.max(0, hud.fury_progress - 512);
-            Fury.setFuel(Math.floor(hud.fury_progress / 512));
+            
             shouldClearDan = true;
+
+            // Do not end fury while final boss is alive
+            const minFury = hud.finalBoss ? 512 * 65 : 0;
+
+            hud.fury_progress = Math.max(minFury, hud.fury_progress - 512);
+            Fury.setFuel(Math.floor(hud.fury_progress / 512));
         }
 
         if (hud.fury_progress > hud.displayed_fury) {
@@ -471,7 +481,7 @@ export function render() {
         }
 
         const furyWidth = 4 + ((44 * hud.displayed_fury) >> 18);
-        GL.drawRect(4 + furyWidth, 300, 64 - furyWidth, 20, dangerRed, 0, 0, 1);
+        GL.drawRect(4 + furyWidth, 300, 70 - furyWidth, 20, dangerRed, 0, 0, 1);
         GL.drawSprite(S.furybox, 4, 306);
 
         GL.drawSpriteAdditive(S.furylight, 54, 307, hud.frl1 >> 1);

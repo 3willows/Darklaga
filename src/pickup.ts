@@ -90,9 +90,8 @@ function stepPickup(p: Pickup, pp: {x: number, y: number}, move: boolean) : bool
 
     if ((p.change += opts.ModChangePickup) >= 128) {
         p.change = 0;
-        if (Hud.hasItem(p.kind = next[p.kind]))
-            p.kind = next[p.kind]; 
-        if ((p.kind == BONUS_OFFP || p.kind == BONUS_DEFP) && !opts.UseStrongerEnemies)
+        p.kind = next[p.kind]
+        while (Hud.hasItem(p.kind) || ((p.kind == BONUS_OFFP || p.kind == BONUS_DEFP) && !opts.UseStrongerEnemies))
             p.kind = next[p.kind];
         p.anim = anim[p.kind];
     }

@@ -10,10 +10,11 @@ export function run() {
     function frame() {
         const now = +new Date();
         
-        if (now - nextFrame > 10000) 
-            // The simulation is lagging more than 10 seconds,
+        if (now - nextFrame > 1000) 
+            // The simulation is lagging more than 1 second,
             // give up on catching up: this was probably because
-            // the tab was out-of-focus. 
+            // the tab was out-of-focus, or maybe a catastrophic 
+            // GC pause.
             nextFrame = now;
 
         // Step based on actual time elapsed, rather than expecting

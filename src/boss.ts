@@ -10,6 +10,7 @@ import * as Snd from "./sound"
 import * as Stats from "./stats"
 import * as Music from "./music"
 import * as Schlorp from "./schlorp"
+import * as Fury from "./fury"
 
 class BossBase {
 
@@ -87,9 +88,13 @@ class BossBase {
 
         if (this.hitPrev && !this.suffering && this.alive) {
 
-            this.health -= 16;
-            if (Hud.stuff().offense_overload > 0) 
-                this.health -= 16;
+            const stuff = Hud.stuff();
+            
+            let dmg = 16;
+            if (stuff.offense_overload) dmg *= 2;
+            if (stuff.offense == Hud.ITEM_LASER) dmg *= 2
+            
+            this.health -= dmg;
 
             if (this.health <= 0)
                 this.die();
@@ -669,7 +674,7 @@ class Boss2 extends BossBase
                 144, 
                 256,
             cd / 60 + 90);
-        this.lives = 1;
+        this.lives = 0;
         this.stage = 1;
         this.shine = 128;
     }
@@ -683,6 +688,15 @@ class Boss2 extends BossBase
     }
 
     public die() {
+        
+        if (this.stage == 4 && Fury.isRunning()) {
+            this.stage = 5;
+            Snd.bossboom1.play();
+            Hud.finalBoss(false);
+            super.die();
+            return;
+        }
+
         Hud.makeInvulnerable(64);
         Music.setVolume(0);
         Snd.bossboom2.play();
@@ -723,9 +737,15 @@ class Boss2 extends BossBase
 
             if (this.stage == 4) {
                 Hud.increaseFury();
+                
                 if (this.timer % 10 == 0) {
                     const angle = Math.random() * 2 * Math.PI;
                     Dan.fireBossMissile(this.x + 96, this.y + 96, angle, "bs3");
+                }
+
+                if (Fury.isRunning()) {
+                    if ((this.health -= 32) < 0) 
+                        this.die();
                 }
             }
 
@@ -742,14 +762,14 @@ class Boss2 extends BossBase
         {
             this.timer += 3;
             const max = 1 << this.baseHealth;
-            this.health += 64;
+            this.health += (max >> 8);
             if (this.health > max) {
                 this.health = max;
                 this.stage = 4;
                 this.darken = 0;
                 this.shine = 96;
                 Snd.statsPop.play();
-                Hud.disarm();
+                Hud.finalBoss(true);
                 Music.setVolume(1);
             } else {
                 this.darken = this.health / max;
