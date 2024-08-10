@@ -309,7 +309,8 @@ function addScoreBonus(
 ) {
     if (opts.UseScore) {
         hud.real_score += value;
-        Float.add(x, y, value);
+        if (opts.LodScoreFloat)
+            Float.add(x, y, value);
     }
 }
 
@@ -326,7 +327,8 @@ function addScore(
         hud.real_score += (added = (2 * log_value - 10) * 50);
     }
 
-    Float.add(x, y, added);
+    if (opts.LodScoreFloat)
+        Float.add(x, y, added);
 }
 
 export function increaseFury() {

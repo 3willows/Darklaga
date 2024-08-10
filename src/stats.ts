@@ -282,7 +282,8 @@ export function step() {
     if (!opts.UseScore) return 0;
 
     const score = stats.show[stats.showing - 1].score;
-    Float.add(40 << 3, (ypos(stats.showing - 1) + 15) << 3, score);
+    if (opts.LodScoreFloat)
+        Float.add(40 << 3, (ypos(stats.showing - 1) + 15) << 3, score);
     return score;
 }
 

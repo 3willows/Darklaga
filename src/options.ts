@@ -33,6 +33,9 @@ export const opts = {
     // Level of details for explosions
     LodExplosions: 3,
 
+    // Show floating score values
+    LodScoreFloat: true,
+
     // Does hitting a wall cause ship to bounce ?
     ModWallsBounce: false,
 
@@ -49,5 +52,5 @@ export const opts = {
     ModPlayerSpeed: 2,
 
     // Player movement quadratic friction, 0..3
-    ModPlayerFriction: 1    
+    ModPlayerFriction: 1
 }

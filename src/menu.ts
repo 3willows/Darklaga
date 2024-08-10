@@ -239,7 +239,10 @@ class OptionsMenu extends MenuWindow {
             () => opts.ModPlayerSpeed = (opts.ModPlayerSpeed + 1) % 4));
         this.add(new CheckboxesItem("AUTO-FIRE", 2,
             () => opts.ModAutoFire, 
-            () => opts.ModAutoFire = (opts.ModAutoFire + 1) % 3));  
+            () => opts.ModAutoFire = (opts.ModAutoFire + 1) % 3));
+        this.add(new CheckboxItem("FLOAT SCORE", 
+            () => opts.LodScoreFloat, 
+            () => opts.LodScoreFloat = !opts.LodScoreFloat));  
         this.add(new CheckboxItem("GEO-DESTRUCTION", 
             () => opts.UseGeoDestruct, 
             () => opts.UseGeoDestruct = !opts.UseGeoDestruct));
