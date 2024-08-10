@@ -45,9 +45,9 @@ export const opts = {
     // Frequency at which pickups change
     ModChangePickup: 1,
 
-    // Player movement speed, 0..5
+    // Player movement speed, 0..3
     ModPlayerSpeed: 2,
 
-    // Player movement quadratic friction, 0..5
+    // Player movement quadratic friction, 0..3
     ModPlayerFriction: 1    
 }

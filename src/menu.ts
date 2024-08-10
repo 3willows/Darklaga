@@ -197,18 +197,52 @@ class CheckboxItem extends MenuItem {
 
 }
 
+class CheckboxesItem extends MenuItem {
+
+    constructor(
+        label: string, 
+        public readonly max: number,
+        public readonly read: () => number, 
+        public readonly toggle: () => void) {
+        super(S.btn_l, S.btn_lsel, false, S.font, label);
+    }
+
+    activate() { this.toggle(); }
+
+    render(x: number, y: number, selected: boolean) {
+        super.render(x, y, selected);
+        const value = this.read();
+        const cw = S.checkbox_s[S.w];
+        const cy = y + ((this.height - S.checkbox_s[S.h]) >> 1);
+
+        for (let i = 0; i < this.max; ++i) {
+            const cx = x + this.width - (2 + cw) * (this.max - i);
+            GL.drawSpriteAlpha(S.checkbox_s, cx, cy, this.alpha);
+            if (value > i)
+                GL.drawSpriteAlpha(S.check_s, cx, cy, this.alpha);
+        }
+    }
+}
+
+
 class OptionsMenu extends MenuWindow {
 
     private readonly btnBack : MenuItem
 
     constructor() {
         super((240-S.btn_l[S.w])/2, 140);
-        this.add(new CheckboxItem("PLAYER FRICTION", () => !!opts.ModPlayerFriction, () => {}));
-        this.add(new CheckboxItem("PLAYER SPEED", () => !!opts.ModPlayerSpeed, () => {}));
-        this.add(new CheckboxItem("AUTO-FIRE", () => !!opts.ModAutoFire, () => {}));  
-        this.add(new CheckboxItem("GEO-DESTRUCTION", () => opts.UseGeoDestruct, () => opts.UseGeoDestruct = !opts.UseGeoDestruct));
-        this.add(new CheckboxItem("OLD SCHOOL MODE", () => !opts.UseNewSchool, () => opts.UseNewSchool = !opts.UseNewSchool));
-        this.add(new CheckboxItem("TIME ATTACK MODE", () => opts.UseTimeAttack, () => opts.UseTimeAttack = !opts.UseTimeAttack));
+        this.add(new CheckboxesItem("PLAYER FRICTION", 3,
+            () => opts.ModPlayerFriction, 
+            () => opts.ModPlayerFriction = (opts.ModPlayerFriction + 1) % 4));
+        this.add(new CheckboxesItem("PLAYER SPEED", 3,
+            () => opts.ModPlayerSpeed, 
+            () => opts.ModPlayerSpeed = (opts.ModPlayerSpeed + 1) % 4));
+        this.add(new CheckboxesItem("AUTO-FIRE", 2,
+            () => opts.ModAutoFire, 
+            () => opts.ModAutoFire = (opts.ModAutoFire + 1) % 3));  
+        this.add(new CheckboxItem("GEO-DESTRUCTION", 
+            () => opts.UseGeoDestruct, 
+            () => opts.UseGeoDestruct = !opts.UseGeoDestruct));
         this.add(this.btnBack = new MenuItem(S.btn_l, S.btn_lsel, true, S.font, "BACK"));
     }
 
