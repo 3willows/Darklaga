@@ -182,6 +182,18 @@ const maxY = 2176;
 const mouseDeltaX = 88;
 const mouseDeltaY = 320 + 88;
 
+function adjustSpeed(realSpeed: number, requestedSpeed: number, friction: number, speed: number) {
+    if (requestedSpeed >= 0 && realSpeed > requestedSpeed) 
+        return Math.max(requestedSpeed, realSpeed - friction);
+    if (requestedSpeed <= 0 && realSpeed < requestedSpeed)
+        return Math.max(requestedSpeed, realSpeed + friction);
+    if (requestedSpeed < 0 && realSpeed > requestedSpeed)
+        return Math.max(requestedSpeed, realSpeed - speed);
+    if (requestedSpeed > 0 && realSpeed < requestedSpeed)
+        return Math.min(requestedSpeed, realSpeed + speed);
+    return realSpeed;
+}
+
 export function step() {
 
     const friction = opts.ModPlayerFriction * opts.ModPlayerFriction * 4;
@@ -267,20 +279,8 @@ export function step() {
 
     // controlled movement
 
-    function adjustSpeed(realSpeed: number, requestedSpeed: number) {
-        if (requestedSpeed >= 0 && realSpeed > requestedSpeed) 
-            return Math.max(requestedSpeed, realSpeed - friction);
-        if (requestedSpeed <= 0 && realSpeed < requestedSpeed)
-            return Math.max(requestedSpeed, realSpeed + friction);
-        if (requestedSpeed < 0 && realSpeed > requestedSpeed)
-            return Math.max(requestedSpeed, realSpeed - speed);
-        if (requestedSpeed > 0 && realSpeed < requestedSpeed)
-            return Math.min(requestedSpeed, realSpeed + speed);
-        return realSpeed;
-    }
-
-    pl.x_speed = adjustSpeed(pl.x_speed, pl.r_x_speed);
-    pl.y_speed = adjustSpeed(pl.y_speed, pl.r_y_speed);
+    pl.x_speed = adjustSpeed(pl.x_speed, pl.r_x_speed, friction, speed);
+    pl.y_speed = adjustSpeed(pl.y_speed, pl.r_y_speed, friction, speed);
 
     if (pl.distance > 0) --pl.distance;
     if (pl.distance < 0) ++pl.distance;
