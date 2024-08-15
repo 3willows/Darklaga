@@ -162,15 +162,20 @@ export function drawRect(
     ], r, g, b, a, a);    
 }
 
+const colPositionsBuf = gl.createBuffer();
+if (!colPositionsBuf) throw "Could not allocate buffer";
+
+const colColorsBuf = gl.createBuffer();
+if (!colColorsBuf) throw "Could not allocate buffer";
+
+const colAlphasBuf = gl.createBuffer();
+if (!colColorsBuf) throw "Could not allocate buffer";
+
 function drawBatchedColored() {
 
     if (!coloredBatched) return;
 
-    // Allocate and fill positions buffer
-    const positionsBuf = gl.createBuffer();
-    if (!positionsBuf) throw "Could not allocate buffer";
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, colPositionsBuf);
 
     gl.bufferData(
         gl.ARRAY_BUFFER, 
@@ -179,11 +184,7 @@ function drawBatchedColored() {
 
     statBytes += 2 * coloredBatched * 4;
 
-    // Allocate and fill colors buffer
-    const colorsBuf = gl.createBuffer();
-    if (!colorsBuf) throw "Could not allocate buffer";
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, colColorsBuf);
 
     gl.bufferData(
         gl.ARRAY_BUFFER, 
@@ -192,11 +193,7 @@ function drawBatchedColored() {
 
     statBytes += 2 * coloredBatched * 4;
     
-    // Allocate and fill alphas buffer
-    const alphasBuf = gl.createBuffer();
-    if (!alphasBuf) throw "Could not allocate buffer";
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, alphasBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, colAlphasBuf);
 
     gl.bufferData(
         gl.ARRAY_BUFFER, 
@@ -208,7 +205,7 @@ function drawBatchedColored() {
     // Render buffer
     gl.useProgram(colorProgram.program);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, colPositionsBuf);
     gl.vertexAttribPointer(
         colorProgram.attribLocations.vertexPosition,
         /* size */ 2,
@@ -219,7 +216,7 @@ function drawBatchedColored() {
 
     gl.enableVertexAttribArray(colorProgram.attribLocations.vertexPosition);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, colColorsBuf);
     gl.vertexAttribPointer(
         colorProgram.attribLocations.vertexColor,
         /* size */ 3,
@@ -230,7 +227,7 @@ function drawBatchedColored() {
 
     gl.enableVertexAttribArray(colorProgram.attribLocations.vertexColor);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, alphasBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, colAlphasBuf);
     gl.vertexAttribPointer(
         colorProgram.attribLocations.alphas,
         /* size */ 2,
@@ -256,10 +253,6 @@ function drawBatchedColored() {
     gl.disableVertexAttribArray(colorProgram.attribLocations.vertexColor);
     gl.disableVertexAttribArray(colorProgram.attribLocations.vertexPosition);    
     gl.disableVertexAttribArray(colorProgram.attribLocations.alphas);
-
-    gl.deleteBuffer(positionsBuf);
-    gl.deleteBuffer(colorsBuf);
-    gl.deleteBuffer(alphasBuf);
 
     coloredBatched = 0;
 }
@@ -310,16 +303,19 @@ void main() {
     }
 
 }());
+
+const linesXyrgbBuf = gl.createBuffer();
+if (!linesXyrgbBuf) throw "Could not allocate buffer";
+
+const linesIndexBuf = gl.createBuffer();
+if (!linesIndexBuf) throw "Could not allocate buffer";
+
 export function drawLines(verticesXYZGB: Float32Array, indices: Uint16Array) {
 
     if (coloredBatched) drawBatchedColored();
     if (spritesBatched) drawBatchedSprites();
 
-    // Allocate and fill positions+colors buffer
-    const xyrgbBuf = gl.createBuffer();
-    if (!xyrgbBuf) throw "Could not allocate buffer";
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, xyrgbBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, linesXyrgbBuf);
 
     gl.bufferData(
         gl.ARRAY_BUFFER, 
@@ -328,11 +324,7 @@ export function drawLines(verticesXYZGB: Float32Array, indices: Uint16Array) {
 
     statBytes += verticesXYZGB.byteLength;
 
-    // Allocate and fill colors buffer
-    const indexBuf = gl.createBuffer();
-    if (!indexBuf) throw "Could not allocate buffer";
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, linesIndexBuf);
 
     gl.bufferData(
         gl.ELEMENT_ARRAY_BUFFER, 
@@ -344,7 +336,7 @@ export function drawLines(verticesXYZGB: Float32Array, indices: Uint16Array) {
     // Render buffer
     gl.useProgram(lineProgram.program);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, xyrgbBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, linesXyrgbBuf);
     gl.vertexAttribPointer(
         lineProgram.attribLocations.vertexPosition,
         /* size */ 2,
@@ -355,7 +347,7 @@ export function drawLines(verticesXYZGB: Float32Array, indices: Uint16Array) {
 
     gl.enableVertexAttribArray(lineProgram.attribLocations.vertexPosition);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, xyrgbBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, linesXyrgbBuf);
     gl.vertexAttribPointer(
         lineProgram.attribLocations.vertexColor,
         /* size */ 3,
@@ -375,9 +367,6 @@ export function drawLines(verticesXYZGB: Float32Array, indices: Uint16Array) {
 
     gl.disableVertexAttribArray(lineProgram.attribLocations.vertexColor);
     gl.disableVertexAttribArray(lineProgram.attribLocations.vertexPosition);
-
-    gl.deleteBuffer(xyrgbBuf);
-    gl.deleteBuffer(indexBuf);
 }
 
 // SPRITES ===================================================================
@@ -628,17 +617,22 @@ export function drawSpriteAngle(sprite: S.Sprite, x: number, y: number, angle: n
     drawSpriteRaw(sprite, S.texwhite, x, y, 1, 1, angle)
 }
 
+const sprPositionsBuf = gl.createBuffer();
+if (!sprPositionsBuf) throw "Could not allocate buffer";
+
+const sprTexturesBuf = gl.createBuffer();
+if (!sprTexturesBuf) throw "Could not allocate buffer";
+
+const sprAlphasBuf = gl.createBuffer();
+if (!sprAlphasBuf) throw "Could not allocate buffer";
+
 // Draw all sprites accumulated into the current batch 
 function drawBatchedSprites() {
 
     if (!spritesBatched) 
         return;
 
-    // Allocate and fill positions buffer
-    const positionsBuf = gl.createBuffer();
-    if (!positionsBuf) throw "Could not allocate buffer";
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, sprPositionsBuf);
 
     gl.bufferData(
         gl.ARRAY_BUFFER, 
@@ -647,11 +641,7 @@ function drawBatchedSprites() {
 
     statBytes += spritesBatched * 4;
 
-    // Allocate and fill textures buffer
-    const texturesBuf = gl.createBuffer();
-    if (!texturesBuf) throw "Could not allocate buffer";
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, texturesBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, sprTexturesBuf);
 
     gl.bufferData(
         gl.ARRAY_BUFFER, 
@@ -660,11 +650,7 @@ function drawBatchedSprites() {
 
     statBytes += spritesBatched * 8;
 
-    // Allocate and fill alphas buffer
-    const alphasBuf = gl.createBuffer();
-    if (!alphasBuf) throw "Could not allocate buffer";
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, alphasBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, sprAlphasBuf);
 
     gl.bufferData(
         gl.ARRAY_BUFFER, 
@@ -676,7 +662,7 @@ function drawBatchedSprites() {
     // Render buffer
     gl.useProgram(spriteProgram.program);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, sprPositionsBuf);
     gl.vertexAttribPointer(
         spriteProgram.attribLocations.vertexPosition,
         /* size */ 2,
@@ -687,7 +673,7 @@ function drawBatchedSprites() {
 
     gl.enableVertexAttribArray(spriteProgram.attribLocations.vertexPosition);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, texturesBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, sprTexturesBuf);
     gl.vertexAttribPointer(
         spriteProgram.attribLocations.texCoord,
         /* size */ 4,
@@ -698,7 +684,7 @@ function drawBatchedSprites() {
 
     gl.enableVertexAttribArray(spriteProgram.attribLocations.texCoord);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, alphasBuf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, sprAlphasBuf);
     gl.vertexAttribPointer(
         spriteProgram.attribLocations.alphas,
         /* size */ 2,
@@ -728,9 +714,6 @@ function drawBatchedSprites() {
     gl.disableVertexAttribArray(spriteProgram.attribLocations.vertexPosition);
     gl.disableVertexAttribArray(spriteProgram.attribLocations.texCoord);
     gl.disableVertexAttribArray(spriteProgram.attribLocations.alphas);
-
-    gl.deleteBuffer(positionsBuf);
-    gl.deleteBuffer(texturesBuf);
 
     spritesBatched = 0;
 }
