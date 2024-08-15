@@ -588,9 +588,11 @@ function onShotCollide(off: number, tx: number, ty: number, tw: number, th: numb
         const dot = ttx * vx + tty * vy;
 
         // Apply reflection vector in order to 'bounce'
-        shots[off + PARAM1] -= Math.floor(2 * ttx * dot);
-        shots[off + PARAM0] -= Math.floor(2 * tty * dot);
-
+        if (dot > 0) {
+            shots[off + PARAM1] -= Math.floor(2 * ttx * dot);
+            shots[off + PARAM0] -= Math.floor(2 * tty * dot);
+        }
+        
         const o = addRaw(
             SHOT_BLADE_STAR,
             shots[off+LEFT],

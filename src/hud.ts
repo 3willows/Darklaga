@@ -510,7 +510,7 @@ export function render() {
         const y = (hud.player_y - 32) >> 3;
         if (hud.graze < 0) {
             const alpha = hud.graze_timer/128;
-            GL.drawText("Disrupted", S.font, S.texred, x + 2, y - 2, 0, alpha);
+            GL.drawText("Disrupted", S.font, S.texred, x + 2, y - 2, alpha, 0);
         } else if (hud.graze > 0) {
             const anim = hud.graze_anim;
             const t = anim + 16 - GRAZE_DELAY;
