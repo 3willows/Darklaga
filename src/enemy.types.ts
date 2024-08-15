@@ -306,7 +306,7 @@ export class Tank extends Enemy {
             mode == "n" ? S.estaticnh : 
             mode == "d" ? S.estaticdh : S.estaticvh);
 
-        this.threshold = this.basehealth;
+        this.threshold = this.health;
         this.m = mode == "n" ? 1 : 2;
 
         this.regen = mode == "v" ? 2 : 1;
