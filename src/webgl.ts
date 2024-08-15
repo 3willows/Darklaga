@@ -13,6 +13,21 @@ const gl : WebGLRenderingContext = (function() {
         throw "WebGL not supported"
     }
 
+    canvas.requestFullscreen();
+
+    const but = document.createElement("button");
+    canvas.after(but);
+
+    but.onclick = () => canvas.requestFullscreen();
+    but.innerText = "Fullscreen";
+    but.style.border = "1px solid green"
+    but.style.float = "right";
+    but.style.background = "black";
+    but.style.color = "green";
+    but.style.borderRadius = "4px";
+    but.style.padding = "4px 8px";
+    but.style.cursor = "pointer"; 
+
     return gl;
 
 }());
