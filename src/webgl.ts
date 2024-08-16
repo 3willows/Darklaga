@@ -18,7 +18,8 @@ const gl : WebGLRenderingContext = (function() {
     const but = document.createElement("button");
     canvas.after(but);
 
-    but.onclick = () => canvas.requestFullscreen();
+    but.onmousedown = () => canvas.requestFullscreen();
+    but.ontouchstart = () => canvas.requestFullscreen();
     but.innerText = "Fullscreen";
     but.style.border = "1px solid green"
     but.style.float = "right";
