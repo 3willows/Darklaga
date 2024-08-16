@@ -1,6 +1,6 @@
 import * as GL from "./webgl"
 import * as S from "./sprites"
-import { key } from "./input"
+import { key, mouse } from "./input"
 
 const end : {
     win: boolean
@@ -66,7 +66,7 @@ export function enable(win: boolean, score: number) {
 
 export function step() {
     ++end.timer;
-    if (end.timer > 128 && (key.action || key.action2))
+    if (end.timer > 128 && (key.action || key.action2 || mouse.click || mouse.touch))
         end.done = true;
 }
 
