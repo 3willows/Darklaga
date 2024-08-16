@@ -286,7 +286,6 @@ function endLevelStep() {
 
     Background.step();
     Enemy.step();
-    Hud.step();
     Shot.step();
     Player.step();
     Pickup.step(false);
@@ -295,7 +294,7 @@ function endLevelStep() {
     Boss.step();
     Fury.step();
 
-    Hud.addScoreRaw(Stats.step());
+    Hud.endLevelStep(Stats.step());
 
     if (Stats.isDone())
         nextLevel();

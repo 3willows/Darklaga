@@ -296,10 +296,13 @@ function multiplier() {
     return multiplier;
 }
 
-export function addScoreRaw(value: number) {
-    if (opts.UseScore) {
+export function endLevelStep(value: number) {
+    
+    if (opts.UseScore)
         hud.real_score += value;
-    }
+    
+    step();
+    makeInvulnerable(1);
 }
 
 function addScoreBonus(
