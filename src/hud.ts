@@ -267,6 +267,10 @@ export function step() {
             hud.fury_progress = Math.max(minFury, hud.fury_progress - 512);
             Fury.setFuel(Math.floor(hud.fury_progress / 512));
         }
+        
+        if (hud.defense == ITEM_FURY) {
+            increaseFury(hud.defense_overload > 0 ? 64 : 32);
+        }
 
         if (hud.fury_progress > hud.displayed_fury) {
             const delta = hud.fury_progress - hud.displayed_fury;
@@ -301,6 +305,9 @@ export function endLevelStep(value: number) {
     if (opts.UseScore)
         hud.real_score += value;
     
+    if (hud.defense == ITEM_FURY)
+        increaseFury(1024);
+
     step();
     makeInvulnerable(1);
 }
@@ -325,20 +332,23 @@ function addScore(
 {
     let added : number;
     if (opts.UseNewSchool) {
-        hud.real_score += (added = value * log_value * multiplier());
+        added = value * log_value * multiplier();
     } else {
-        hud.real_score += (added = (2 * log_value - 10) * 50);
+        added = (2 * log_value - 10) * 50;
     }
 
+    if (added < 1) added = 1;
+
+    hud.real_score += added;
     if (opts.LodScoreFloat)
         Float.add(x, y, added);
 }
 
-export function increaseFury() {
+export function increaseFury(amount = 180) {
 
     if (Fury.isRunning()) return;
 
-    hud.fury_progress += 180;
+    hud.fury_progress += amount;
 
     if (hud.fury_progress > 262144) {
         hud.fury_progress = 263000;
