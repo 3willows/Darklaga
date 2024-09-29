@@ -147,7 +147,7 @@ export function addInfo(
 {
     fl.push({
         x: 324,
-        y: 2160, 
+        y: 2240 - 40 * text.length, 
         value: 0,
         timer: 0,
         text,

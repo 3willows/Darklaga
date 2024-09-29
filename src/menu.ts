@@ -170,7 +170,9 @@ function showShipTip() {
         Float.addInfo(
             [S.player[2]], 
             ["Your ship. Move it with the arrow keys or",
-            "drag it with your mouse, stylus or finger."]),
+            "drag it with your mouse, stylus or finger.",
+            "Click or press X to shoot.",
+            "Press space or click fury bar to use fury."]),
         5500);
 }
 
