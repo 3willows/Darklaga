@@ -14,4 +14,4 @@
 - ```npm run bin```
 - Open "dist/darklaga.html" on Live Server
 
-(Note: the audio and graphics are unavailable on local version because ["sadly, I cannot provide the video and audio assets themselves under any open license")](https://news.ycombinator.com/item?id=42557920)
+(Note: the audio and graphics are unavailable on local version because ["sadly, I cannot provide the video and audio assets themselves under any open license"](https://news.ycombinator.com/item?id=42557920))
